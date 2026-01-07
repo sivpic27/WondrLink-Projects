@@ -18,7 +18,7 @@ from auth_helpers import register_user, login_user, logout_user, get_current_use
 from supabase_storage import (
     save_profile, load_profile, clear_profile,
     load_all_chunks, get_conversation_history, add_conversation,
-    get_document_metadata
+    get_document_metadata, update_profile_with_sources
 )
 from profile_utils import (
     extract_patient_context_complex, format_patient_summary_complex,
@@ -28,7 +28,8 @@ from pdf_utils import search_chunks
 from llm_utils import (
     assemble_prompt, call_llm, classify_query_type,
     trim_incomplete_sentence, validate_response, enhanced_medical_validation,
-    format_conversation_context, get_llm_status
+    format_conversation_context, get_llm_status, sanitize_query,
+    extract_profile_updates_from_query
 )
 
 # -------------------------
@@ -299,6 +300,12 @@ def api_chat():
         if not message:
             return jsonify({"error": "No message provided"}), 400
 
+        # Sanitize PII from user message (compliance)
+        original_message = message
+        message, pii_warnings = sanitize_query(message)
+        if pii_warnings:
+            logger.warning(f"PII detected and sanitized: {pii_warnings}")
+
         logger.info(f"Chat request (session: {session_id}): {message[:50]}...")
 
         # Load chunks from Supabase
@@ -337,10 +344,10 @@ def api_chat():
         # Assemble prompt
         if mismatch_detected:
             message_with_note = f"{message}\n\n[SYSTEM NOTE: User asked about different cancer type than their profile]"
-            prompt = assemble_prompt(message_with_note, retrieved, patient_profile, response_length,
+            prompt, prompt_metadata = assemble_prompt(message_with_note, retrieved, patient_profile, response_length,
                                     conversation_context, patient_context)
         else:
-            prompt = assemble_prompt(message, retrieved, patient_profile, response_length,
+            prompt, prompt_metadata = assemble_prompt(message, retrieved, patient_profile, response_length,
                                     conversation_context, patient_context)
 
         # Check LLM availability
@@ -351,9 +358,12 @@ def api_chat():
                 "debug_info": llm_status
             }), 500
 
-        # Call LLM
+        # Classify query type for smart routing
+        query_type = classify_query_type(message)
+
+        # Call LLM with smart routing
         try:
-            answer, api_used = call_llm(prompt, response_length)
+            answer, api_used = call_llm(prompt, response_length, query=message, query_type=query_type)
             if not answer:
                 raise RuntimeError("LLM returned empty response")
 
@@ -373,6 +383,37 @@ def api_chat():
             # Store conversation in Supabase
             add_conversation(session_id, user_id, message, answer)
 
+            # --- Feature 1: Scan for profile updates ---
+            profile_updates = extract_profile_updates_from_query(original_message, patient_profile or {})
+            if profile_updates:
+                logger.info(f"Detected profile updates for user {user_id}: {profile_updates}")
+                source_info = {
+                    "source_type": "chat",
+                    "session_id": session_id,
+                    "timestamp": datetime.now().isoformat()
+                }
+                update_profile_with_sources(user_id, profile_updates, source_info)
+
+            # Extract sources for the frontend button
+            sources_metadata = []
+            seen_sources = set()
+            for chunk in retrieved:
+                if isinstance(chunk, dict) and chunk.get('filename'):
+                    fname = chunk['filename']
+                    # Clean filename for display (remove id prefix if present, usually not needed if simple)
+                    # Deduplicate
+                    if fname not in seen_sources:
+                        sources_metadata.append({
+                            "title": fname,
+                            "type": "document"
+                        })
+                        seen_sources.add(fname)
+            
+            # Prioritize the specific guide user mentioned
+            for s in sources_metadata:
+                if "Comprehensive_Colon_Cancer_Guide" in s["title"]:
+                    s["is_featured"] = True
+
             return jsonify({
                 "answer": final_answer,
                 "api_used": api_used,
@@ -380,15 +421,19 @@ def api_chat():
                 "response_length": response_length,
                 "patient_context_used": bool(patient_context),
                 "mismatch_detected": mismatch_detected,
+                "pi_filtered": len(pii_warnings) > 0,
                 "validation_warnings": all_warnings,
                 "medical_safety_check": medical_validation['safe'],
                 "conversation_length": len(history) + 1,
+                "has_profile_updates": bool(profile_updates),
+                "sources": sources_metadata,
                 "debug_info": {
                     "api_used": api_used,
                     "retrieved_count": len(retrieved),
                     "has_patient_profile": bool(patient_profile),
-                    "query_type": classify_query_type(message),
-                    "session_id": session_id
+                    "query_type": query_type,
+                    "session_id": session_id,
+                    "pii_warnings": pii_warnings if pii_warnings else None
                 }
             })
 
@@ -420,6 +465,29 @@ def api_data_sources():
         })
     except Exception as e:
         logger.exception("get_data_sources error")
+        return jsonify({"error": str(e)}), 500
+
+
+# -------------------------
+# Widget Routes
+# -------------------------
+@app.route("/api/widget/code", methods=["GET"])
+def api_widget_code():
+    """Generate embed code for the widget."""
+    try:
+        base_url = os.environ.get("BASE_URL", "http://localhost:3000")
+        
+        script_code = f"""
+<!-- WondrLink Chat Widget -->
+<script src="{base_url}/widget.js" async></script>
+<div id="wondrlink-chat-widget" data-api-url="{base_url}/api"></div>
+"""
+        return jsonify({
+            "status": "ok",
+            "embed_code": script_code.strip()
+        })
+    except Exception as e:
+        logger.exception("get_widget_code error")
         return jsonify({"error": str(e)}), 500
 
 # -------------------------

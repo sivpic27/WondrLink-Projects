@@ -6,6 +6,104 @@ from typing import List, Dict, Any, Tuple, Optional
 
 logger = logging.getLogger("llm_utils")
 
+# =============================================================================
+# PII DETECTION AND FILTERING (Compliance Feature)
+# =============================================================================
+
+# PII patterns to detect and filter from user queries
+PII_PATTERNS = {
+    'ssn': r'\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b',  # Social Security Number
+    'dob': r'\b(\d{1,2}[/\-]\d{1,2}[/\-]\d{2,4}|\d{4}[/\-]\d{1,2}[/\-]\d{1,2})\b',  # Date patterns
+    'phone': r'\b(?:\+1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b',  # Phone numbers
+    'email': r'\b[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Z|a-z]{2,}\b',  # Email addresses
+    'address': r'\b\d+\s+[A-Za-z]+\s+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Way|Place|Pl)\b',  # Street addresses
+    'credit_card': r'\b(?:\d{4}[-\s]?){3}\d{4}\b',  # Credit card numbers
+}
+
+# PII instruction to add to system prompt
+PII_INSTRUCTION = """
+PII HANDLING (CRITICAL):
+- Do NOT acknowledge, repeat, or store any personally identifiable information such as:
+  * Full names (last names, family names)
+  * Dates of birth or specific birth dates
+  * Social Security numbers
+  * Phone numbers
+  * Email addresses
+  * Street addresses
+  * Credit card numbers
+- If the user provides such information, do NOT include it in your response
+- Only use the patient's first name if provided in their profile
+- Focus on the medical content of the question, ignoring any PII
+"""
+
+
+def detect_pii(text: str) -> Dict[str, List[str]]:
+    """
+    Detect PII in user input.
+
+    Args:
+        text: The text to scan for PII
+
+    Returns:
+        Dict of detected PII types and their matched values
+    """
+    detected = {}
+
+    for pii_type, pattern in PII_PATTERNS.items():
+        matches = re.findall(pattern, text, re.IGNORECASE)
+        if matches:
+            detected[pii_type] = matches
+
+    return detected
+
+
+def sanitize_query(query: str) -> Tuple[str, List[str]]:
+    """
+    Remove PII from user query before sending to LLM.
+
+    Args:
+        query: The user's query text
+
+    Returns:
+        Tuple of (sanitized_query, list_of_warnings)
+    """
+    sanitized = query
+    warnings = []
+
+    # Remove SSN
+    if re.search(PII_PATTERNS['ssn'], query):
+        sanitized = re.sub(PII_PATTERNS['ssn'], '[REMOVED]', sanitized)
+        warnings.append("SSN detected and removed")
+
+    # Remove DOB patterns (but be careful not to remove treatment cycle dates)
+    # Only remove if it looks like a birthdate context
+    dob_context = re.search(r'\b(?:born|birthday|dob|date of birth)\s*(?:is|:)?\s*' + PII_PATTERNS['dob'], query, re.IGNORECASE)
+    if dob_context:
+        sanitized = re.sub(r'\b(?:born|birthday|dob|date of birth)\s*(?:is|:)?\s*' + PII_PATTERNS['dob'], '[DOB REMOVED]', sanitized, flags=re.IGNORECASE)
+        warnings.append("Date of birth detected and removed")
+
+    # Remove phone numbers
+    if re.search(PII_PATTERNS['phone'], query):
+        sanitized = re.sub(PII_PATTERNS['phone'], '[PHONE REMOVED]', sanitized)
+        warnings.append("Phone number detected and removed")
+
+    # Remove emails
+    if re.search(PII_PATTERNS['email'], query):
+        sanitized = re.sub(PII_PATTERNS['email'], '[EMAIL REMOVED]', sanitized)
+        warnings.append("Email detected and removed")
+
+    # Remove street addresses
+    if re.search(PII_PATTERNS['address'], query, re.IGNORECASE):
+        sanitized = re.sub(PII_PATTERNS['address'], '[ADDRESS REMOVED]', sanitized, flags=re.IGNORECASE)
+        warnings.append("Address detected and removed")
+
+    # Remove credit card numbers
+    if re.search(PII_PATTERNS['credit_card'], query):
+        sanitized = re.sub(PII_PATTERNS['credit_card'], '[CARD REMOVED]', sanitized)
+        warnings.append("Credit card number detected and removed")
+
+    return sanitized, warnings
+
 # Token counting with tiktoken
 try:
     import tiktoken
@@ -574,8 +672,10 @@ def truncate_to_tokens(text: str, max_tokens: int, preserve_end: bool = False) -
     return text[:char_limit] + "..."
 
 
-def select_chunks_within_budget(chunks: List[str], max_tokens: int) -> str:
-    """Select and format chunks that fit within token budget."""
+def select_chunks_within_budget(chunks: Union[List[str], List[Dict]], max_tokens: int) -> str:
+    """Select and format chunks that fit within token budget.
+       Accepts List[str] or List[Dict] (with 'content' key).
+    """
     if not chunks:
         return "No specific guideline excerpts found for this query."
 
@@ -583,18 +683,27 @@ def select_chunks_within_budget(chunks: List[str], max_tokens: int) -> str:
     current_tokens = 0
 
     for i, chunk in enumerate(chunks):
-        chunk_tokens = count_tokens(chunk)
+        # Handle dict vs str
+        if isinstance(chunk, dict):
+            text = chunk.get('content', '') or chunk.get('chunk_text', '') or ""
+        else:
+            text = str(chunk)
+
+        if not text:
+            continue
+
+        chunk_tokens = count_tokens(text)
         # Account for separator tokens
         separator_tokens = 15 if i > 0 else 0
 
         if current_tokens + chunk_tokens + separator_tokens > max_tokens:
             # Try to fit a truncated version if we have no chunks yet
             if not selected:
-                truncated = truncate_to_tokens(chunk, max_tokens - 50)
+                truncated = truncate_to_tokens(text, max_tokens - 50)
                 selected.append(truncated)
             break
 
-        selected.append(chunk)
+        selected.append(text)
         current_tokens += chunk_tokens + separator_tokens
 
     if selected:
@@ -831,7 +940,7 @@ def format_conversation_context(history: List[Dict[str, str]], max_tokens: int =
     return "PREVIOUS CONVERSATION:\n" + "\n\n".join(formatted_parts)
 
 
-def assemble_prompt(message: str, retrieved: List[str], patient: dict,
+def assemble_prompt(message: str, retrieved: Union[List[str], List[Dict]], patient: dict,
                     response_length: str = "normal", conversation_context: str = "",
                     patient_context: Dict[str, Any] = None) -> Tuple[str, dict]:
     """
@@ -1338,11 +1447,16 @@ def call_llm(prompt: str, response_length: str = "normal", temperature: float = 
     preferred_model = "together"
     logger.info(f"Using Together AI (70B) for query type: {query_type or 'unknown'}")
 
+    together_error = None
+    groq_error = None
+
     def try_together():
         """Try Together AI (70B model)."""
+        nonlocal together_error
         client = get_together_client()
         if not client:
-            logger.warning("Together client not available")
+            together_error = "Together client not available (API key may be invalid)"
+            logger.warning(together_error)
             return None
         try:
             logger.info(f"Calling Together AI (70B), response_length: {response_length}, temp: {effective_temperature}")
@@ -1361,15 +1475,20 @@ def call_llm(prompt: str, response_length: str = "normal", temperature: float = 
                 if content:
                     logger.info(f"Together AI response success - length: {len(content)}")
                     return content.strip(), "together"
+            together_error = "Together AI returned empty response"
+            logger.warning(together_error)
         except Exception as e:
-            logger.warning(f"Together AI failed: {e}")
+            together_error = f"Together AI API error: {str(e)}"
+            logger.warning(together_error)
         return None
 
     def try_groq():
         """Try Groq (8B model - faster)."""
+        nonlocal groq_error
         client = get_groq_client()
         if not client:
-            logger.warning("Groq client not available")
+            groq_error = "Groq client not available (API key may be invalid)"
+            logger.warning(groq_error)
             return None
         try:
             logger.info(f"Calling Groq (8B), response_length: {response_length}, temp: {effective_temperature}")
@@ -1388,8 +1507,11 @@ def call_llm(prompt: str, response_length: str = "normal", temperature: float = 
                 if content:
                     logger.info(f"Groq response success - length: {len(content)}")
                     return content.strip(), "groq"
+            groq_error = "Groq returned empty response"
+            logger.warning(groq_error)
         except Exception as e:
-            logger.warning(f"Groq failed: {e}")
+            groq_error = f"Groq API error: {str(e)}"
+            logger.warning(groq_error)
         return None
 
     # Try preferred model first, then fallback
@@ -1410,4 +1532,76 @@ def call_llm(prompt: str, response_length: str = "normal", temperature: float = 
         if result:
             return result
 
-    raise RuntimeError("No LLM API available or both failed")
+    # Both failed - include detailed error messages
+    error_details = []
+    if together_error:
+        error_details.append(f"Together: {together_error}")
+    if groq_error:
+        error_details.append(f"Groq: {groq_error}")
+    
+    error_msg = "No LLM API available or both failed"
+    if error_details:
+        error_msg += f" - Details: {'; '.join(error_details)}"
+    
+    raise RuntimeError(error_msg)
+
+
+def extract_profile_updates_from_query(message: str, current_profile: dict) -> dict:
+    """
+    Scan user query for profile-relevant updates using LLM.
+    
+    Returns: Dict of updates found.
+    """
+    client = get_together_client() or get_groq_client()
+    if not client:
+        logger.warning("No LLM client available for profile extraction")
+        return {}
+
+    system_prompt = """
+    You are a medical data extraction assistant. Analyze the user's message and identify any NEW or UPDATED information 
+    relevant to their patient profile. Use the CURRENT profile as context to only extract CHANGED or NEW information.
+    
+    Extract fields like:
+    - Age (or date of birth)
+    - Symptoms (toxicities)
+    - Treatments (regimens, cycle numbers, status)
+    - Biomarkers
+    - Comorbidities
+    - Basic info (name, zip code, race/ethnicity, height, weight)
+
+    CURRENT PROFILE:
+    {current_profile_json}
+
+    Return ONLY a JSON object with the updates. If no updates are found, return {}.
+    The JSON structure should follow the patient profile format:
+    {
+      "patient": { "age": ..., "firstName": ..., "zipCode": ..., ... },
+      "primaryDiagnosis": { "biomarkers": { ... }, ... },
+      "treatments": [ ... ],
+      "symptoms": [ ... ]
+    }
+    Include ONLY the fields that have changed.
+    """
+    
+    current_profile_json = json.dumps(current_profile, indent=2)
+    
+    try:
+        model = "meta-llama/Llama-3.3-70B-Instruct-Turbo" if get_together_client() else "llama-3.1-8b-instant"
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt.format(current_profile_json=current_profile_json)},
+                {"role": "user", "content": message}
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.1,
+        )
+        
+        if response and response.choices:
+            content = response.choices[0].message.content
+            return json.loads(content)
+    except Exception as e:
+        logger.error(f"Profile extraction failed: {e}")
+    
+    return {}
+

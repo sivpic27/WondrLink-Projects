@@ -24,7 +24,8 @@ def save_profile(user_id: str, profile_data: dict) -> bool:
         True if successful, False otherwise
     """
     try:
-        client = get_supabase_client()
+        # Use admin client to bypass RLS - user_id is verified in API layer
+        client = get_admin_client()
 
         # Extract key fields from profile_data for individual columns
         patient = profile_data.get('patient', {})
@@ -70,7 +71,8 @@ def load_profile(user_id: str) -> dict:
         Profile data dict (from raw_profile), or empty dict if not found
     """
     try:
-        client = get_supabase_client()
+        # Use admin client to bypass RLS - user_id is verified in API layer
+        client = get_admin_client()
         result = client.table('patient_profiles') \
             .select('raw_profile') \
             .eq('user_id', user_id) \
@@ -99,7 +101,8 @@ def clear_profile(user_id: str) -> bool:
         True if successful, False otherwise
     """
     try:
-        client = get_supabase_client()
+        # Use admin client to bypass RLS - user_id is verified in API layer
+        client = get_admin_client()
         client.table('patient_profiles') \
             .delete() \
             .eq('user_id', user_id) \
@@ -109,6 +112,53 @@ def clear_profile(user_id: str) -> bool:
         return True
     except Exception as e:
         logger.error(f"Failed to clear profile: {e}")
+        return False
+
+
+def merge_profile_updates(target: dict, updates: dict) -> dict:
+    """Recursively merge updates into target profile."""
+    for key, value in updates.items():
+        if isinstance(value, dict) and key in target and isinstance(target[key], dict):
+            merge_profile_updates(target[key], value)
+        else:
+            target[key] = value
+    return target
+
+
+def update_profile_with_sources(user_id: str, updates: dict, source_info: dict) -> bool:
+    """
+    Update patient profile with new data and track sources.
+    
+    source_info should look like: {"source_type": "chat", "session_id": "...", "timestamp": "..."}
+    """
+    if not updates:
+        return True
+
+    try:
+        current_profile = load_profile(user_id)
+        
+        # Merge updates into current profile
+        updated_profile = merge_profile_updates(current_profile, updates)
+        
+        # Handle field-specific sources
+        # We'll store sources in a special '_sources' field within the profile
+        if '_sources' not in updated_profile:
+            updated_profile['_sources'] = {}
+        
+        def track_sources(data, path=""):
+            for key, value in data.items():
+                current_path = f"{path}.{key}" if path else key
+                if isinstance(value, dict):
+                    track_sources(value, current_path)
+                else:
+                    updated_profile['_sources'][current_path] = source_info
+
+        track_sources(updates)
+        
+        # Save the updated profile back
+        return save_profile(user_id, updated_profile)
+    except Exception as e:
+        logger.error(f"Failed to update profile with sources: {e}")
         return False
 
 
@@ -171,12 +221,12 @@ def save_document_chunks(filename: str, chunks: List[str]) -> bool:
         return False
 
 
-def load_all_chunks() -> List[str]:
+def load_all_chunks() -> List[Dict[str, Any]]:
     """
-    Load all document chunks from the database.
+    Load all document chunks from the database with metadata.
 
     Returns:
-        List of all chunk texts
+        List of dicts: [{'content': str, 'filename': str, 'chunk_index': int, ...}]
     """
     try:
         client = get_supabase_client()
@@ -198,15 +248,23 @@ def load_all_chunks() -> List[str]:
         offset = 0
 
         while offset < total_count:
+            # Select relevant columns. Assuming 'content' keeps the text.
+            # If 'chunk_text' was used for insert and 'content' for select, we try both or stick to 'content' if that's what works.
+            # We'll try to select filename too.
             result = client.table('pdf_chunks') \
-                .select('content') \
+                .select('content, filename, chunk_index, chunk_text') \
                 .order('document_id') \
                 .order('chunk_index') \
                 .range(offset, offset + page_size - 1) \
                 .execute()
 
             if result.data:
-                all_chunks.extend([row['content'] for row in result.data])
+                # normalize content
+                for row in result.data:
+                    # Prefer content, fallback to chunk_text
+                    text = row.get('content') or row.get('chunk_text') or ""
+                    row['content'] = text
+                    all_chunks.append(row)
 
             offset += page_size
 

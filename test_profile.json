@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "name": "John Martinez",
+    "dob": "1966-03-15",
+    "sex": "Male",
+    "ecog": 1,
+    "allergies": "Penicillin",
+    "comorbidities": ["Type 2 Diabetes", "Hypertension", "Mild Peripheral Neuropathy"]
+  },
+  "primaryDiagnosis": {
+    "site": "Sigmoid Colon",
+    "histology": "Adenocarcinoma",
+    "stage": "IIIB",
+    "dateOfDiagnosis": "2024-06-15",
+    "biomarkers": {
+      "KRAS": "G12D mutation",
+      "NRAS": "Wild-type",
+      "BRAF": "Wild-type",
+      "MSI": "MSS (Microsatellite Stable)",
+      "HER2": "Negative",
+      "MMR": "Proficient"
+    }
+  },
+  "treatments": [
+    {
+      "line": "Adjuvant",
+      "regimen": "FOLFOX + Bevacizumab",
+      "status": "active",
+      "startDate": "2024-08-01",
+      "cycleNumber": 8,
+      "toxicities": [
+        {"event": "Peripheral Neuropathy", "grade": 2},
+        {"event": "Fatigue", "grade": 1},
+        {"event": "Nausea", "grade": 1}
+      ]
+    }
+  ],
+  "surgicalHistory": [
+    {
+      "procedure": "Laparoscopic Sigmoid Colectomy",
+      "date": "2024-07-10",
+      "outcome": "R0 resection, 18 lymph nodes examined, 3 positive"
+    }
+  ],
+  "symptoms": ["Mild tingling in fingers", "Occasional fatigue", "Decreased appetite"]
+}

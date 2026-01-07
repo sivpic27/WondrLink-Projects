@@ -2,7 +2,7 @@
 import os
 import re
 import logging
-from typing import List, Tuple
+from typing import List, Tuple, Union, Dict, Any
 import math
 
 logger = logging.getLogger("pdf_utils")
@@ -228,8 +228,50 @@ def calculate_similarity(query_vector: dict, doc_vector: dict) -> float:
     return min(similarity + phrase_bonus, 1.0)
 
 
-def search_chunks(query: str, chunks: List[str], top_k: int = 5) -> List[str]:
-    """Enhanced semantic search with medical context awareness"""
+def filter_chunks_dynamic(scored_chunks: List[Tuple[float, Any, int]], min_chunks: int = 2, max_chunks: int = 5) -> List[Any]:
+    """
+    Filter chunks using dynamic threshold based on score distribution.
+
+    Uses the mean score as a baseline threshold, ensuring we return
+    at least min_chunks but no more than max_chunks of the best results.
+    """
+    if not scored_chunks:
+        return []
+
+    scores = [s for s, _, _ in scored_chunks]
+    if not scores:
+        return []
+
+    mean_score = sum(scores) / len(scores)
+    max_score = max(scores)
+
+    # Dynamic threshold: use 50% of max score or mean, whichever is higher
+    # But cap at 0.4 to avoid being too restrictive
+    threshold = min(max(mean_score, max_score * 0.5), 0.4)
+
+    # Minimum threshold of 0.15 to filter out truly irrelevant chunks
+    threshold = max(threshold, 0.15)
+
+    logger.info(f"Dynamic threshold: {threshold:.3f} (mean: {mean_score:.3f}, max: {max_score:.3f})")
+
+    # Filter by threshold
+    filtered = [(s, c, i) for s, c, i in scored_chunks if s >= threshold]
+
+    # Ensure we have at least min_chunks if any exist
+    if len(filtered) < min_chunks and scored_chunks:
+        filtered = scored_chunks[:min_chunks]
+        logger.info(f"Threshold too strict, using top {min_chunks} chunks instead")
+
+    # Cap at max_chunks
+    filtered = filtered[:max_chunks]
+
+    return [chunk for _, chunk, _ in filtered]
+
+
+def search_chunks(query: str, chunks: List[Any], top_k: int = 5) -> List[Any]:
+    """Enhanced semantic search with medical context awareness and dynamic filtering.
+       Accepts chunks as List[str] or List[Dict] (with 'content' key).
+    """
     if not chunks:
         return []
 
@@ -242,21 +284,27 @@ def search_chunks(query: str, chunks: List[str], top_k: int = 5) -> List[str]:
 
     scored_chunks = []
     for i, chunk in enumerate(chunks):
-        if not chunk.strip():
+        # Handle dict vs str
+        if isinstance(chunk, dict):
+            text = chunk.get('content', '') or chunk.get('chunk_text', '') or ""
+        else:
+            text = str(chunk)
+            
+        if not text.strip():
             continue
 
-        chunk_vector = create_term_vector(chunk)
+        chunk_vector = create_term_vector(text)
         similarity = calculate_similarity(query_vector, chunk_vector)
 
         query_words = set(query.lower().split())
-        chunk_words = set(chunk.lower().split())
+        chunk_words = set(text.lower().split())
         exact_matches = len(query_words & chunk_words)
         exact_bonus = exact_matches * 0.1
 
         medical_keywords = ['treatment', 'therapy', 'diagnosis', 'prognosis', 'cancer', 'tumor', 'stage', 'grade']
-        medical_relevance = sum(1 for kw in medical_keywords if kw in chunk.lower()) * 0.05
+        medical_relevance = sum(1 for kw in medical_keywords if kw in text.lower()) * 0.05
 
-        length_penalty = 0 if len(chunk) > 200 else -0.1
+        length_penalty = 0 if len(text) > 200 else -0.1
 
         position_bonus = (len(chunks) - i) / len(chunks) * 0.02
 
@@ -266,18 +314,15 @@ def search_chunks(query: str, chunks: List[str], top_k: int = 5) -> List[str]:
 
     scored_chunks.sort(key=lambda x: x[0], reverse=True)
 
-    result_chunks = []
-    for score, chunk, idx in scored_chunks[:top_k]:
-        if score > 0.05:
-            result_chunks.append(chunk)
-        else:
-            break
+    # Log top scores for debugging
+    if scored_chunks:
+        top_scores = [f"{s:.3f}" for s, _, _ in scored_chunks[:5]]
+        logger.info(f"Top chunk scores: {', '.join(top_scores)}")
 
-    if not result_chunks and chunks:
-        result_chunks = chunks[:min(3, len(chunks))]
-        logger.info("No high-similarity chunks found, returning fallback chunks")
+    # Use dynamic filtering instead of static threshold
+    result_chunks = filter_chunks_dynamic(scored_chunks, min_chunks=2, max_chunks=top_k)
 
-    logger.info(f"Returning {len(result_chunks)} chunks")
+    logger.info(f"Returning {len(result_chunks)} chunks after dynamic filtering")
 
     return result_chunks
 

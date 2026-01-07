@@ -116,7 +116,7 @@ def safe_extract_value(data: Any, path: str, default: str = "unspecified") -> st
 
 
 def extract_treatments_summary(treatments: List[Dict]) -> List[str]:
-    """Extract a summary of treatments from complex treatment data"""
+    """Extract a summary of treatments from complex treatment data, including cycle info"""
     if not treatments or not isinstance(treatments, list):
         return []
 
@@ -128,9 +128,14 @@ def extract_treatments_summary(treatments: List[Dict]) -> List[str]:
         line = treatment.get('line', 'unknown line')
         regimen = treatment.get('regimen', 'unknown regimen')
         status = treatment.get('status', 'completed')
+        cycle_number = treatment.get('cycleNumber')  # Extract cycle number
 
         if status == 'active':
-            summary = f"Currently on {regimen} ({line})"
+            if cycle_number:
+                # Include cycle info: "Currently on FOLFOX (Adjuvant, Cycle 8)"
+                summary = f"Currently on {regimen} ({line}, Cycle {cycle_number})"
+            else:
+                summary = f"Currently on {regimen} ({line})"
         else:
             summary = f"{regimen} ({line})"
 
@@ -155,6 +160,135 @@ def extract_biomarkers_summary(biomarkers: Dict) -> str:
                 key_markers.append(f"{marker}: {value}")
 
     return ', '.join(key_markers) if key_markers else "pending/unspecified"
+
+
+# =============================================================================
+# BIOMARKER CLINICAL IMPLICATIONS
+# =============================================================================
+
+BIOMARKER_IMPLICATIONS = {
+    'KRAS': {
+        'mutated_keywords': ['mutation', 'mutant', 'mutated', 'g12', 'g13', 'positive'],
+        'wildtype_keywords': ['wild-type', 'wildtype', 'wild type', 'negative', 'wt'],
+        'mutated_implication': 'KRAS mutation means EGFR-targeted therapies (cetuximab, panitumumab) will NOT be effective for your cancer.',
+        'wildtype_implication': 'KRAS wild-type status means you may be eligible for EGFR-targeted therapies (cetuximab, panitumumab) if needed.'
+    },
+    'NRAS': {
+        'mutated_keywords': ['mutation', 'mutant', 'mutated', 'positive'],
+        'wildtype_keywords': ['wild-type', 'wildtype', 'wild type', 'negative', 'wt'],
+        'mutated_implication': 'NRAS mutation means EGFR-targeted therapies will NOT be effective.',
+        'wildtype_implication': None  # Only relevant if mutated
+    },
+    'BRAF': {
+        'mutated_keywords': ['v600e', 'mutation', 'mutant', 'mutated', 'positive'],
+        'wildtype_keywords': ['wild-type', 'wildtype', 'wild type', 'negative', 'wt'],
+        'mutated_implication': 'BRAF V600E mutation may respond to targeted therapy combinations (encorafenib + cetuximab). This mutation is associated with more aggressive disease but has specific treatment options.',
+        'wildtype_implication': None
+    },
+    'MSI': {
+        'favorable_keywords': ['msi-h', 'msi-high', 'high', 'unstable', 'msih'],
+        'unfavorable_keywords': ['mss', 'stable', 'msi-l', 'msi-low', 'microsatellite stable'],
+        'favorable_implication': 'MSI-High (MSI-H) status is actually good news - these tumors often respond very well to immunotherapy (checkpoint inhibitors like pembrolizumab). This is an important treatment option.',
+        'unfavorable_implication': 'MSS (Microsatellite Stable) means immunotherapy/checkpoint inhibitors are unlikely to be effective as a standalone treatment. However, many other effective treatments are available.'
+    },
+    'HER2': {
+        'positive_keywords': ['positive', 'amplified', 'overexpressed', '3+', '2+'],
+        'negative_keywords': ['negative', 'not amplified', '0', '1+'],
+        'positive_implication': 'HER2-positive status means you may benefit from HER2-targeted therapies (trastuzumab, pertuzumab) which are showing promising results in colorectal cancer.',
+        'negative_implication': None
+    },
+    'MMR': {
+        'deficient_keywords': ['deficient', 'dmmr', 'loss'],
+        'proficient_keywords': ['proficient', 'pmmr', 'intact'],
+        'deficient_implication': 'MMR-deficient tumors (like MSI-H) often respond well to immunotherapy.',
+        'proficient_implication': 'MMR-proficient status means the tumor is microsatellite stable and less likely to respond to immunotherapy alone.'
+    }
+}
+
+
+def get_biomarker_implications(biomarkers: Dict) -> List[str]:
+    """
+    Extract clinical implications from biomarker status.
+
+    Args:
+        biomarkers: Dict of biomarker name -> value (e.g., {'KRAS': 'G12D mutation', 'MSI': 'MSS'})
+
+    Returns:
+        List of relevant clinical implication strings
+    """
+    if not biomarkers or not isinstance(biomarkers, dict):
+        return []
+
+    implications = []
+
+    for marker_name, marker_info in BIOMARKER_IMPLICATIONS.items():
+        if marker_name not in biomarkers:
+            continue
+
+        value = str(biomarkers[marker_name]).lower()
+        if not value or value in ['unspecified', 'pending', 'unknown', 'n/a']:
+            continue
+
+        # Check for MSI (special case with favorable/unfavorable)
+        if marker_name == 'MSI':
+            if any(kw in value for kw in marker_info.get('favorable_keywords', [])):
+                if marker_info.get('favorable_implication'):
+                    implications.append(marker_info['favorable_implication'])
+            elif any(kw in value for kw in marker_info.get('unfavorable_keywords', [])):
+                if marker_info.get('unfavorable_implication'):
+                    implications.append(marker_info['unfavorable_implication'])
+
+        # Check for MMR (deficient/proficient)
+        elif marker_name == 'MMR':
+            if any(kw in value for kw in marker_info.get('deficient_keywords', [])):
+                if marker_info.get('deficient_implication'):
+                    implications.append(marker_info['deficient_implication'])
+            elif any(kw in value for kw in marker_info.get('proficient_keywords', [])):
+                if marker_info.get('proficient_implication'):
+                    implications.append(marker_info['proficient_implication'])
+
+        # Check for HER2 (positive/negative)
+        elif marker_name == 'HER2':
+            if any(kw in value for kw in marker_info.get('positive_keywords', [])):
+                if marker_info.get('positive_implication'):
+                    implications.append(marker_info['positive_implication'])
+
+        # Check for mutation markers (KRAS, NRAS, BRAF)
+        else:
+            if any(kw in value for kw in marker_info.get('mutated_keywords', [])):
+                if marker_info.get('mutated_implication'):
+                    implications.append(marker_info['mutated_implication'])
+            elif any(kw in value for kw in marker_info.get('wildtype_keywords', [])):
+                if marker_info.get('wildtype_implication'):
+                    implications.append(marker_info['wildtype_implication'])
+
+    return implications
+
+
+def format_biomarker_context(biomarkers: Dict, query_type: str = None) -> str:
+    """
+    Format biomarker information with clinical implications for prompt context.
+
+    Only includes implications when relevant to the query type.
+    """
+    if not biomarkers:
+        return ""
+
+    summary = extract_biomarkers_summary(biomarkers)
+    if summary == "pending/unspecified":
+        return ""
+
+    # Only add implications for treatment/prognosis queries
+    include_implications = query_type in ['treatment', 'prognosis', 'diagnosis', None]
+
+    if include_implications:
+        implications = get_biomarker_implications(biomarkers)
+        if implications:
+            # Limit to top 2 most relevant implications
+            impl_text = " | ".join(implications[:2])
+            return f"Biomarkers: {summary}\nImplications: {impl_text}"
+
+    return f"Biomarkers: {summary}"
 
 
 def extract_current_symptoms(profile: Dict) -> List[str]:
@@ -226,15 +360,34 @@ def extract_patient_context_complex(profile: dict) -> Dict[str, Any]:
     patient_info = profile.get('patient', {})
     if isinstance(patient_info, dict):
         dob = safe_extract_value(patient_info, 'dob', 'unspecified')
-        age = calculate_age(dob)
-        if age is not None:
-            context['age'] = age
+        age = safe_extract_value(patient_info, 'age', None)
+        
+        if age and age != 'None' and age != 'unspecified':
+             # Use provided age if available
+             try:
+                 context['age'] = int(age)
+             except (ValueError, TypeError):
+                 context['age'] = age
         else:
-            context['age'] = None
+             # Fallback to calculating from DOB
+             calced_age = calculate_age(dob)
+             if calced_age is not None:
+                context['age'] = calced_age
+             else:
+                context['age'] = None
 
+        firstName = safe_extract_value(patient_info, 'firstName', None)
         name = safe_extract_value(patient_info, 'name', None)
-        if name and name != 'unspecified':
-            context['patient_name'] = name
+        
+        if firstName and firstName != 'unspecified' and firstName != 'None':
+             context['patient_name'] = firstName
+        elif name and name != 'unspecified':
+             context['patient_name'] = name
+             
+        context['zip_code'] = safe_extract_value(patient_info, 'zipCode', 'unspecified')
+        context['race_ethnicity'] = safe_extract_value(patient_info, 'raceEthnicity', 'unspecified')
+        context['height'] = safe_extract_value(patient_info, 'height', 'unspecified')
+        context['weight'] = safe_extract_value(patient_info, 'weight', 'unspecified')
 
         context['gender'] = safe_extract_value(patient_info, 'sex', 'unspecified')
         context['performance_status'] = f"ECOG {safe_extract_value(patient_info, 'ecog', 'unspecified')}"
@@ -273,9 +426,24 @@ def extract_patient_context_complex(profile: dict) -> Dict[str, Any]:
     if isinstance(treatments, list):
         context['current_treatments'] = extract_treatments_summary(treatments)
         context['medications'] = extract_current_medications(profile)
+
+        # Extract cycle metadata from active treatment
+        context['current_cycle_number'] = None
+        context['treatment_line'] = None
+        context['current_regimen'] = None
+
+        for treatment in treatments:
+            if isinstance(treatment, dict) and treatment.get('status') == 'active':
+                context['current_cycle_number'] = treatment.get('cycleNumber')
+                context['treatment_line'] = treatment.get('line')
+                context['current_regimen'] = treatment.get('regimen')
+                break
     else:
         context['current_treatments'] = []
         context['medications'] = []
+        context['current_cycle_number'] = None
+        context['treatment_line'] = None
+        context['current_regimen'] = None
 
     context['symptoms'] = extract_current_symptoms(profile)
 
@@ -320,6 +488,14 @@ def format_patient_summary_complex(context: Dict[str, Any]) -> str:
     gender = context.get('gender', 'unspecified')
     if gender != 'unspecified':
         demo_parts.append(gender)
+        
+    age = context.get('age')
+    if age:
+        demo_parts.append(f"{age} yo")
+        
+    race = context.get('race_ethnicity', 'unspecified')
+    if race != 'unspecified':
+        demo_parts.append(race)
 
     performance_status = context.get('performance_status', 'unspecified')
     if performance_status != 'unspecified':

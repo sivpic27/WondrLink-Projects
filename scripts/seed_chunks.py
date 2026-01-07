@@ -87,16 +87,48 @@ def seed_document(filepath: str) -> dict:
 
         print(f"  Extracted {len(chunks)} chunks")
 
-        # Delete existing chunks for this file
-        print(f"  Clearing existing chunks...")
-        supabase.table('pdf_chunks').delete().eq('filename', filename).execute()
+        # Step 1: Check if document already exists
+        print(f"  Checking for existing document...")
+        existing = supabase.table('pdf_documents').select('id, status').eq('filename', filename).execute()
 
-        # Insert new chunks in batches
+        if existing.data:
+            # Document exists - just use its ID, update chunk_count only
+            document_id = existing.data[0]['id']
+            print(f"  Found existing document ID: {document_id}")
+            # Only update chunk_count, preserve existing status
+            supabase.table('pdf_documents').update({
+                'chunk_count': len(chunks)
+            }).eq('id', document_id).execute()
+        else:
+            # Document doesn't exist - insert it
+            # Use 'system' document_type and storage_path pattern from existing docs
+            print(f"  Creating new document record...")
+            storage_path = f"system/{filename}"
+            doc_result = supabase.table('pdf_documents').insert({
+                'filename': filename,
+                'original_filename': filename,
+                'storage_path': storage_path,
+                'document_type': 'system',
+                'status': 'completed',
+                'chunk_count': len(chunks)
+            }).execute()
+
+            if not doc_result.data:
+                raise Exception("Failed to insert document record")
+
+            document_id = doc_result.data[0]['id']
+            print(f"  Created document ID: {document_id}")
+
+        # Step 2: Delete existing chunks for this document
+        print(f"  Clearing existing chunks...")
+        supabase.table('pdf_chunks').delete().eq('document_id', document_id).execute()
+
+        # Step 3: Insert new chunks with correct column names
         rows = [
             {
-                'filename': filename,
-                'chunk_index': i,
-                'chunk_text': chunk
+                'document_id': document_id,
+                'content': chunk,
+                'chunk_index': i
             }
             for i, chunk in enumerate(chunks)
         ]
@@ -106,13 +138,6 @@ def seed_document(filepath: str) -> dict:
             batch = rows[i:i + batch_size]
             supabase.table('pdf_chunks').insert(batch).execute()
             print(f"  Inserted batch {i // batch_size + 1}/{(len(rows) + batch_size - 1) // batch_size}")
-
-        # Update metadata
-        supabase.table('document_metadata').upsert({
-            'filename': filename,
-            'chunk_count': len(chunks),
-            'processed_at': datetime.now().isoformat()
-        }, on_conflict='filename').execute()
 
         print(f"  SUCCESS: {len(chunks)} chunks seeded")
         return {

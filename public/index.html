@@ -8,6 +8,8 @@
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
         * {
             margin: 0;
             padding: 0;
@@ -15,34 +17,46 @@
         }
 
         :root {
-            --primary: #1e40af;
-            --primary-light: #3b82f6;
-            --primary-lighter: #60a5fa;
-            --accent: #0ea5e9;
-            --success: #10b981;
+            /* Primary - Calming teal (healthcare trust) */
+            --primary: #0d9488;
+            --primary-light: #14b8a6;
+            --primary-lighter: #5eead4;
+            --primary-dark: #0f766e;
+            --accent: #0284c7;
+            --success: #22c55e;
             --danger: #ef4444;
             --danger-hover: #dc2626;
             --background: #f8fafc;
+            --background-alt: #f1f5f9;
             --surface: #ffffff;
             --border: #e2e8f0;
+            --border-light: #f1f5f9;
             --border-hover: #cbd5e1;
             --text-primary: #0f172a;
             --text-secondary: #475569;
             --text-muted: #94a3b8;
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            --radius: 12px;
-            --radius-lg: 16px;
+            --text-inverse: #ffffff;
+            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+            --radius-sm: 6px;
+            --radius: 10px;
+            --radius-lg: 14px;
+            --radius-full: 9999px;
+            --transition: 200ms ease;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--background);
             color: var(--text-primary);
             height: 100vh;
             overflow: hidden;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
         .app {
@@ -58,7 +72,7 @@
         .sidebar {
             width: 340px;
             background: var(--surface);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-light);
             border-radius: var(--radius-lg);
             display: flex;
             flex-direction: column;
@@ -67,109 +81,177 @@
         }
 
         .brand-section {
-            padding: 24px;
-            border-bottom: 1px solid var(--border);
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-light);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .brand-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+            pointer-events: none;
         }
 
         .brand-main {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
-            color: white;
-            letter-spacing: -0.02em;
+            color: var(--text-inverse);
+            letter-spacing: -0.03em;
+            position: relative;
         }
 
         .brand-sub {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.75);
             margin-top: 4px;
+            font-weight: 500;
+            position: relative;
         }
 
         .sidebar-content {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 14px;
         }
 
         /* Section Cards */
         .section-card {
-            background: var(--background);
-            border: 1px solid var(--border);
+            background: var(--surface);
+            border: 1px solid var(--border-light);
             border-radius: var(--radius);
             padding: 16px;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        .section-card:hover {
+            border-color: var(--border);
+            box-shadow: var(--shadow-xs);
         }
 
         .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-light);
         }
 
         .section-title {
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 600;
             color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-btn {
+            background: none;
+            border: 1px solid var(--text-muted);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            padding: 0;
+            font-size: 10px;
+            font-weight: 600;
+            font-style: italic;
+            font-family: Georgia, serif;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .info-btn:hover {
+            opacity: 1;
+            background: none;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .profile-info-panel {
+            background: var(--background);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            padding: 14px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .profile-info-panel p {
+            margin: 0 0 6px 0;
+        }
+
+        .profile-info-panel ul {
+            margin: 6px 0;
+            padding-left: 18px;
+        }
+
+        .profile-info-panel li {
+            margin: 4px 0;
         }
 
         .section-badge {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-muted);
-            background: var(--surface);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-weight: 500;
-        }
-
-        /* Settings Slider */
-        .slider-container {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .response-slider {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: var(--border);
-            outline: none;
-            -webkit-appearance: none;
-            cursor: pointer;
-        }
-
-        .response-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-            border: 3px solid white;
-            box-shadow: var(--shadow);
-        }
-
-        .slider-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        .current-setting {
-            text-align: center;
-            font-size: 12px;
+            background: var(--background);
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
             font-weight: 600;
-            color: var(--primary);
-            padding: 6px 12px;
-            background: rgba(59, 130, 246, 0.1);
-            border-radius: 6px;
-            margin-top: 4px;
+            border: 1px solid var(--border-light);
+        }
+
+        /* Response Dropdown */
+        .response-dropdown {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-family: inherit;
+            font-weight: 500;
+            color: var(--text-primary);
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            outline: none;
+            transition: border-color var(--transition), box-shadow var(--transition);
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        .response-dropdown:hover {
+            border-color: var(--border-hover);
+        }
+
+        .response-dropdown:focus {
+            border-color: var(--primary-lighter);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.08);
+        }
+
+        .response-dropdown option {
+            padding: 10px;
         }
 
         /* Upload Area */
@@ -180,31 +262,32 @@
         .upload-placeholder {
             border: 2px dashed var(--border);
             border-radius: var(--radius);
-            padding: 20px;
+            padding: 24px 16px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s;
-            background: var(--surface);
+            transition: all var(--transition);
+            background: var(--background);
         }
 
         .upload-placeholder:hover {
             border-color: var(--primary-lighter);
-            background: rgba(59, 130, 246, 0.02);
+            background: rgba(13, 148, 136, 0.03);
         }
 
         .upload-icon {
-            font-size: 28px;
+            font-size: 24px;
             margin-bottom: 8px;
+            opacity: 0.8;
         }
 
         .upload-text {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-secondary);
             font-weight: 500;
         }
 
         .upload-hint {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-muted);
             margin-top: 4px;
         }
@@ -213,7 +296,7 @@
         .profile-info {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         .profile-row {
@@ -221,9 +304,9 @@
             justify-content: space-between;
             align-items: center;
             padding: 8px 10px;
-            background: var(--surface);
-            border-radius: 6px;
-            font-size: 12px;
+            background: var(--background);
+            border-radius: var(--radius-sm);
+            font-size: 11px;
         }
 
         .profile-label {
@@ -240,18 +323,23 @@
         /* Buttons */
         button {
             background: var(--primary);
-            color: white;
+            color: var(--text-inverse);
             border: none;
-            border-radius: 8px;
-            padding: 10px 16px;
-            font-weight: 500;
+            border-radius: var(--radius);
+            padding: 10px 18px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--transition);
             font-size: 13px;
+            font-family: inherit;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             background: var(--primary-light);
+        }
+
+        button:active:not(:disabled) {
+            transform: scale(0.98);
         }
 
         button:disabled {
@@ -265,21 +353,22 @@
             border: 1px solid var(--border);
         }
 
-        button.secondary:hover {
-            background: var(--border);
+        button.secondary:hover:not(:disabled) {
+            background: var(--border-light);
+            border-color: var(--border-hover);
         }
 
         button.danger {
             background: var(--danger);
         }
 
-        button.danger:hover {
+        button.danger:hover:not(:disabled) {
             background: var(--danger-hover);
         }
 
         button.small {
             padding: 6px 12px;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         /* Data Sources List */
@@ -293,38 +382,49 @@
 
         .no-data {
             text-align: center;
-            padding: 20px;
+            padding: 16px;
             color: var(--text-muted);
-            font-size: 13px;
+            font-size: 12px;
         }
 
         /* Status Bar */
         .status-bar {
-            padding: 12px 16px;
+            padding: 14px 18px;
             background: var(--background);
-            border-top: 1px solid var(--border);
+            border-top: 1px solid var(--border-light);
             font-size: 12px;
             color: var(--text-muted);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .status-indicator {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: var(--success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
 
         .status-dot.inactive {
             background: var(--text-muted);
+            animation: none;
         }
 
         /* Chat Area */
@@ -337,61 +437,87 @@
 
         .chat-header {
             background: var(--surface);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-light);
             border-radius: var(--radius-lg);
             padding: 20px 24px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow-sm);
+            margin-bottom: 14px;
+            box-shadow: var(--shadow-xs);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .chat-header-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .chat-header-text {
+            flex: 1;
         }
 
         .chat-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--text-primary);
+            letter-spacing: -0.02em;
         }
 
         .chat-subtitle {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-secondary);
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .messages {
             flex: 1;
             overflow-y: auto;
             background: var(--surface);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-light);
             border-radius: var(--radius-lg);
             padding: 24px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow-sm);
+            margin-bottom: 14px;
+            box-shadow: var(--shadow-xs);
         }
 
         .input-section {
             background: var(--surface);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-light);
             border-radius: var(--radius-lg);
-            padding: 16px;
+            padding: 14px;
             display: flex;
             gap: 12px;
             align-items: flex-end;
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow-xs);
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        .input-section:focus-within {
+            border-color: var(--primary-lighter);
+            box-shadow: var(--shadow-sm), 0 0 0 3px rgba(13, 148, 136, 0.08);
         }
 
         textarea {
             flex: 1;
-            min-height: 48px;
+            min-height: 44px;
             max-height: 120px;
             resize: none;
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px 16px;
+            border-radius: var(--radius);
+            padding: 11px 14px;
             font-family: inherit;
             font-size: 14px;
             color: var(--text-primary);
             background: var(--background);
             outline: none;
-            transition: border-color 0.2s;
+            transition: border-color var(--transition);
             line-height: 1.5;
         }
 
@@ -403,10 +529,65 @@
             color: var(--text-muted);
         }
 
+        /* Voice Button */
+        .voice-btn {
+            width: 44px;
+            height: 44px;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 18px;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .voice-btn:hover {
+            background: var(--border-light);
+            border-color: var(--border-hover);
+        }
+
+        .voice-btn.listening {
+            background: var(--danger);
+            border-color: var(--danger);
+            animation: pulse-voice 1.5s infinite;
+        }
+
+        .voice-btn.unsupported {
+            display: none;
+        }
+
+        @keyframes pulse-voice {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
         .send-btn {
-            height: 48px;
-            min-width: 80px;
+            height: 44px;
+            min-width: 76px;
             font-weight: 600;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: var(--radius);
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .send-btn:active:not(:disabled) {
+            transform: translateY(0);
         }
 
         /* Messages */
@@ -414,59 +595,90 @@
             margin-bottom: 20px;
             display: flex;
             flex-direction: column;
-            animation: fadeIn 0.3s ease;
+            animation: slideIn 0.3s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .msg.user {
             align-items: flex-end;
         }
 
+        .msg.bot {
+            align-items: flex-start;
+        }
+
         .bubble {
-            max-width: 75%;
+            max-width: 72%;
             padding: 14px 18px;
-            border-radius: var(--radius);
+            border-radius: var(--radius-lg);
             font-size: 14px;
-            line-height: 1.6;
+            line-height: 1.65;
+            position: relative;
         }
 
         .bubble.user {
-            background: var(--primary);
-            color: white;
-            border-bottom-right-radius: 4px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: var(--text-inverse);
+            border-bottom-right-radius: var(--radius-sm);
+            box-shadow: var(--shadow-sm);
         }
 
         .bubble.bot {
             background: var(--background);
             color: var(--text-primary);
-            border: 1px solid var(--border);
-            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border-light);
+            border-bottom-left-radius: var(--radius-sm);
+        }
+
+        .bubble.bot strong {
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        .bubble.bot em {
+            color: var(--text-secondary);
         }
 
         .ai-status {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-muted);
             margin-top: 6px;
             padding: 4px 10px;
             background: var(--background);
-            border-radius: 4px;
-            display: inline-block;
+            border-radius: var(--radius-full);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid var(--border-light);
         }
 
         .ai-status.enhanced {
             color: var(--primary);
-            background: rgba(59, 130, 246, 0.1);
+            background: rgba(13, 148, 136, 0.06);
+            border-color: rgba(13, 148, 136, 0.15);
+        }
+
+        .ai-status.enhanced::before {
+            content: '\2713';
+            font-size: 9px;
         }
 
         /* Loading */
         .loading {
             display: inline-block;
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             border: 2px solid var(--border);
             border-top-color: var(--primary);
             border-radius: 50%;
@@ -474,12 +686,108 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Thinking indicator */
+        .thinking {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .thinking-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .thinking-dots span {
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: bounce 1.4s ease-in-out infinite;
+        }
+
+        .thinking-dots span:nth-child(2) {
+            animation-delay: 0.16s;
+        }
+
+        .thinking-dots span:nth-child(3) {
+            animation-delay: 0.32s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-6px);
+            }
+        }
+
+        /* Welcome message */
+        .welcome-message {
+            max-width: 85%;
+        }
+
+        .welcome-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .welcome-icon {
+            font-size: 20px;
+        }
+
+        .welcome-intro {
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+        }
+
+        .welcome-features {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-light);
+        }
+
+        .welcome-feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .feature-icon {
+            font-size: 14px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .welcome-cta {
+            color: var(--text-muted);
+            font-size: 13px;
         }
 
         /* Scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 5px;
+            height: 5px;
         }
 
         ::-webkit-scrollbar-track {
@@ -488,11 +796,17 @@
 
         ::-webkit-scrollbar-thumb {
             background: var(--border);
-            border-radius: 3px;
+            border-radius: var(--radius-full);
         }
 
         ::-webkit-scrollbar-thumb:hover {
             background: var(--border-hover);
+        }
+
+        /* Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
         }
 
         /* Responsive */
@@ -500,14 +814,67 @@
             .app {
                 flex-direction: column;
                 overflow-y: auto;
+                padding: 12px;
+                gap: 12px;
             }
 
             .sidebar {
                 width: 100%;
+                max-height: none;
             }
 
             .chat-wrap {
                 min-height: 60vh;
+            }
+
+            .bubble {
+                max-width: 85%;
+            }
+
+            .welcome-message {
+                max-width: 95%;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .brand-section {
+                padding: 18px 16px;
+            }
+
+            .brand-main {
+                font-size: 20px;
+            }
+
+            .sidebar-content {
+                padding: 14px;
+            }
+
+            .chat-header {
+                display: none;
+            }
+
+            .chat-title {
+                font-size: 16px;
+            }
+
+            .messages {
+                padding: 16px;
+            }
+
+            .input-section {
+                padding: 10px;
+            }
+
+            textarea {
+                min-height: 40px;
+                padding: 10px 12px;
+                font-size: 16px;
+                /* Prevents zoom on iOS */
+            }
+
+            .send-btn {
+                min-width: 60px;
+                height: 40px;
             }
         }
 
@@ -518,7 +885,9 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -528,45 +897,62 @@
         .auth-modal {
             background: var(--surface);
             border-radius: var(--radius-lg);
-            padding: 32px;
+            padding: 36px;
             width: 100%;
-            max-width: 400px;
+            max-width: 380px;
             box-shadow: var(--shadow-lg);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .auth-title {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             color: var(--text-primary);
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
+            letter-spacing: -0.02em;
         }
 
         .auth-subtitle {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-secondary);
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
         }
 
         .auth-form {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 14px;
         }
 
         .auth-input {
             width: 100%;
             padding: 12px 16px;
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: var(--radius);
             font-size: 14px;
+            font-family: inherit;
             outline: none;
-            transition: border-color 0.2s;
+            transition: border-color var(--transition), box-shadow var(--transition);
+            background: var(--background);
         }
 
         .auth-input:focus {
             border-color: var(--primary-lighter);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.08);
         }
 
         .auth-btn {
@@ -574,11 +960,19 @@
             padding: 12px;
             font-size: 14px;
             font-weight: 600;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: var(--radius);
+            margin-top: 4px;
+        }
+
+        .auth-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
         }
 
         .auth-toggle {
             text-align: center;
-            margin-top: 16px;
+            margin-top: 20px;
             font-size: 13px;
             color: var(--text-secondary);
         }
@@ -586,51 +980,997 @@
         .auth-toggle a {
             color: var(--primary);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
+            transition: color var(--transition);
         }
 
         .auth-toggle a:hover {
+            color: var(--primary-dark);
             text-decoration: underline;
         }
 
         .auth-error {
-            background: rgba(239, 68, 68, 0.1);
+            background: rgba(239, 68, 68, 0.08);
             color: var(--danger);
-            padding: 10px 12px;
-            border-radius: 6px;
-            font-size: 13px;
+            padding: 10px 14px;
+            border-radius: var(--radius);
+            font-size: 12px;
             display: none;
+            border: 1px solid rgba(239, 68, 68, 0.15);
+        }
+
+        .auth-success {
+            background: rgba(34, 197, 94, 0.08);
+            color: var(--success);
+            padding: 10px 14px;
+            border-radius: var(--radius);
+            font-size: 12px;
+            display: none;
+            border: 1px solid rgba(34, 197, 94, 0.15);
+            line-height: 1.5;
         }
 
         .user-info {
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .logout-btn {
             width: 100%;
-            padding: 10px 16px;
-            font-size: 13px;
+            padding: 10px 14px;
+            font-size: 12px;
             background: var(--background);
             color: var(--text-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all var(--transition);
         }
 
         .logout-btn:hover {
             background: var(--danger);
-            color: white;
+            color: var(--text-inverse);
             border-color: var(--danger);
         }
 
         .logout-btn #userEmail {
             color: var(--text-primary);
             font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 200px;
         }
 
         .logout-btn:hover #userEmail {
+            color: var(--text-inverse);
+        }
+
+        /* Profile Wizard */
+        .profile-wizard {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xs);
+            overflow: hidden;
+        }
+
+        .wizard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-light);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        }
+
+        .wizard-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-inverse);
+            margin: 0;
+        }
+
+        .wizard-close {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--text-inverse);
+            border: none;
+            padding: 8px 14px;
+            font-size: 12px;
+            border-radius: var(--radius);
+        }
+
+        .wizard-close:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .wizard-progress {
+            padding: 16px 24px;
+            background: var(--background);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .progress-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: var(--border);
+        }
+
+        .progress-step.completed:not(:last-child)::after {
+            background: var(--primary);
+        }
+
+        .step-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--background);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            position: relative;
+            z-index: 1;
+            transition: all var(--transition);
+        }
+
+        .progress-step.active .step-circle {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--surface);
+        }
+
+        .progress-step.completed .step-circle {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: var(--text-inverse);
+        }
+
+        .step-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        .progress-step.active .step-label {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .progress-bar-container {
+            height: 4px;
+            background: var(--border-light);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: var(--radius-full);
+            transition: width 0.3s ease;
+        }
+
+        .wizard-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .wizard-step {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .step-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .step-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-label .optional {
+            font-weight: 400;
+            text-transform: none;
+            color: var(--text-muted);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--background);
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        .form-input:focus {
+            border-color: var(--primary-lighter);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.08);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--background);
+            color: var(--text-primary);
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        .form-select:focus {
+            border-color: var(--primary-lighter);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.08);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card Selector (ECOG, Stage) */
+        .card-selector {
+            display: grid;
+            gap: 10px;
+        }
+
+        .card-selector.cols-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .card-selector.cols-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        @media (max-width: 640px) {
+
+            .card-selector.cols-2,
+            .card-selector.cols-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Enhanced Mobile Wizard Styles */
+        @media (max-width: 640px) {
+            .profile-wizard {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 100;
+                border-radius: 0;
+                border: none;
+            }
+
+            .wizard-content {
+                padding: 16px;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .wizard-progress {
+                padding: 12px 16px;
+            }
+
+            .progress-steps {
+                display: flex;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 8px;
+                gap: 8px;
+            }
+
+            .progress-step {
+                min-width: 60px;
+                flex-shrink: 0;
+            }
+
+            .step-label {
+                font-size: 9px;
+                white-space: nowrap;
+            }
+
+            .step-circle {
+                width: 24px;
+                height: 24px;
+                font-size: 11px;
+            }
+
+            .wizard-footer {
+                position: sticky;
+                bottom: 0;
+                z-index: 10;
+                background: var(--surface);
+                border-top: 1px solid var(--border-light);
+            }
+
+            /* Larger touch targets */
+            .selector-card {
+                padding: 16px;
+                min-height: 60px;
+            }
+
+            .radio-option {
+                padding: 14px 18px;
+                font-size: 14px;
+            }
+
+            .chip {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+
+            /* Form inputs - prevent iOS zoom */
+            .form-input,
+            .form-select {
+                font-size: 16px !important;
+                padding: 14px;
+                min-height: 48px;
+            }
+
+            .step-title {
+                font-size: 18px;
+            }
+
+            .step-description {
+                font-size: 13px;
+            }
+        }
+
+        /* Tablet breakpoint */
+        @media (max-width: 768px) and (min-width: 641px) {
+            .form-row-3 {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .wizard-content {
+                padding: 20px;
+            }
+        }
+
+        /* Mobile Hamburger Menu */
+        .hamburger-btn {
+            display: none;
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 101;
+            width: 44px;
+            height: 44px;
+            background: var(--primary);
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            padding: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .hamburger-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: white;
+            stroke-width: 2;
+        }
+
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.5);
+            z-index: 99;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-overlay.active {
+            /* The provided code snippet appears to be Python code, which is not valid CSS.
+               To maintain syntactical correctness of the CSS file, the snippet is commented out.
+               If this was intended to be CSS, please provide valid CSS properties. */
+            /*
+            patient_summary = format_patient_summary_complex(patient_context)
+            return jsonify({
+                "profile": profile,
+                "patient_summary": patient_summary,
+                "context": patient_context,
+                "sources": profile.get('_sources', {})
+            })
+            */
+            opacity: 1;
+        }
+
+        @media (max-width: 640px) {
+            .hamburger-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-overlay {
+                display: block;
+                pointer-events: none;
+            }
+
+            .mobile-overlay.active {
+                pointer-events: auto;
+            }
+
+            .app {
+                padding: 0;
+                gap: 0;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 300px;
+                z-index: 100;
+                border-radius: 0;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .chat-wrap {
+                width: 100%;
+                border-radius: 0;
+                height: 100vh;
+            }
+
+            .messages {
+                padding-top: 70px;
+            }
+
+            .input-section {
+                padding: 8px;
+            }
+        }
+
+        .selector-card {
+            padding: 14px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all var(--transition);
+            background: var(--surface);
+        }
+
+        .selector-card:hover {
+            border-color: var(--border-hover);
+            background: var(--background);
+        }
+
+        .selector-card.selected {
+            border-color: var(--primary);
+            background: rgba(13, 148, 136, 0.04);
+        }
+
+        .selector-card .card-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .selector-card .card-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .selector-card.selected .card-title {
+            color: var(--primary-dark);
+        }
+
+        /* Radio Group */
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .radio-option {
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: all var(--transition);
+            background: var(--surface);
+        }
+
+        .radio-option:hover {
+            border-color: var(--border-hover);
+            background: var(--background);
+        }
+
+        .radio-option.selected {
+            border-color: var(--primary);
+            background: rgba(13, 148, 136, 0.06);
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+
+        /* Chip Selector (Side Effects, Symptoms) */
+        .chip-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--text-secondary);
+            transition: all var(--transition);
+            background: var(--surface);
+        }
+
+        .chip:hover {
+            border-color: var(--border-hover);
+            background: var(--background);
+        }
+
+        .chip.selected {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: var(--text-inverse);
+        }
+
+        /* Severity Selector */
+        .severity-container {
+            margin-top: 12px;
+            padding: 14px;
+            background: var(--background);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-light);
+        }
+
+        .severity-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .severity-item:last-child {
+            border-bottom: none;
+        }
+
+        .severity-name {
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .severity-options {
+            display: flex;
+            gap: 6px;
+        }
+
+        .severity-btn {
+            padding: 4px 10px;
+            font-size: 11px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .severity-btn:hover {
+            border-color: var(--border-hover);
+        }
+
+        .severity-btn.selected {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: var(--text-inverse);
+        }
+
+        .severity-btn.mild.selected {
+            background: #22c55e;
+            border-color: #22c55e;
+        }
+
+        .severity-btn.moderate.selected {
+            background: #f59e0b;
+            border-color: #f59e0b;
+        }
+
+        .severity-btn.severe.selected {
+            background: #ef4444;
+            border-color: #ef4444;
+        }
+
+        /* Treatment Card */
+        .treatment-card {
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            background: var(--surface);
+        }
+
+        .treatment-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .treatment-number {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .remove-treatment {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 11px;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+
+        .remove-treatment:hover {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .add-treatment-btn {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .add-treatment-btn:hover {
+            border-color: var(--primary-lighter);
+            color: var(--primary);
+            background: rgba(13, 148, 136, 0.03);
+        }
+
+        /* Biomarker Help */
+        .biomarker-help {
+            background: rgba(13, 148, 136, 0.04);
+            border: 1px solid rgba(13, 148, 136, 0.15);
+            border-radius: var(--radius);
+            padding: 14px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .biomarker-help strong {
+            color: var(--primary-dark);
+        }
+
+        /* Review Section */
+        .review-section {
+            background: var(--background);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .review-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .review-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .review-edit-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 11px;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+
+        .review-edit-btn:hover {
+            text-decoration: underline;
+        }
+
+        .review-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 12px;
+        }
+
+        .review-label {
+            color: var(--text-muted);
+        }
+
+        .review-value {
+            color: var(--text-primary);
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .review-value.empty {
+            color: var(--text-muted);
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        /* Wizard Footer */
+        .wizard-footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-light);
+            background: var(--surface);
+        }
+
+        .wizard-footer .btn-back {
+            background: var(--background);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .wizard-footer .btn-back:hover {
+            background: var(--border-light);
+        }
+
+        .wizard-footer .btn-next {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            min-width: 120px;
+        }
+
+        /* Build Profile Button */
+        .build-profile-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: var(--text-inverse);
+            border: none;
+            border-radius: var(--radius);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .build-profile-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .edit-profile-btn {
+            width: 100%;
+            padding: 10px;
+            background: var(--background);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .edit-profile-btn:hover {
+            background: var(--border-light);
+            border-color: var(--border-hover);
+        }
+
+        /* Source Badge */
+        .source-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            background: var(--accent);
             color: white;
+            border-radius: 3px;
+            font-size: 8px;
+            font-weight: bold;
+            margin-left: 4px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .source-badge:hover {
+            opacity: 1;
+        }
+
+        /* Embed Modal */
+        .embed-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .embed-modal {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .embed-code-box {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 16px 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Source Buttons in Chat */
+        .msg-sources {
+            margin-top: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .source-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .source-button:hover {
+            background: white;
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .source-button.featured {
+            background: rgba(13, 148, 136, 0.1);
+            border-color: rgba(13, 148, 136, 0.2);
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+
+        .source-button.featured:hover {
+            background: rgba(13, 148, 136, 0.2);
         }
     </style>
 </head>
@@ -640,11 +1980,13 @@
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-modal">
             <div class="auth-title" id="authTitle">Welcome Back</div>
-            <div class="auth-subtitle" id="authSubtitle">Sign in to access your cancer care guide</div>
+            <div class="auth-subtitle" id="authSubtitle">Sign in to access your colon cancer care guide</div>
             <div class="auth-error" id="authError"></div>
+            <div class="auth-success" id="authSuccess"></div>
             <form class="auth-form" id="authForm">
                 <input type="email" class="auth-input" id="authEmail" placeholder="Email address" required>
-                <input type="password" class="auth-input" id="authPassword" placeholder="Password (min 6 characters)" required minlength="6">
+                <input type="password" class="auth-input" id="authPassword" placeholder="Password (min 6 characters)"
+                    required minlength="6">
                 <button type="submit" class="auth-btn" id="authSubmitBtn">Sign In</button>
             </form>
             <div class="auth-toggle">
@@ -655,62 +1997,103 @@
     </div>
 
     <div class="app" id="mainApp" style="display: none;">
-        <div class="sidebar">
+        <!-- Mobile Hamburger Menu Button -->
+        <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileMenu()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <!-- Mobile Overlay -->
+        <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+
+        <div class="sidebar" id="sidebar">
             <div class="brand-section">
                 <div class="brand-main">WondrLink</div>
-                <div class="brand-sub">Your AI Cancer Care Guide</div>
+                <div class="brand-sub">Your Colon Cancer Care Guide</div>
+                <div class="colon-cancer-notice"
+                    style="margin-top: 8px; padding: 5px 10px; background: rgba(255,255,255,0.15); border-radius: 6px; font-size: 10px; color: rgba(255,255,255,0.9); text-align: center;">
+                    Specialized for Colon Cancer Patients
+                </div>
             </div>
 
             <div class="sidebar-content">
                 <!-- User Info -->
                 <div class="user-info" id="userInfo">
-                    <button class="logout-btn" onclick="handleLogout()"><span id="userEmail">User</span> · Logout</button>
+                    <button class="logout-btn" onclick="handleLogout()"><span id="userEmail">User</span> ·
+                        Logout</button>
                 </div>
                 <!-- Response Settings -->
                 <div class="section-card">
                     <div class="section-header">
                         <div class="section-title">Response Detail</div>
                     </div>
-                    <div class="slider-container">
-                        <input type="range" min="0" max="2" value="1" step="1" class="response-slider" id="responseLength">
-                        <div class="slider-labels">
-                            <span>Brief</span>
-                            <span>Normal</span>
-                            <span>Detailed</span>
-                        </div>
-                        <div class="current-setting" id="currentSetting">Normal responses</div>
+                    <select class="response-dropdown" id="responseLength">
+                        <option value="brief">Brief - 1-2 sentences</option>
+                        <option value="normal" selected>Normal - 2-3 sentences</option>
+                        <option value="detailed">Detailed - 4-6 sentences</option>
+                    </select>
+                </div>
+
+                <!-- Embed Widget -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-title">Embed Tool</div>
                     </div>
+                    <button class="small secondary" style="width: 100%;" onclick="showEmbedModal()">Get Widget
+                        Code</button>
                 </div>
 
                 <!-- Patient Profile -->
                 <div class="section-card">
                     <div class="section-header">
-                        <div class="section-title">Patient Profile</div>
+                        <div class="section-title">
+                            Patient Profile
+                            <button class="info-btn" onclick="toggleProfileInfo()" title="What is this?">i</button>
+                        </div>
                         <div class="section-badge" id="profileBadge">No profile</div>
                     </div>
 
-                    <!-- Upload area (shown when no profile) -->
+                    <!-- Info panel (hidden by default) -->
+                    <div class="profile-info-panel" id="profileInfoPanel" style="display: none;">
+                        <p><strong>What is a Patient Profile?</strong></p>
+                        <p>Your personalized profile helps WondrLink give you relevant guidance tailored to your
+                            specific situation.</p>
+                        <p style="margin-top: 8px;"><strong>We'll ask about:</strong></p>
+                        <ul>
+                            <li>Your diagnosis (colon cancer type, stage)</li>
+                            <li>Current treatments and any side effects</li>
+                            <li>Test results (biomarkers like KRAS, BRAF)</li>
+                        </ul>
+                        <p style="margin-top: 8px; font-size: 10px; color: var(--text-muted);">Takes about 5 minutes to
+                            complete.</p>
+                    </div>
+
+                    <!-- Build profile button (shown when no profile) -->
                     <div class="upload-area" id="uploadArea">
-                        <input type="file" id="profileFile" accept=".json" hidden />
-                        <div class="upload-placeholder" onclick="document.getElementById('profileFile').click()">
-                            <div class="upload-icon">📋</div>
-                            <div class="upload-text">Click to upload patient profile</div>
-                            <div class="upload-hint">JSON format</div>
+                        <button class="build-profile-btn" onclick="startProfileWizard(false)">
+                            Build Your Profile
+                        </button>
+                        <div style="text-align: center; margin-top: 8px; font-size: 11px; color: var(--text-muted);">
+                            Answer a few questions to personalize your experience
                         </div>
                     </div>
 
-                    <!-- Profile info (shown after upload) -->
+                    <!-- Profile info (shown after profile created) -->
                     <div class="profile-info" id="profileInfo" style="display: none;"></div>
 
-                    <!-- Clear button -->
-                    <button class="small secondary" id="clearProfileBtn" style="display: none; margin-top: 12px; width: 100%;">Clear Profile</button>
+                    <!-- Edit/Clear buttons -->
+                    <button class="edit-profile-btn" id="editProfileBtn" onclick="startProfileWizard(true)"
+                        style="display: none;">Edit Profile</button>
+                    <button class="small secondary" id="clearProfileBtn"
+                        style="display: none; margin-top: 8px; width: 100%;">Clear Profile</button>
                 </div>
 
                 <!-- Data Sources -->
                 <div class="section-card">
                     <div class="section-header">
                         <div class="section-title">Medical Guidelines</div>
-                        <div class="section-badge" id="documentCount">0 sources</div>
                     </div>
                     <div class="data-sources-list" id="dataSourcesList">
                         <div class="no-data">No data sources available</div>
@@ -723,34 +2106,97 @@
                     <div class="status-dot" id="statusDot"></div>
                     <span id="aiStatus">Ready</span>
                 </div>
-                <span id="chunkCount">0 chunks</span>
             </div>
         </div>
 
         <div class="chat-wrap">
             <div class="chat-header">
-                <div class="chat-title">Your Cancer Care Guide</div>
-                <div class="chat-subtitle">Ask questions and get evidence-based guidance in plain language</div>
+                <div class="chat-header-icon">💬</div>
+                <div class="chat-header-text">
+                    <div class="chat-title">Your Colon Cancer Guide</div>
+                    <div class="chat-subtitle">Evidence-based guidance in plain language</div>
+                </div>
             </div>
 
             <div class="messages" id="messages">
                 <div class="msg bot">
-                    <div class="bubble bot">
-                        <strong>Welcome to WondrLink!</strong><br><br>
-                        I'm here to help you understand your cancer treatment in simple, everyday language.<br><br>
-                        <strong>I can help you:</strong><br>
-                        - Understand your diagnosis and treatment options<br>
-                        - Explain medical terms in plain English<br>
-                        - Answer questions about side effects<br>
-                        - Help you prepare for appointments<br><br>
-                        <em>Upload your patient profile in the sidebar, then ask me anything.</em>
+                    <div class="bubble bot welcome-message">
+                        <div class="colon-cancer-badge"
+                            style="display: inline-block; background: rgba(13, 148, 136, 0.1); color: var(--primary-dark); padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-bottom: 12px;">
+                            COLON CANCER SUPPORT
+                        </div>
+                        <div class="welcome-header">
+                            <span class="welcome-icon">👋</span>
+                            <strong>Welcome to WondrLink!</strong>
+                        </div>
+                        <p class="welcome-intro">I'm here to help you understand your <strong>colon cancer</strong>
+                            treatment in simple, everyday language.</p>
+                        <div class="welcome-features">
+                            <div class="welcome-feature">
+                                <span class="feature-icon">📖</span>
+                                <span>Understand your diagnosis and treatment options</span>
+                            </div>
+                            <div class="welcome-feature">
+                                <span class="feature-icon">💬</span>
+                                <span>Explain medical terms in plain English</span>
+                            </div>
+                            <div class="welcome-feature">
+                                <span class="feature-icon">⚠️</span>
+                                <span>Answer questions about side effects</span>
+                            </div>
+                            <div class="welcome-feature">
+                                <span class="feature-icon">📝</span>
+                                <span>Help you prepare for appointments</span>
+                            </div>
+                        </div>
+                        <p class="welcome-cta"><em>Build your patient profile in the sidebar to get personalized
+                                guidance.</em></p>
                     </div>
                 </div>
             </div>
 
             <div class="input-section">
                 <textarea id="msgInput" placeholder="Ask me anything about your treatment..."></textarea>
+                <button id="voiceBtn" class="voice-btn" title="Voice input">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                </button>
                 <button id="sendBtn" class="send-btn">Send</button>
+            </div>
+        </div>
+
+        <!-- Profile Wizard (hidden by default) -->
+        <div class="profile-wizard" id="profileWizard" style="display: none;">
+            <div class="wizard-header">
+                <div>
+                    <h2 id="wizardTitle">Build Your Profile</h2>
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 4px;">For Colon Cancer
+                        Patients Only</div>
+                </div>
+                <button class="wizard-close" onclick="cancelWizard()">Cancel</button>
+            </div>
+
+            <div class="wizard-progress">
+                <div class="progress-steps" id="progressSteps">
+                    <!-- Generated by JS -->
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="progressBarFill" style="width: 20%"></div>
+                </div>
+            </div>
+
+            <div class="wizard-content" id="wizardContent">
+                <!-- Step content rendered by JS -->
+            </div>
+
+            <div class="wizard-footer">
+                <button class="btn-back" id="wizardBack" onclick="prevStep()">Back</button>
+                <button class="btn-next" id="wizardNext" onclick="nextStep()">Continue</button>
             </div>
         </div>
     </div>
@@ -779,6 +2225,7 @@
         const authTitle = document.getElementById("authTitle");
         const authSubtitle = document.getElementById("authSubtitle");
         const authError = document.getElementById("authError");
+        const authSuccess = document.getElementById("authSuccess");
         const authForm = document.getElementById("authForm");
         const authEmail = document.getElementById("authEmail");
         const authPassword = document.getElementById("authPassword");
@@ -796,16 +2243,17 @@
             isLoginMode = !isLoginMode;
             authError.textContent = "";
             authError.style.display = "none";
+            authSuccess.style.display = "none";
 
             if (isLoginMode) {
                 authTitle.textContent = "Welcome Back";
-                authSubtitle.textContent = "Sign in to access your cancer care guide";
+                authSubtitle.textContent = "Sign in to access your colon cancer care guide";
                 authSubmitBtn.textContent = "Sign In";
                 authToggleText.textContent = "Don't have an account?";
                 authToggleLink.textContent = "Create one";
             } else {
                 authTitle.textContent = "Create Account";
-                authSubtitle.textContent = "Get personalized cancer care guidance";
+                authSubtitle.textContent = "Get personalized colon cancer care guidance";
                 authSubmitBtn.textContent = "Create Account";
                 authToggleText.textContent = "Already have an account?";
                 authToggleLink.textContent = "Sign in";
@@ -813,8 +2261,15 @@
         }
 
         function showAuthError(message) {
+            authSuccess.style.display = "none";
             authError.textContent = message;
             authError.style.display = "block";
+        }
+
+        function showAuthSuccess(message) {
+            authError.style.display = "none";
+            authSuccess.innerHTML = message;
+            authSuccess.style.display = "block";
         }
 
         async function checkAuth() {
@@ -847,6 +2302,7 @@
             authEmail.value = "";
             authPassword.value = "";
             authError.style.display = "none";
+            authSuccess.style.display = "none";
         }
 
         // Handle auth form submission
@@ -885,10 +2341,19 @@
                         await loadDataSources();
                         await loadExistingProfile();
                     } else {
-                        // No session means email confirmation is required
-                        showAuthError("Please check your email to confirm your account, then sign in.");
+                        // No session means email confirmation is required - show SUCCESS not error
+                        showAuthSuccess(`
+                            <strong>Account created!</strong><br>
+                            Check your email to confirm your account, then sign in.<br>
+                            <small style="opacity: 0.8;">(Check your spam folder if you don't see it)</small>
+                        `);
+                        // Switch to login mode
                         isLoginMode = true;
-                        updateAuthMode();
+                        authTitle.textContent = "Welcome Back";
+                        authSubtitle.textContent = "Sign in to access your colon cancer care guide";
+                        authSubmitBtn.textContent = "Sign In";
+                        authToggleText.textContent = "Don't have an account?";
+                        authToggleLink.textContent = "Create one";
                     }
                 }
             } catch (err) {
@@ -935,141 +2400,119 @@
         // =====================
         // DOM Elements
         // =====================
-        const chunkCount = document.getElementById("chunkCount");
         const aiStatus = document.getElementById("aiStatus");
         const statusDot = document.getElementById("statusDot");
         const sendBtn = document.getElementById("sendBtn");
         const msgInput = document.getElementById("msgInput");
         const messages = document.getElementById("messages");
-        const responseSlider = document.getElementById("responseLength");
-        const currentSetting = document.getElementById("currentSetting");
+        const responseDropdown = document.getElementById("responseLength");
         const dataSourcesList = document.getElementById("dataSourcesList");
-        const documentCount = document.getElementById("documentCount");
 
         // Profile elements
-        const profileFile = document.getElementById("profileFile");
         const uploadArea = document.getElementById("uploadArea");
         const profileInfo = document.getElementById("profileInfo");
         const profileBadge = document.getElementById("profileBadge");
         const clearProfileBtn = document.getElementById("clearProfileBtn");
 
+        // For edit mode
+        let existingProfileData = null;
+
+        // =====================
+        // Mobile Menu Functions
+        // =====================
+        const sidebar = document.getElementById("sidebar");
+        const mobileOverlay = document.getElementById("mobileOverlay");
+        const hamburgerBtn = document.getElementById("hamburgerBtn");
+
+        function toggleMobileMenu() {
+            const isOpen = sidebar.classList.contains('mobile-open');
+            if (isOpen) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        }
+
+        function openMobileMenu() {
+            sidebar.classList.add('mobile-open');
+            mobileOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            // Change hamburger to X icon
+            hamburgerBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+                <line x1="6" y1="18" x2="18" y2="6"></line>
+            </svg>`;
+        }
+
+        function closeMobileMenu() {
+            sidebar.classList.remove('mobile-open');
+            mobileOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+            // Change X back to hamburger icon
+            hamburgerBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>`;
+        }
+
         // =====================
         // Profile Functions
         // =====================
-        profileFile.addEventListener("change", async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+        const profileInfoPanel = document.getElementById("profileInfoPanel");
 
-            const form = new FormData();
-            form.append("file", file);
-
-            try {
-                uploadArea.querySelector('.upload-placeholder').innerHTML = '<div class="loading"></div> Loading...';
-
-                const resp = await authFetch("/api/upload_profile", { method: "POST", body: form });
-                const data = await resp.json();
-
-                if (resp.ok) {
-                    displayProfile(data.context, data.patient_summary);
-                } else {
-                    alert("Upload failed: " + (data.error || "Unknown error"));
-                    resetUploadArea();
-                }
-            } catch (err) {
-                alert("Error: " + err.message);
-                resetUploadArea();
+        function toggleProfileInfo() {
+            if (profileInfoPanel.style.display === "none") {
+                profileInfoPanel.style.display = "block";
+            } else {
+                profileInfoPanel.style.display = "none";
             }
-        });
+        }
 
-        function displayProfile(context, summary) {
+        function displayProfile(context, summary, sources = {}) {
             uploadArea.style.display = "none";
             profileInfo.style.display = "flex";
             clearProfileBtn.style.display = "block";
+            document.getElementById("editProfileBtn").style.display = "block";
             profileBadge.textContent = "Active";
             profileBadge.style.background = "rgba(16, 185, 129, 0.1)";
             profileBadge.style.color = "#10b981";
 
-            function calcAge(dateStr) {
-                if (!dateStr) return null;
-                const birth = new Date(dateStr);
-                if (isNaN(birth)) return null;
-                const today = new Date();
-                let age = today.getFullYear() - birth.getFullYear();
-                const m = today.getMonth() - birth.getMonth();
-                if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-                return age;
-            }
-
-            function getCurrentTreatment(treatments) {
-                if (!treatments || !treatments.length) return null;
-                const current = treatments.find(t => t.toLowerCase().includes('currently'));
-                if (current) {
-                    const match = current.match(/Currently on (.+?)(?:\s*\(|$)/i);
-                    return match ? match[1].trim() : current.replace(/^Currently on\s*/i, '').split('(')[0].trim();
-                }
-                const last = treatments[treatments.length - 1];
-                return last.split('(')[0].trim();
-            }
-
             const rows = [];
 
             if (context.patient_name) {
-                rows.push({ label: "Name", value: context.patient_name });
+                rows.push({ label: "Name", value: context.patient_name, path: "patient.firstName" });
             }
 
             if (context.age) {
-                const ageVal = context.age;
-                if (typeof ageVal === 'number') {
-                    rows.push({ label: "Age", value: ageVal + " years" });
-                } else if (typeof ageVal === 'string' && ageVal.includes('-')) {
-                    const age = calcAge(ageVal);
-                    if (age) rows.push({ label: "Age", value: age + " years" });
-                } else {
-                    rows.push({ label: "Age", value: ageVal });
-                }
+                rows.push({ label: "Age", value: context.age + " years", path: "patient.age" });
             }
 
             if (context.cancer_type) {
-                let diagnosis = context.cancer_type;
-                if (diagnosis.length > 40) {
-                    diagnosis = diagnosis.split(' ').slice(0, 4).join(' ') + '...';
-                }
-                rows.push({ label: "Diagnosis", value: diagnosis });
+                rows.push({ label: "Diagnosis", value: context.cancer_type, path: "primaryDiagnosis.site" });
             }
 
             if (context.stage) {
-                rows.push({ label: "Stage", value: context.stage });
+                rows.push({ label: "Stage", value: context.stage, path: "primaryDiagnosis.stage" });
             }
 
-            if (context.current_treatments?.length) {
-                const treatment = getCurrentTreatment(context.current_treatments);
-                if (treatment) {
-                    rows.push({ label: "Current Tx", value: treatment });
-                }
+            if (context.biomarkers && context.biomarkers !== 'unspecified') {
+                rows.push({ label: "Biomarkers", value: context.biomarkers, path: "primaryDiagnosis.biomarkers" });
             }
 
-            if (rows.length === 0 && summary) {
-                rows.push({ label: "Summary", value: summary });
-            }
-
-            profileInfo.innerHTML = rows.map(r => `
-                <div class="profile-row">
-                    <span class="profile-label">${r.label}</span>
-                    <span class="profile-value">${r.value}</span>
-                </div>
-            `).join('');
+            profileInfo.innerHTML = rows.map(r => {
+                const source = sources[r.path];
+                const sourceHtml = source ? `<span class="source-badge" title="Source: ${source.source_type} at ${new Date(source.timestamp).toLocaleString()}" onclick="alert('Information source: ${source.source_type}\\nTime: ${new Date(source.timestamp).toLocaleString()}')">S</span>` : '';
+                return `
+                    <div class="profile-row">
+                        <span class="profile-label">${r.label}</span>
+                        <span class="profile-value">${r.value}${sourceHtml}</span>
+                    </div>
+                `;
+            }).join('');
 
             const cancerShort = context.cancer_type?.split(' ')[0] || 'Patient';
             aiStatus.textContent = `${cancerShort} context`;
-        }
-
-        function resetUploadArea() {
-            uploadArea.querySelector('.upload-placeholder').innerHTML = `
-                <div class="upload-icon">📋</div>
-                <div class="upload-text">Click to upload patient profile</div>
-                <div class="upload-hint">JSON format</div>
-            `;
-            profileFile.value = '';
         }
 
         clearProfileBtn.addEventListener("click", async () => {
@@ -1083,8 +2526,12 @@
                 profileBadge.textContent = "No profile";
                 profileBadge.style.background = "";
                 profileBadge.style.color = "";
-                resetUploadArea();
                 aiStatus.textContent = "Ready";
+                existingProfileData = null;
+
+                // Hide edit button
+                const editBtn = document.getElementById("editProfileBtn");
+                if (editBtn) editBtn.style.display = "none";
             } catch (err) {
                 alert("Error: " + err.message);
             }
@@ -1096,11 +2543,1341 @@
                 if (resp.ok) {
                     const data = await resp.json();
                     if (data.profile && data.context) {
-                        displayProfile(data.context, data.patient_summary);
+                        existingProfileData = data.profile; // Store for edit mode
+                        displayProfile(data.context, data.patient_summary, data.sources || {});
+                        showBuildProfileButton(true); // Show edit button
                     }
                 }
             } catch (e) {
                 console.log("No existing profile");
+            }
+        }
+
+        // =====================
+        // Profile Wizard
+        // =====================
+        const profileWizard = document.getElementById("profileWizard");
+        const chatWrap = document.querySelector(".chat-wrap");
+        const wizardContent = document.getElementById("wizardContent");
+        const wizardTitle = document.getElementById("wizardTitle");
+        const progressSteps = document.getElementById("progressSteps");
+        const progressBarFill = document.getElementById("progressBarFill");
+        const wizardBack = document.getElementById("wizardBack");
+        const wizardNext = document.getElementById("wizardNext");
+
+        // Wizard state
+        let currentStep = 1;
+        const TOTAL_STEPS = 5;
+        let wizardData = {
+            name: "",
+            dob: "",
+            sex: "",
+            ecog: "",
+            allergies: "",
+            comorbidities: [],
+            histology: "",
+            stage: "",
+            biomarkers: { KRAS: "", NRAS: "", BRAF: "", MSI: "", MMR: "" },
+            treatments: [{ category: "", regimen: "", line: "1st line", status: "active", sideEffects: [], sideEffectGrades: {} }],
+            symptoms: [],
+            symptomSeverities: {},
+            currentOptions: []
+        };
+        let isEditMode = false;
+
+        const STEP_LABELS = ["Demographic Info", "Diagnosis", "Test Results", "Treatment", "Review"];
+
+        const ECOG_OPTIONS = [
+            { value: "0", title: "Fully active, no restrictions", desc: "ECOG 0" },
+            { value: "1", title: "Light activity, can do light work", desc: "ECOG 1" },
+            { value: "2", title: "Up and about 50%+ of day", desc: "ECOG 2" },
+            { value: "3", title: "Resting 50%+ of day", desc: "ECOG 3" },
+            { value: "4", title: "Completely bedridden", desc: "ECOG 4" }
+        ];
+
+        const STAGE_OPTIONS = [
+            { value: "Stage I", title: "Stage I", desc: "Early - in colon wall only" },
+            { value: "Stage II", title: "Stage II", desc: "Grown through colon wall" },
+            { value: "Stage III", title: "Stage III", desc: "Spread to lymph nodes" },
+            { value: "Stage IV", title: "Stage IV", desc: "Spread to other organs" },
+            { value: "Unknown", title: "Not sure", desc: "I don't know my stage" }
+        ];
+
+        const HISTOLOGY_OPTIONS = [
+            { value: "adenocarcinoma", label: "Adenocarcinoma (most common)" },
+            { value: "mucinous adenocarcinoma", label: "Mucinous adenocarcinoma" },
+            { value: "signet ring cell", label: "Signet ring cell carcinoma" },
+            { value: "neuroendocrine", label: "Neuroendocrine tumor" },
+            { value: "other", label: "Other / Not sure" }
+        ];
+
+        const BIOMARKER_OPTIONS = ["Wild-type", "Mutated", "Pending", "Don't know"];
+
+        const TREATMENT_REGIMENS = {
+            "Chemotherapy/Immunotherapy": [
+                "FOLFOX", "FOLFIRI", "CAPOX", "FOLFOXIRI", "5-FU/Leucovorin",
+                "Bevacizumab (Avastin)", "Cetuximab (Erbitux)", "Panitumumab (Vectibix)",
+                "Pembrolizumab (Keytruda)", "Nivolumab (Opdivo)", "Regorafenib (Stivarga)",
+                "TAS-102 (Lonsurf)", "Other"
+            ],
+            "Surgery": [
+                "Colectomy", "Hemicolectomy", "Proctocolectomy", "Colostomy", "Ileostomy", "Other"
+            ],
+            "Radiation Therapy": [
+                "External beam radiation", "Brachytherapy", "Stereotactic body radiation therapy (SBRT)", "Other"
+            ]
+        };
+
+        const SIDE_EFFECTS = [
+            "Fatigue", "Nausea", "Neuropathy", "Diarrhea", "Constipation",
+            "Mouth sores", "Hair thinning", "Skin rash", "Loss of appetite",
+            "Hand-foot syndrome", "Low blood counts"
+        ];
+
+        const SYMPTOM_OPTIONS = [
+            "Fatigue", "Pain", "Nausea", "Loss of appetite", "Weight changes",
+            "Sleep problems", "Anxiety", "Depression", "Constipation", "Diarrhea"
+        ];
+
+        const COMORBIDITY_OPTIONS = [
+            "Hypertension", "Type 2 diabetes", "Heart disease", "Kidney disease",
+            "Liver disease", "COPD/Lung disease", "Obesity", "Arthritis"
+        ];
+
+        const RACE_ETHNICITY_OPTIONS = [
+            "American Indian or Alaska Native",
+            "Asian",
+            "Black or African American",
+            "Hispanic or Latino",
+            "Native Hawaiian or Other Pacific Islander",
+            "White",
+            "Two or more races",
+            "Prefer not to say"
+        ];
+
+        function showConsentModal() {
+            const consentHTML = `
+                <div class="consent-overlay" id="consentOverlay" style="
+                    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                    background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+                    display: flex; align-items: center; justify-content: center; z-index: 1001; padding: 20px;
+                ">
+                    <div class="consent-modal" style="
+                        background: var(--surface); border-radius: var(--radius-lg);
+                        padding: 32px; max-width: 480px; width: 100%; box-shadow: var(--shadow-lg);
+                        animation: modalSlideIn 0.3s ease;
+                    ">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <div style="font-size: 48px; margin-bottom: 12px;">🎗️</div>
+                            <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary);">Colon Cancer Support Tool</h3>
+                            <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">
+                                WondrLink is designed <strong>specifically for patients diagnosed with colon cancer</strong>
+                                (also called colorectal cancer). This tool provides educational information only.
+                            </p>
+                        </div>
+
+                        <div style="background: var(--background); border-radius: var(--radius); padding: 16px; margin-bottom: 20px;">
+                            <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
+                                <input type="checkbox" id="consentCheckbox" style="margin-top: 3px; width: 18px; height: 18px; accent-color: var(--primary);">
+                                <span style="font-size: 13px; color: var(--text-primary); line-height: 1.5;">
+                                    I understand that this tool is designed <strong>specifically for colon cancer</strong> patients and caregivers,
+                                    and provides educational information only — not medical advice. Always consult your healthcare team for medical decisions.
+                                </span>
+                            </label>
+                        </div>
+
+                        <button id="consentContinueBtn" disabled onclick="acceptConsent()" style="
+                            width: 100%; padding: 14px; font-size: 14px; font-weight: 600;
+                            background: var(--primary); color: white; border: none; border-radius: var(--radius);
+                            cursor: not-allowed; opacity: 0.5; transition: all var(--transition);
+                        ">
+                            Continue to Profile Builder
+                        </button>
+
+                        <button onclick="closeConsentModal()" style="
+                            width: 100%; padding: 12px; margin-top: 10px; font-size: 13px;
+                            background: transparent; color: var(--text-muted); border: none; cursor: pointer;
+                        ">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', consentHTML);
+
+            document.getElementById('consentCheckbox').addEventListener('change', function () {
+                const btn = document.getElementById('consentContinueBtn');
+                btn.disabled = !this.checked;
+                btn.style.cursor = this.checked ? 'pointer' : 'not-allowed';
+                btn.style.opacity = this.checked ? '1' : '0.5';
+            });
+        }
+
+        function acceptConsent() {
+            document.getElementById('consentOverlay').remove();
+            actuallyStartProfileWizard(false);
+        }
+
+        function closeConsentModal() {
+            document.getElementById('consentOverlay').remove();
+        }
+
+        function startProfileWizard(editMode = false) {
+            // Show consent modal for new profiles only
+            if (!editMode && !existingProfileData) {
+                showConsentModal();
+                return;
+            }
+            actuallyStartProfileWizard(editMode);
+        }
+
+        function actuallyStartProfileWizard(editMode = false) {
+            isEditMode = editMode;
+            wizardTitle.textContent = editMode ? "Edit Your Profile" : "Build Your Profile";
+
+            if (editMode && existingProfileData) {
+                loadExistingProfileIntoWizard();
+            } else {
+                resetWizardData();
+            }
+
+            currentStep = 1;
+            chatWrap.style.display = "none";
+            profileWizard.style.display = "flex";
+            renderProgressSteps();
+            renderStep();
+            updateNavButtons();
+
+            // Lock body scroll on mobile
+            document.body.style.overflow = 'hidden';
+            window.scrollTo(0, 0);
+        }
+
+        function resetWizardData() {
+            wizardData = {
+                firstName: "",
+                age: "",
+                zipCode: "",
+                raceEthnicity: "",
+                heightFt: "",
+                heightIn: "",
+                weight: "",
+                sex: "",
+                ecog: "",
+                allergies: "",
+                comorbidities: [],
+                histology: "",
+                stage: "",
+                biomarkers: { KRAS: "", NRAS: "", BRAF: "", MSI: "", MMR: "" },
+                treatments: [{ category: "", regimen: "", line: "1st line", status: "active", sideEffects: [], sideEffectGrades: {} }],
+                symptoms: [],
+                symptomSeverities: {},
+                currentOptions: []
+            };
+        }
+
+        function loadExistingProfileIntoWizard() {
+            if (!existingProfileData) return;
+            const p = existingProfileData;
+
+            wizardData.firstName = p.patient?.firstName || p.patient?.name || "";
+            wizardData.age = p.patient?.age || "";
+            wizardData.zipCode = p.patient?.zipCode || "";
+            wizardData.raceEthnicity = p.patient?.raceEthnicity || "";
+            // Parse height from stored format (e.g., "5'10\"")
+            const heightMatch = (p.patient?.height || "").match(/(\d+)'(\d+)/);
+            wizardData.heightFt = heightMatch ? heightMatch[1] : "";
+            wizardData.heightIn = heightMatch ? heightMatch[2] : "";
+            wizardData.weight = (p.patient?.weight || "").replace(/[^\d]/g, "") || "";
+            wizardData.sex = p.patient?.sex || "";
+            wizardData.ecog = p.patient?.ecog || "";
+            wizardData.allergies = p.patient?.allergies || "";
+            wizardData.comorbidities = p.patient?.comorbidities || [];
+            wizardData.histology = p.primaryDiagnosis?.histology || "";
+            wizardData.stage = p.primaryDiagnosis?.stage || "";
+            wizardData.biomarkers = p.primaryDiagnosis?.biomarkers || { KRAS: "", NRAS: "", BRAF: "", MSI: "", MMR: "" };
+            wizardData.symptoms = p.symptoms || [];
+            wizardData.currentOptions = p.currentOptions || [];
+
+            // Convert treatments
+            if (p.treatments && p.treatments.length > 0) {
+                wizardData.treatments = p.treatments.map(t => ({
+                    category: t.category || "",
+                    regimen: t.regimen || "",
+                    line: t.line || "1st line",
+                    status: t.status || "active",
+                    sideEffects: (t.toxicities || []).map(tox => tox.event),
+                    sideEffectGrades: (t.toxicities || []).reduce((acc, tox) => {
+                        acc[tox.event] = tox.grade;
+                        return acc;
+                    }, {})
+                }));
+            } else {
+                wizardData.treatments = [{ category: "", regimen: "", line: "1st line", status: "active", sideEffects: [], sideEffectGrades: {} }];
+            }
+        }
+
+        function cancelWizard() {
+            if (confirm("Are you sure? Your progress will be lost.")) {
+                profileWizard.style.display = "none";
+                chatWrap.style.display = "flex";
+                // Restore body scroll
+                document.body.style.overflow = '';
+            }
+        }
+
+        function renderProgressSteps() {
+            progressSteps.innerHTML = STEP_LABELS.map((label, i) => {
+                const stepNum = i + 1;
+                const isActive = stepNum === currentStep;
+                const isCompleted = stepNum < currentStep;
+                let classes = "progress-step";
+                if (isActive) classes += " active";
+                if (isCompleted) classes += " completed";
+
+                return `
+                    <div class="${classes}">
+                        <div class="step-circle">${isCompleted ? '✓' : stepNum}</div>
+                        <div class="step-label">${label}</div>
+                    </div>
+                `;
+            }).join('');
+
+            progressBarFill.style.width = `${(currentStep / TOTAL_STEPS) * 100}%`;
+        }
+
+        function updateNavButtons() {
+            wizardBack.style.visibility = currentStep === 1 ? "hidden" : "visible";
+            wizardNext.textContent = currentStep === TOTAL_STEPS ? (isEditMode ? "Update Profile" : "Save Profile") : "Continue";
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                saveCurrentStepData();
+                currentStep--;
+                renderProgressSteps();
+                renderStep();
+                updateNavButtons();
+                // Scroll to top of wizard content
+                wizardContent.scrollTop = 0;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function validateCurrentStep() {
+            let isValid = true;
+            let errorMessage = "";
+
+            if (currentStep === 1) {
+                // Validate About You step
+                const name = wizardData.firstName.trim();
+                if (!name || name.length < 2) {
+                    isValid = false;
+                    errorMessage = "Please enter your first name (at least 2 characters)";
+                    const nameInput = document.getElementById("wizFirstName");
+                    const nameError = document.getElementById("firstNameError");
+                    if (nameInput && nameError) {
+                        nameError.textContent = errorMessage;
+                        nameError.style.display = "block";
+                        nameInput.style.borderColor = "var(--danger)";
+                    }
+                }
+
+                if (!wizardData.age || wizardData.age < 18 || wizardData.age > 120) {
+                    isValid = false;
+                    errorMessage = "Please enter a valid age (18-120)";
+                    const ageInput = document.getElementById("wizAge");
+                    const ageError = document.getElementById("ageError");
+                    if (ageInput && ageError) {
+                        ageError.textContent = errorMessage;
+                        ageError.style.display = "block";
+                        ageInput.style.borderColor = "var(--danger)";
+                    }
+                }
+
+                if (!wizardData.zipCode || !/^\d{5}(-\d{4})?$/.test(wizardData.zipCode)) {
+                    isValid = false;
+                    errorMessage = "Please enter a valid Zip Code";
+                    const zipInput = document.getElementById("wizZipCode");
+                    const zipError = document.getElementById("zipCodeError");
+                    if (zipInput && zipError) {
+                        zipError.textContent = errorMessage;
+                        zipError.style.display = "block";
+                        zipInput.style.borderColor = "var(--danger)";
+                    }
+                }
+
+                if (!wizardData.raceEthnicity) {
+                    isValid = false;
+                    errorMessage = "Please select your Race / Ethnicity";
+                    const raceInput = document.getElementById("wizRace");
+                    const raceError = document.getElementById("raceError");
+                    if (raceInput && raceError) {
+                        raceError.textContent = errorMessage;
+                        raceError.style.display = "block";
+                        raceInput.style.borderColor = "var(--danger)";
+                    }
+                }
+
+                if (!wizardData.sex) {
+                    isValid = false;
+                    errorMessage = "Please select your sex";
+                }
+
+                if (!wizardData.ecog) {
+                    isValid = false;
+                    errorMessage = "Please select your activity level (ECOG status)";
+                }
+            } else if (currentStep === 2) {
+                // Validate Diagnosis step
+                if (!wizardData.histology) {
+                    isValid = false;
+                    errorMessage = "Please select a cancer type";
+                    const histologyInput = document.getElementById("wizHistology");
+                    const histologyError = document.getElementById("histologyError");
+                    if (histologyInput && histologyError) {
+                        histologyError.textContent = errorMessage;
+                        histologyError.style.display = "block";
+                        histologyInput.style.borderColor = "var(--danger)";
+                    }
+                }
+
+                if (!wizardData.stage) {
+                    isValid = false;
+                    errorMessage = "Please select a cancer stage";
+                    const stageError = document.getElementById("stageError");
+                    if (stageError) {
+                        stageError.textContent = errorMessage;
+                        stageError.style.display = "block";
+                    }
+                }
+            } else if (currentStep === 4) {
+                // Validate Treatment step - if any treatment has a regimen, it must have a category
+                const treatmentsWithRegimen = wizardData.treatments.filter(t => t.regimen);
+                for (let i = 0; i < treatmentsWithRegimen.length; i++) {
+                    const treatment = treatmentsWithRegimen[i];
+                    if (treatment.regimen && !treatment.category) {
+                        isValid = false;
+                        errorMessage = `Treatment ${i + 1}: Please select a treatment type before selecting a regimen`;
+                        const categoryError = document.querySelector(`.treatment-category-error[data-index="${wizardData.treatments.indexOf(treatment)}"]`);
+                        if (categoryError) {
+                            categoryError.textContent = "Please select a treatment type";
+                            categoryError.style.display = "block";
+                        }
+                        const categorySelect = document.querySelector(`.treatment-category[data-index="${wizardData.treatments.indexOf(treatment)}"]`);
+                        if (categorySelect) {
+                            categorySelect.style.borderColor = "var(--danger)";
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (!isValid && errorMessage) {
+                // Show error message at top of form
+                let errorDiv = document.getElementById("stepValidationError");
+                if (!errorDiv) {
+                    errorDiv = document.createElement("div");
+                    errorDiv.id = "stepValidationError";
+                    errorDiv.style.cssText = "background: rgba(239, 68, 68, 0.08); color: var(--danger); padding: 12px 16px; border-radius: var(--radius); font-size: 13px; margin-bottom: 20px; border: 1px solid rgba(239, 68, 68, 0.15);";
+                    const wizardContent = document.getElementById("wizardContent");
+                    if (wizardContent && wizardContent.firstChild) {
+                        wizardContent.insertBefore(errorDiv, wizardContent.firstChild);
+                    }
+                }
+                errorDiv.textContent = errorMessage;
+                errorDiv.style.display = "block";
+
+                // Scroll to top to show error
+                document.getElementById("wizardContent").scrollTop = 0;
+            } else {
+                // Hide error if validation passes
+                const errorDiv = document.getElementById("stepValidationError");
+                if (errorDiv) {
+                    errorDiv.style.display = "none";
+                }
+            }
+
+            return isValid;
+        }
+
+        function nextStep() {
+            saveCurrentStepData();
+
+            // Validate current step before proceeding
+            if (!validateCurrentStep()) {
+                return;
+            }
+
+            if (currentStep < TOTAL_STEPS) {
+                currentStep++;
+                renderProgressSteps();
+                renderStep();
+                updateNavButtons();
+                // Scroll to top of wizard content
+                wizardContent.scrollTop = 0;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                saveProfile();
+            }
+        }
+
+        function goToStep(stepNum) {
+            if (stepNum >= 1 && stepNum <= TOTAL_STEPS && stepNum < currentStep) {
+                saveCurrentStepData();
+                currentStep = stepNum;
+                renderProgressSteps();
+                renderStep();
+                updateNavButtons();
+            }
+        }
+
+        function saveCurrentStepData() {
+            // Data is saved via event handlers on form elements
+        }
+
+        function renderStep() {
+            switch (currentStep) {
+                case 1: renderAboutYouStep(); break;
+                case 2: renderDiagnosisStep(); break;
+                case 3: renderBiomarkersStep(); break;
+                case 4: renderTreatmentStep(); break;
+                case 5: renderReviewStep(); break;
+            }
+        }
+
+        function renderAboutYouStep() {
+            wizardContent.innerHTML = `
+                <div class="wizard-step">
+                    <div class="step-title">Demographic Information</div>
+                    <div class="step-description">Tell us a bit about yourself so we can personalize your experience.</div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-input" id="wizFirstName" value="${wizardData.firstName}" placeholder="First name only" maxlength="50">
+                            <div class="validation-error" id="firstNameError" style="display: none; color: var(--danger); font-size: 12px; margin-top: 4px;"></div>
+                        </div>
+                        <div class="form-group" style="flex: 0 0 120px;">
+                            <label class="form-label">Age</label>
+                            <input type="number" class="form-input" id="wizAge" value="${wizardData.age}" placeholder="Age" min="18" max="120">
+                            <div class="validation-error" id="ageError" style="display: none; color: var(--danger); font-size: 12px; margin-top: 4px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Zip Code</label>
+                            <input type="text" class="form-input" id="wizZipCode" value="${wizardData.zipCode}" placeholder="e.g. 10001" maxlength="10">
+                            <div class="validation-error" id="zipCodeError" style="display: none; color: var(--danger); font-size: 12px; margin-top: 4px;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Race / Ethnicity</label>
+                            <select class="form-select" id="wizRace">
+                                <option value="">Select...</option>
+                                ${RACE_ETHNICITY_OPTIONS.map(r => `
+                                    <option value="${r}" ${wizardData.raceEthnicity === r ? 'selected' : ''}>${r}</option>
+                                `).join('')}
+                            </select>
+                            <div class="validation-error" id="raceError" style="display: none; color: var(--danger); font-size: 12px; margin-top: 4px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Height <span class="optional">(optional)</span></label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="number" class="form-input" id="wizHeightFt" value="${wizardData.heightFt}" placeholder="Ft" min="1" max="8" style="width: 70px;">
+                                <span style="color: var(--text-muted);">ft</span>
+                                <input type="number" class="form-input" id="wizHeightIn" value="${wizardData.heightIn}" placeholder="In" min="0" max="11" style="width: 70px;">
+                                <span style="color: var(--text-muted);">in</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Weight <span class="optional">(optional)</span></label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="number" class="form-input" id="wizWeight" value="${wizardData.weight}" placeholder="e.g. 150" min="50" max="500" style="width: 100px;">
+                                <span style="color: var(--text-muted);">lbs</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Sex</label>
+                        <div class="radio-group" id="wizSex">
+                            ${["Male", "Female", "Other"].map(s => `
+                                <div class="radio-option ${wizardData.sex === s ? 'selected' : ''}" data-value="${s}">${s}</div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Activity Level (ECOG Status)</label>
+                        <div class="card-selector cols-2" id="wizEcog">
+                            ${ECOG_OPTIONS.map(opt => `
+                                <div class="selector-card ${wizardData.ecog === opt.value ? 'selected' : ''}" data-value="${opt.value}">
+                                    <div class="card-title">${opt.title}</div>
+                                    <div class="card-desc">${opt.desc}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Allergies <span class="optional">(optional)</span></label>
+                        <input type="text" class="form-input" id="wizAllergies" value="${wizardData.allergies}" placeholder="e.g., penicillin, sulfa drugs, or 'none'" maxlength="200">
+                        <div class="validation-error" id="allergiesError" style="display: none; color: var(--danger); font-size: 12px; margin-top: 4px;"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Other Health Conditions <span class="optional">(optional)</span></label>
+                        <div class="chip-selector" id="wizComorbidities">
+                            ${COMORBIDITY_OPTIONS.map(c => `
+                                <div class="chip ${wizardData.comorbidities.includes(c) ? 'selected' : ''}" data-value="${c}">${c}</div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Event listeners
+            document.getElementById("wizFirstName").addEventListener("input", e => {
+                const nameInput = e.target;
+                const nameError = document.getElementById("firstNameError");
+                const nameValue = nameInput.value.trim();
+
+                if (nameValue.length > 0) {
+                    if (nameValue.length < 2) {
+                        nameError.textContent = "Name must be at least 2 characters";
+                        nameError.style.display = "block";
+                        nameInput.style.borderColor = "var(--danger)";
+                        return;
+                    }
+                    if (!/^[a-zA-Z\s\-']+$/.test(nameValue)) {
+                        nameError.textContent = "Name can only contain letters, spaces, hyphens, and apostrophes";
+                        nameError.style.display = "block";
+                        nameInput.style.borderColor = "var(--danger)";
+                        return;
+                    }
+                }
+
+                nameError.style.display = "none";
+                nameInput.style.borderColor = "";
+                wizardData.firstName = nameValue;
+            });
+
+            document.getElementById("wizAge").addEventListener("change", e => {
+                const ageInput = e.target;
+                const ageError = document.getElementById("ageError");
+                const ageValue = parseInt(ageInput.value);
+
+                if (ageValue) {
+                    if (ageValue < 18 || ageValue > 120) {
+                        ageError.textContent = "Please enter a valid age (18-120)";
+                        ageError.style.display = "block";
+                        ageInput.style.borderColor = "var(--danger)";
+                        return;
+                    }
+                }
+
+                ageError.style.display = "none";
+                ageInput.style.borderColor = "";
+                wizardData.age = ageValue;
+            });
+
+            document.getElementById("wizZipCode").addEventListener("input", e => {
+                const zipInput = e.target;
+                const zipError = document.getElementById("zipCodeError");
+                const zipValue = zipInput.value.trim();
+
+                if (zipValue.length > 0) {
+                    // Basic US ZIP code validation (5 digits or 5+4)
+                    if (!/^\d{5}(-\d{4})?$/.test(zipValue)) {
+                        zipError.textContent = "Please enter a valid Zip Code";
+                        zipError.style.display = "block";
+                        zipInput.style.borderColor = "var(--danger)";
+                        return;
+                    }
+                }
+
+                zipError.style.display = "none";
+                zipInput.style.borderColor = "";
+                wizardData.zipCode = zipValue;
+            });
+
+            document.getElementById("wizRace").addEventListener("change", e => {
+                wizardData.raceEthnicity = e.target.value;
+                const raceError = document.getElementById("raceError");
+                if (wizardData.raceEthnicity) {
+                    raceError.style.display = "none";
+                    document.getElementById("wizRace").style.borderColor = "";
+                }
+            });
+
+            // Height/Weight event listeners
+            document.getElementById("wizHeightFt").addEventListener("change", e => {
+                wizardData.heightFt = e.target.value;
+            });
+            document.getElementById("wizHeightIn").addEventListener("change", e => {
+                wizardData.heightIn = e.target.value;
+            });
+            document.getElementById("wizWeight").addEventListener("change", e => {
+                wizardData.weight = e.target.value;
+            });
+
+            document.getElementById("wizAllergies").addEventListener("input", e => {
+                const allergiesInput = e.target;
+                const allergiesError = document.getElementById("allergiesError");
+                const allergiesValue = allergiesInput.value;
+
+                if (allergiesValue.length > 200) {
+                    allergiesError.textContent = "Allergies description must be 200 characters or less";
+                    allergiesError.style.display = "block";
+                    allergiesInput.style.borderColor = "var(--danger)";
+                    return;
+                }
+
+                allergiesError.style.display = "none";
+                allergiesInput.style.borderColor = "";
+                wizardData.allergies = allergiesValue;
+            });
+
+            document.querySelectorAll("#wizSex .radio-option").forEach(el => {
+                el.addEventListener("click", () => {
+                    document.querySelectorAll("#wizSex .radio-option").forEach(o => o.classList.remove("selected"));
+                    el.classList.add("selected");
+                    wizardData.sex = el.dataset.value;
+                });
+            });
+
+            document.querySelectorAll("#wizEcog .selector-card").forEach(el => {
+                el.addEventListener("click", () => {
+                    document.querySelectorAll("#wizEcog .selector-card").forEach(o => o.classList.remove("selected"));
+                    el.classList.add("selected");
+                    wizardData.ecog = el.dataset.value;
+                });
+            });
+
+            document.querySelectorAll("#wizComorbidities .chip").forEach(el => {
+                el.addEventListener("click", () => {
+                    el.classList.toggle("selected");
+                    const val = el.dataset.value;
+                    if (el.classList.contains("selected")) {
+                        if (!wizardData.comorbidities.includes(val)) wizardData.comorbidities.push(val);
+                    } else {
+                        wizardData.comorbidities = wizardData.comorbidities.filter(c => c !== val);
+                    }
+                });
+            });
+        }
+
+        function renderDiagnosisStep() {
+            wizardContent.innerHTML = `
+                <div class="wizard-step">
+                    <div class="step-title">Your Diagnosis</div>
+                    <div class="step-description">Information about your colon cancer diagnosis.</div>
+
+                    <div class="form-group">
+                        <label class="form-label">Cancer Type (Histology)</label>
+                        <select class="form-select" id="wizHistology">
+                            <option value="">Select type...</option>
+                            ${HISTOLOGY_OPTIONS.map(h => `
+                                <option value="${h.value}" ${wizardData.histology === h.value ? 'selected' : ''}>${h.label}</option>
+                            `).join('')}
+                        </select>
+                        <div class="validation-error" id="histologyError" style="display: none; color: var(--danger); font-size: 12px; margin-top: 4px;"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Cancer Stage</label>
+                        <div class="card-selector cols-2" id="wizStage">
+                            ${STAGE_OPTIONS.map(opt => `
+                                <div class="selector-card ${wizardData.stage === opt.value ? 'selected' : ''}" data-value="${opt.value}">
+                                    <div class="card-title">${opt.title}</div>
+                                    <div class="card-desc">${opt.desc}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="validation-error" id="stageError" style="display: none; color: var(--danger); font-size: 12px; margin-top: 4px;"></div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById("wizHistology").addEventListener("change", e => {
+                const histologyInput = e.target;
+                const histologyError = document.getElementById("histologyError");
+                const histologyValue = e.target.value;
+
+                if (histologyValue) {
+                    histologyError.style.display = "none";
+                    histologyInput.style.borderColor = "";
+                }
+                wizardData.histology = histologyValue;
+            });
+
+            document.querySelectorAll("#wizStage .selector-card").forEach(el => {
+                el.addEventListener("click", () => {
+                    document.querySelectorAll("#wizStage .selector-card").forEach(o => o.classList.remove("selected"));
+                    el.classList.add("selected");
+                    wizardData.stage = el.dataset.value;
+
+                    // Clear error when stage is selected
+                    const stageError = document.getElementById("stageError");
+                    if (stageError) {
+                        stageError.style.display = "none";
+                    }
+                });
+            });
+        }
+
+        function renderBiomarkersStep() {
+            const biomarkerNames = ["KRAS", "NRAS", "BRAF", "MSI", "MMR"];
+
+            wizardContent.innerHTML = `
+                <div class="wizard-step">
+                    <div class="step-title">Test Results</div>
+                    <div class="step-description">Your tumor biomarker test results. These help guide treatment decisions.</div>
+
+                    <div class="biomarker-help">
+                        <strong>Don't know these results?</strong> That's okay! You can find them in your medical records,
+                        patient portal, or ask your oncologist. You can also skip and add them later.
+                    </div>
+
+                    ${biomarkerNames.map(bm => `
+                        <div class="form-group">
+                            <label class="form-label">${bm} Status</label>
+                            <div class="radio-group" id="wiz${bm}">
+                                ${BIOMARKER_OPTIONS.map(opt => `
+                                    <div class="radio-option ${wizardData.biomarkers[bm] === opt ? 'selected' : ''}" data-value="${opt}">${opt}</div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            biomarkerNames.forEach(bm => {
+                document.querySelectorAll(`#wiz${bm} .radio-option`).forEach(el => {
+                    el.addEventListener("click", () => {
+                        document.querySelectorAll(`#wiz${bm} .radio-option`).forEach(o => o.classList.remove("selected"));
+                        el.classList.add("selected");
+                        wizardData.biomarkers[bm] = el.dataset.value;
+                    });
+                });
+            });
+        }
+
+        function renderTreatmentStep() {
+            const hasTreatment = wizardData.treatments.length > 0 && wizardData.treatments[0].regimen;
+
+            wizardContent.innerHTML = `
+                <div class="wizard-step">
+                    <div class="step-title">Your Treatment</div>
+                    <div class="step-description">Tell us about your current or past treatments.</div>
+
+                    <div id="treatmentCards">
+                        ${wizardData.treatments.map((t, i) => renderTreatmentCard(t, i)).join('')}
+                    </div>
+
+                    <button type="button" class="add-treatment-btn" onclick="addTreatment()">+ Add Another Treatment</button>
+
+                    <div class="form-group" style="margin-top: 24px;">
+                        <label class="form-label">Current Symptoms <span class="optional">(optional)</span></label>
+                        <div class="chip-selector" id="wizSymptoms">
+                            ${SYMPTOM_OPTIONS.map(s => `
+                                <div class="chip ${wizardData.symptoms.includes(s) ? 'selected' : ''}" data-value="${s}">${s}</div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            attachTreatmentListeners();
+
+            document.querySelectorAll("#wizSymptoms .chip").forEach(el => {
+                el.addEventListener("click", () => {
+                    el.classList.toggle("selected");
+                    const val = el.dataset.value;
+                    if (el.classList.contains("selected")) {
+                        if (!wizardData.symptoms.includes(val)) wizardData.symptoms.push(val);
+                    } else {
+                        wizardData.symptoms = wizardData.symptoms.filter(s => s !== val);
+                    }
+                });
+            });
+        }
+
+        function renderTreatmentCard(treatment, index) {
+            return `
+                <div class="treatment-card" data-index="${index}">
+                    <div class="treatment-card-header">
+                        <span class="treatment-number">Treatment ${index + 1}</span>
+                        ${index > 0 ? `<button type="button" class="remove-treatment" onclick="removeTreatment(${index})">Remove</button>` : ''}
+                    </div>
+
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Treatment Type</label>
+                            <select class="form-select treatment-category" data-index="${index}">
+                                <option value="">Select category...</option>
+                                ${Object.keys(TREATMENT_REGIMENS).map(cat => `
+                                    <option value="${cat}" ${treatment.category === cat ? 'selected' : ''}>${cat}</option>
+                                `).join('')}
+                            </select>
+                            <div class="validation-error treatment-category-error" data-index="${index}" style="display: none; color: var(--danger); font-size: 12px; margin-top: 4px;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Regimen</label>
+                            <select class="form-select treatment-regimen" data-index="${index}">
+                                <option value="">Select treatment...</option>
+                                ${treatment.category && TREATMENT_REGIMENS[treatment.category] ?
+                    TREATMENT_REGIMENS[treatment.category].map(r => `
+                                        <option value="${r}" ${treatment.regimen === r ? 'selected' : ''}>${r}</option>
+                                    `).join('') : ''}
+                            </select>
+                            <div class="validation-error treatment-regimen-error" data-index="${index}" style="display: none; color: var(--danger); font-size: 12px; margin-top: 4px;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Line</label>
+                            <select class="form-select treatment-line" data-index="${index}">
+                                ${["1st line", "2nd line", "3rd line", "4th line+", "Unknown"].map(l => `
+                                    <option value="${l}" ${treatment.line === l ? 'selected' : ''}>${l}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <div class="radio-group treatment-status" data-index="${index}">
+                            ${["active", "completed", "stopped"].map(s => `
+                                <div class="radio-option ${treatment.status === s ? 'selected' : ''}" data-value="${s}">
+                                    ${s === 'active' ? 'Currently receiving' : s === 'completed' ? 'Completed' : 'Stopped early'}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Side Effects <span class="optional">(if any)</span></label>
+                        <div class="chip-selector treatment-effects" data-index="${index}">
+                            ${SIDE_EFFECTS.map(se => `
+                                <div class="chip ${(treatment.sideEffects || []).includes(se) ? 'selected' : ''}" data-value="${se}">${se}</div>
+                            `).join('')}
+                        </div>
+                        ${(treatment.sideEffects || []).length > 0 ? `
+                            <div class="severity-container">
+                                ${(treatment.sideEffects || []).map(se => `
+                                    <div class="severity-item">
+                                        <span class="severity-name">${se}</span>
+                                        <div class="severity-options" data-effect="${se}" data-treatment="${index}">
+                                            ${["1", "2", "3"].map(g => `
+                                                <button type="button" class="severity-btn ${g === '1' ? 'mild' : g === '2' ? 'moderate' : 'severe'} ${(treatment.sideEffectGrades || {})[se] === g ? 'selected' : ''}" data-grade="${g}">
+                                                    ${g === '1' ? 'Mild' : g === '2' ? 'Moderate' : 'Severe'}
+                                                </button>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function attachTreatmentListeners() {
+            document.querySelectorAll(".treatment-category").forEach(el => {
+                el.addEventListener("change", e => {
+                    const idx = parseInt(e.target.dataset.index);
+                    const category = e.target.value;
+                    wizardData.treatments[idx].category = category;
+                    wizardData.treatments[idx].regimen = ""; // Clear regimen when category changes
+
+                    // Clear validation errors
+                    const categoryError = document.querySelector(`.treatment-category-error[data-index="${idx}"]`);
+                    if (categoryError) {
+                        categoryError.style.display = "none";
+                    }
+                    e.target.style.borderColor = "";
+
+                    // Update only the regimen dropdown instead of full re-render
+                    const regimenSelect = document.querySelector(`.treatment-regimen[data-index="${idx}"]`);
+                    if (regimenSelect) {
+                        const regimens = category && TREATMENT_REGIMENS[category] ? TREATMENT_REGIMENS[category] : [];
+                        regimenSelect.innerHTML = `<option value="">Select treatment...</option>` +
+                            regimens.map(r => `<option value="${r}">${r}</option>`).join('');
+                    }
+                });
+            });
+
+            document.querySelectorAll(".treatment-regimen").forEach(el => {
+                el.addEventListener("change", e => {
+                    const idx = parseInt(e.target.dataset.index);
+                    wizardData.treatments[idx].regimen = e.target.value;
+
+                    // Clear validation errors
+                    const regimenError = document.querySelector(`.treatment-regimen-error[data-index="${idx}"]`);
+                    if (regimenError) {
+                        regimenError.style.display = "none";
+                    }
+                    e.target.style.borderColor = "";
+                });
+            });
+
+            document.querySelectorAll(".treatment-line").forEach(el => {
+                el.addEventListener("change", e => {
+                    const idx = parseInt(e.target.dataset.index);
+                    wizardData.treatments[idx].line = e.target.value;
+                });
+            });
+
+            document.querySelectorAll(".treatment-status .radio-option").forEach(el => {
+                el.addEventListener("click", function () {
+                    const parent = this.closest(".treatment-status");
+                    const idx = parseInt(parent.dataset.index);
+                    parent.querySelectorAll(".radio-option").forEach(o => o.classList.remove("selected"));
+                    this.classList.add("selected");
+                    wizardData.treatments[idx].status = this.dataset.value;
+                });
+            });
+
+            document.querySelectorAll(".treatment-effects .chip").forEach(el => {
+                el.addEventListener("click", function () {
+                    const parent = this.closest(".treatment-effects");
+                    const idx = parseInt(parent.dataset.index);
+                    this.classList.toggle("selected");
+                    const val = this.dataset.value;
+
+                    if (!wizardData.treatments[idx].sideEffects) wizardData.treatments[idx].sideEffects = [];
+                    if (!wizardData.treatments[idx].sideEffectGrades) wizardData.treatments[idx].sideEffectGrades = {};
+
+                    if (this.classList.contains("selected")) {
+                        if (!wizardData.treatments[idx].sideEffects.includes(val)) {
+                            wizardData.treatments[idx].sideEffects.push(val);
+                            wizardData.treatments[idx].sideEffectGrades[val] = "1"; // default mild
+                        }
+                    } else {
+                        wizardData.treatments[idx].sideEffects = wizardData.treatments[idx].sideEffects.filter(s => s !== val);
+                        delete wizardData.treatments[idx].sideEffectGrades[val];
+                    }
+
+                    // Update only this treatment card instead of full re-render
+                    const treatmentCard = this.closest(".treatment-card");
+                    if (treatmentCard) {
+                        updateTreatmentCardSeverity(treatmentCard, idx);
+                    }
+                });
+            });
+
+            document.querySelectorAll(".severity-options .severity-btn").forEach(el => {
+                el.addEventListener("click", function () {
+                    const parent = this.closest(".severity-options");
+                    const effect = parent.dataset.effect;
+                    const tIdx = parseInt(parent.dataset.treatment);
+                    parent.querySelectorAll(".severity-btn").forEach(b => b.classList.remove("selected"));
+                    this.classList.add("selected");
+                    wizardData.treatments[tIdx].sideEffectGrades[effect] = this.dataset.grade;
+                });
+            });
+        }
+
+        function updateTreatmentCardSeverity(treatmentCard, idx) {
+            const treatment = wizardData.treatments[idx];
+            const sideEffects = treatment.sideEffects || [];
+            const grades = treatment.sideEffectGrades || {};
+
+            // Find or create severity container
+            let severityContainer = treatmentCard.querySelector(".severity-container");
+
+            if (sideEffects.length === 0) {
+                // Remove severity container if no side effects
+                if (severityContainer) {
+                    severityContainer.remove();
+                }
+                return;
+            }
+
+            // Build severity HTML
+            const severityHTML = `
+                <div class="severity-container">
+                    ${sideEffects.map(se => `
+                        <div class="severity-item">
+                            <span class="severity-name">${se}</span>
+                            <div class="severity-options" data-effect="${se}" data-treatment="${idx}">
+                                ${["1", "2", "3"].map(g => `
+                                    <button type="button" class="severity-btn ${g === '1' ? 'mild' : g === '2' ? 'moderate' : 'severe'} ${grades[se] === g ? 'selected' : ''}" data-grade="${g}">
+                                        ${g === '1' ? 'Mild' : g === '2' ? 'Moderate' : 'Severe'}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            // Update or insert severity container
+            const effectsGroup = treatmentCard.querySelector(".treatment-effects").closest(".form-group");
+            if (severityContainer) {
+                severityContainer.outerHTML = severityHTML;
+            } else {
+                effectsGroup.insertAdjacentHTML("beforeend", severityHTML);
+            }
+
+            // Re-attach severity button listeners for this card
+            treatmentCard.querySelectorAll(".severity-options .severity-btn").forEach(el => {
+                el.addEventListener("click", function () {
+                    const parent = this.closest(".severity-options");
+                    const effect = parent.dataset.effect;
+                    const tIdx = parseInt(parent.dataset.treatment);
+                    parent.querySelectorAll(".severity-btn").forEach(b => b.classList.remove("selected"));
+                    this.classList.add("selected");
+                    wizardData.treatments[tIdx].sideEffectGrades[effect] = this.dataset.grade;
+                });
+            });
+        }
+
+        let isAddingTreatment = false;
+        function addTreatment() {
+            // Prevent multiple rapid additions
+            if (isAddingTreatment) return;
+            isAddingTreatment = true;
+
+            wizardData.treatments.push({ category: "", regimen: "", line: "1st line", status: "active", sideEffects: [], sideEffectGrades: {} });
+            renderTreatmentStep();
+
+            // Reset flag after a short delay
+            setTimeout(() => { isAddingTreatment = false; }, 300);
+        }
+
+        function removeTreatment(index) {
+            // Always keep at least 1 treatment card
+            if (wizardData.treatments.length > 1) {
+                wizardData.treatments.splice(index, 1);
+                renderTreatmentStep();
+            }
+        }
+
+        function renderReviewStep() {
+            const biomarkerSummary = Object.entries(wizardData.biomarkers)
+                .filter(([k, v]) => v && v !== "Don't know")
+                .map(([k, v]) => `${k}: ${v}`)
+                .join(", ") || "Not specified";
+
+            const treatmentSummary = wizardData.treatments
+                .filter(t => t.regimen)
+                .map(t => {
+                    const categoryPart = t.category ? `${t.category}: ` : "";
+                    return `${categoryPart}${t.regimen} (${t.line}) - ${t.status}`;
+                })
+                .join("; ") || "None specified";
+
+            wizardContent.innerHTML = `
+                <div class="wizard-step">
+                    <div class="step-title">Review Your Profile</div>
+                    <div class="step-description">Please review your information before saving.</div>
+
+                    <div class="review-section">
+                        <div class="review-section-header">
+                            <span class="review-section-title">About You</span>
+                            <button class="review-edit-btn" onclick="goToStep(1)">Edit</button>
+                        </div>
+                        <div class="review-row">
+                            <span class="review-label">First Name</span>
+                            <span class="review-value ${!wizardData.firstName ? 'empty' : ''}">${wizardData.firstName || 'Not provided'}</span>
+                        </div>
+                        <div class="review-row">
+                            <span class="review-label">Age</span>
+                            <span class="review-value ${!wizardData.age ? 'empty' : ''}">${wizardData.age ? wizardData.age + ' years' : 'Not provided'}</span>
+                        </div>
+                        <div class="review-row">
+                            <span class="review-label">Zip Code</span>
+                            <span class="review-value ${!wizardData.zipCode ? 'empty' : ''}">${wizardData.zipCode || 'Not provided'}</span>
+                        </div>
+                         <div class="review-row">
+                            <span class="review-label">Race / Ethnicity</span>
+                            <span class="review-value ${!wizardData.raceEthnicity ? 'empty' : ''}">${wizardData.raceEthnicity || 'Not provided'}</span>
+                        </div>
+                        <div class="review-row">
+                            <span class="review-label">Sex</span>
+                            <span class="review-value ${!wizardData.sex ? 'empty' : ''}">${wizardData.sex || 'Not provided'}</span>
+                        </div>
+                        <div class="review-row">
+                            <span class="review-label">ECOG Status</span>
+                            <span class="review-value ${!wizardData.ecog ? 'empty' : ''}">${wizardData.ecog || 'Not provided'}</span>
+                        </div>
+                    </div>
+
+                    <div class="review-section">
+                        <div class="review-section-header">
+                            <span class="review-section-title">Diagnosis</span>
+                            <button class="review-edit-btn" onclick="goToStep(2)">Edit</button>
+                        </div>
+                        <div class="review-row">
+                            <span class="review-label">Cancer Type</span>
+                            <span class="review-value ${!wizardData.histology ? 'empty' : ''}">${wizardData.histology ? `Colon cancer (${wizardData.histology})` : 'Not provided'}</span>
+                        </div>
+                        <div class="review-row">
+                            <span class="review-label">Stage</span>
+                            <span class="review-value ${!wizardData.stage ? 'empty' : ''}">${wizardData.stage || 'Not provided'}</span>
+                        </div>
+                    </div>
+
+                    <div class="review-section">
+                        <div class="review-section-header">
+                            <span class="review-section-title">Test Results</span>
+                            <button class="review-edit-btn" onclick="goToStep(3)">Edit</button>
+                        </div>
+                        <div class="review-row">
+                            <span class="review-label">Biomarkers</span>
+                            <span class="review-value ${biomarkerSummary === 'Not specified' ? 'empty' : ''}">${biomarkerSummary}</span>
+                        </div>
+                    </div>
+
+                    <div class="review-section">
+                        <div class="review-section-header">
+                            <span class="review-section-title">Treatment</span>
+                            <button class="review-edit-btn" onclick="goToStep(4)">Edit</button>
+                        </div>
+                        <div class="review-row">
+                            <span class="review-label">Treatments</span>
+                            <span class="review-value ${treatmentSummary === 'None specified' ? 'empty' : ''}">${treatmentSummary}</span>
+                        </div>
+                        <div class="review-row">
+                            <span class="review-label">Current Symptoms</span>
+                            <span class="review-value ${wizardData.symptoms.length === 0 ? 'empty' : ''}">${wizardData.symptoms.join(', ') || 'None'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function compileProfileJSON() {
+            const profile = {
+                patient: {
+                    firstName: wizardData.firstName || "Patient",
+                    age: wizardData.age || "",
+                    zipCode: wizardData.zipCode || "",
+                    raceEthnicity: wizardData.raceEthnicity || "",
+                    height: wizardData.heightFt ? `${wizardData.heightFt}'${wizardData.heightIn || 0}"` : "",
+                    weight: wizardData.weight ? `${wizardData.weight} lbs` : "",
+                    sex: wizardData.sex || "",
+                    ecog: wizardData.ecog || "",
+                    allergies: wizardData.allergies || "none reported",
+                    comorbidities: wizardData.comorbidities
+                },
+                primaryDiagnosis: {
+                    site: "colon",
+                    histology: wizardData.histology || "adenocarcinoma",
+                    stage: wizardData.stage || "",
+                    biomarkers: {}
+                },
+                treatments: [],
+                symptoms: wizardData.symptoms,
+                currentOptions: wizardData.currentOptions
+            };
+
+            // Process biomarkers - only include known values
+            Object.entries(wizardData.biomarkers).forEach(([key, val]) => {
+                if (val && val !== "Don't know" && val !== "Pending") {
+                    profile.primaryDiagnosis.biomarkers[key] = val.toLowerCase().replace("wild-type", "wild-type").replace("mutated", "mutated");
+                }
+            });
+
+            // Process treatments - only include treatments with regimens
+            wizardData.treatments.forEach(t => {
+                if (t.regimen) {
+                    const treatment = {
+                        category: t.category || "",
+                        line: t.line,
+                        regimen: t.regimen,
+                        status: t.status,
+                        toxicities: []
+                    };
+
+                    (t.sideEffects || []).forEach(se => {
+                        treatment.toxicities.push({
+                            event: se.toLowerCase(),
+                            grade: t.sideEffectGrades?.[se] || "1"
+                        });
+                    });
+
+                    profile.treatments.push(treatment);
+                }
+            });
+
+            return profile;
+        }
+
+        async function saveProfile() {
+            const profile = compileProfileJSON();
+
+            wizardNext.disabled = true;
+            wizardNext.textContent = "Saving...";
+
+            try {
+                const resp = await authFetch("/api/upload_profile", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(profile)
+                });
+
+                const data = await resp.json();
+
+                if (resp.ok) {
+                    existingProfileData = profile;
+
+                    // Hide wizard and show main chat page
+                    profileWizard.style.display = "none";
+                    chatWrap.style.display = "flex";
+                    // Restore body scroll
+                    document.body.style.overflow = '';
+
+                    // Display profile in sidebar
+                    displayProfile(data.context, data.patient_summary);
+                    showBuildProfileButton(true); // Show edit button
+
+                    // Scroll to top of chat messages
+                    const messagesContainer = document.getElementById("messages");
+                    if (messagesContainer) {
+                        messagesContainer.scrollTop = 0;
+                    }
+
+                    // Focus on chat input to encourage interaction
+                    const chatInput = document.getElementById("msgInput");
+                    if (chatInput) {
+                        setTimeout(() => {
+                            chatInput.focus();
+                        }, 100);
+                    }
+
+                    // Scroll window to top to ensure chat is visible
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    alert("Failed to save profile: " + (data.error || "Unknown error"));
+                }
+            } catch (err) {
+                alert("Error saving profile: " + err.message);
+            } finally {
+                wizardNext.disabled = false;
+                wizardNext.textContent = isEditMode ? "Update Profile" : "Save Profile";
+            }
+        }
+
+        function showBuildProfileButton(hasProfile) {
+            const editBtn = document.getElementById("editProfileBtn");
+
+            if (hasProfile) {
+                uploadArea.style.display = "none";
+                profileInfo.style.display = "flex";
+                clearProfileBtn.style.display = "block";
+                if (editBtn) editBtn.style.display = "block";
+            } else {
+                uploadArea.style.display = "block";
+                profileInfo.style.display = "none";
+                clearProfileBtn.style.display = "none";
+                if (editBtn) editBtn.style.display = "none";
             }
         }
 
@@ -1119,49 +3896,29 @@
                     if (totalChunks > 0) {
                         statusDot.classList.remove('inactive');
                         aiStatus.textContent = "Ready";
-                        chunkCount.textContent = "Ready";
-                    } else {
-                        chunkCount.textContent = "Loading...";
                     }
                 }
             } catch (e) {
                 console.error("Failed to load data sources:", e);
                 statusDot.classList.add('inactive');
-                chunkCount.textContent = "Error";
             }
         }
 
         function displayDataSources(sources) {
-            const totalDocs = sources.length;
-            documentCount.textContent = `${totalDocs} ${totalDocs === 1 ? 'source' : 'sources'}`;
-
-            if (totalDocs === 0) {
-                dataSourcesList.innerHTML = '<div class="no-data">No data sources available</div>';
+            if (sources.length === 0) {
+                dataSourcesList.innerHTML = '<div class="no-data">No medical guidelines loaded</div>';
                 return;
             }
 
-            dataSourcesList.innerHTML = `
-                <div class="no-data" style="color: var(--success);">
-                    ${totalDocs} document${totalDocs !== 1 ? 's' : ''} chunked and ready
-                </div>
-            `;
+            dataSourcesList.innerHTML = '<div class="no-data" style="color: var(--success);">Medical guidelines ready</div>';
         }
 
         // =====================
         // Response Settings
         // =====================
-        function updateResponseLength() {
-            const value = responseSlider.value;
-            const settings = {
-                "0": "Brief responses",
-                "1": "Normal responses",
-                "2": "Detailed responses"
-            };
-            currentSetting.textContent = settings[value];
+        function getResponseLength() {
+            return responseDropdown.value;
         }
-
-        responseSlider.addEventListener("input", updateResponseLength);
-        updateResponseLength();
 
         // =====================
         // Chat Functions
@@ -1175,28 +3932,41 @@
             bubble.innerHTML = text.replace(/\n/g, '<br>');
             div.appendChild(bubble);
 
-            if (who === "bot" && metadata) {
+            if (who === "bot" && metadata && metadata.patient_context_used) {
                 const status = document.createElement("div");
-                const contextUsed = metadata.patient_context_used;
-                const retrievedCount = metadata.retrieved_count || 0;
+                status.className = "ai-status enhanced";
+                status.textContent = "Personalized response";
+                div.appendChild(status);
+            }
 
-                let statusText = [];
-                if (contextUsed) statusText.push("personalized");
-                if (retrievedCount > 0) statusText.push(`${retrievedCount} sources`);
+            if (who === "bot" && metadata && metadata.sources && metadata.sources.length > 0) {
+                const sourcesDiv = document.createElement("div");
+                sourcesDiv.className = "msg-sources";
 
-                if (statusText.length) {
-                    status.className = "ai-status enhanced";
-                    status.textContent = statusText.join(" · ");
-                    div.appendChild(status);
-                }
+                metadata.sources.forEach(source => {
+                    const btn = document.createElement("button");
+                    btn.className = "source-button" + (source.is_featured ? " featured" : "");
+                    // Use a simpler title if it's the long guide name
+                    let displayTitle = source.title;
+                    if (displayTitle.includes("Comprehensive_Colon_Cancer_Guide")) {
+                        displayTitle = "Comprehensive Care Guide";
+                    } else if (displayTitle.length > 20) {
+                        displayTitle = displayTitle.substring(0, 18) + "...";
+                    }
+
+                    btn.innerHTML = `<span>📚</span> ${displayTitle}`;
+                    btn.onclick = () => {
+                        // Simple alert for now, could be a modal
+                        alert(`Source Document:\n${source.title}\n\nThis guidance is based on our medical knowledge base.`);
+                    };
+                    sourcesDiv.appendChild(btn);
+                });
+
+                div.appendChild(sourcesDiv);
             }
 
             messages.appendChild(div);
             messages.scrollTop = messages.scrollHeight;
-        }
-
-        function getResponseLength() {
-            return { "0": "brief", "1": "normal", "2": "detailed" }[responseSlider.value];
         }
 
         sendBtn.addEventListener("click", async () => {
@@ -1206,8 +3976,8 @@
             sendBtn.disabled = true;
             addMessage(msg, "user");
             msgInput.value = "";
-            msgInput.style.height = "48px";
-            addMessage("Thinking...", "bot");
+            msgInput.style.height = "44px";
+            addMessage('<div class="thinking"><div class="thinking-dots"><span></span><span></span><span></span></div></div>', "bot");
 
             try {
                 const resp = await authFetch("/api/chat", {
@@ -1235,6 +4005,10 @@
             } finally {
                 sendBtn.disabled = false;
                 msgInput.focus();
+                // Refresh profile in case it was updated
+                if (j.has_profile_updates) {
+                    loadExistingProfile();
+                }
             }
         });
 
@@ -1247,15 +4021,110 @@
         });
 
         // Auto-resize textarea
-        msgInput.addEventListener("input", function() {
-            this.style.height = "48px";
+        msgInput.addEventListener("input", function () {
+            this.style.height = "44px";
             this.style.height = Math.min(this.scrollHeight, 120) + "px";
         });
 
         // =====================
         // Initialize
         // =====================
+        // =========================================
+        // Voice Input (Speech-to-Text)
+        // =========================================
+        let recognition = null;
+        let isListening = false;
+        const voiceBtn = document.getElementById('voiceBtn');
+
+        // SVG icons for voice button
+        const MIC_ICON = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>`;
+
+        const STOP_ICON = `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+        </svg>`;
+
+        function initVoiceInput() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+
+                recognition.onresult = (event) => {
+                    const transcript = Array.from(event.results)
+                        .map(result => result[0].transcript)
+                        .join('');
+                    msgInput.value = transcript;
+                    // Auto-resize textarea
+                    msgInput.style.height = "44px";
+                    msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + "px";
+                };
+
+                recognition.onend = () => {
+                    // In continuous mode, restart if user hasn't clicked stop
+                    if (isListening) {
+                        try {
+                            recognition.start();
+                        } catch (e) {
+                            // Already started or other error
+                            isListening = false;
+                            voiceBtn.classList.remove('listening');
+                            voiceBtn.innerHTML = MIC_ICON;
+                        }
+                    } else {
+                        voiceBtn.classList.remove('listening');
+                        voiceBtn.innerHTML = MIC_ICON;
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    isListening = false;
+                    voiceBtn.classList.remove('listening');
+                    voiceBtn.innerHTML = MIC_ICON;
+
+                    if (event.error === 'not-allowed') {
+                        alert('Microphone access denied. Please enable microphone permissions in your browser settings.');
+                    }
+                };
+
+                // Add click handler
+                voiceBtn.addEventListener('click', toggleVoiceInput);
+            } else {
+                // Hide voice button if not supported
+                voiceBtn.classList.add('unsupported');
+            }
+        }
+
+        function toggleVoiceInput() {
+            if (!recognition) {
+                alert('Voice input is not supported in your browser. Please try Chrome or Edge.');
+                return;
+            }
+
+            if (isListening) {
+                recognition.stop();
+                isListening = false;
+                voiceBtn.classList.remove('listening');
+                voiceBtn.innerHTML = MIC_ICON;
+            } else {
+                recognition.start();
+                isListening = true;
+                voiceBtn.classList.add('listening');
+                voiceBtn.innerHTML = STOP_ICON;
+            }
+        }
+
         window.addEventListener("load", async () => {
+            // Initialize voice input
+            initVoiceInput();
+
             // Listen for auth state changes
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 console.log("Auth state changed:", event, session ? "has session" : "no session");
@@ -1284,6 +4153,30 @@
                 await loadExistingProfile();
             }
         });
+        // =====================
+        // Embed Widget Code
+        // =====================
+        async function showEmbedModal() {
+            document.getElementById('embedModal').style.display = 'flex';
+            try {
+                const resp = await fetch("/api/widget/code");
+                const j = await resp.json();
+                document.getElementById('embedCodeBox').textContent = j.embed_code;
+            } catch (e) {
+                document.getElementById('embedCodeBox').textContent = "Error loading code: " + e.message;
+            }
+        }
+
+        function hideEmbedModal() {
+            document.getElementById('embedModal').style.display = 'none';
+        }
+
+        function copyEmbedCode() {
+            const code = document.getElementById('embedCodeBox').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert("Embed code copied to clipboard!");
+            });
+        }
     </script>
 </body>
 

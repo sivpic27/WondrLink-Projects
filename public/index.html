@@ -491,10 +491,11 @@
             background: var(--surface);
             border: 1px solid var(--border-light);
             border-radius: var(--radius-lg);
-            padding: 14px;
+            padding: 10px;
             display: flex;
             gap: 12px;
-            align-items: flex-end;
+            align-items: stretch;
+            /* Make them same height */
             box-shadow: var(--shadow-xs);
             transition: border-color var(--transition), box-shadow var(--transition);
         }
@@ -506,12 +507,13 @@
 
         textarea {
             flex: 1;
-            min-height: 44px;
+            min-height: 56px;
             max-height: 120px;
             resize: none;
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 11px 14px;
+            padding: 16px 14px;
+            /* Centered for 56px min-height */
             font-family: inherit;
             font-size: 14px;
             color: var(--text-primary);
@@ -519,6 +521,7 @@
             outline: none;
             transition: border-color var(--transition);
             line-height: 1.5;
+            box-sizing: border-box;
         }
 
         textarea:focus {
@@ -529,25 +532,28 @@
             color: var(--text-muted);
         }
 
-        /* Voice Button */
         .voice-btn {
-            width: 44px;
-            height: 44px;
+            width: 56px;
+            min-height: 56px;
+            height: auto;
             background: var(--background);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            font-size: 18px;
+            color: var(--text-secondary);
             cursor: pointer;
             transition: all var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            box-sizing: border-box;
         }
 
         .voice-btn:hover {
-            background: var(--border-light);
-            border-color: var(--border-hover);
+            background: rgba(13, 148, 136, 0.05);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
         }
 
         .voice-btn.listening {
@@ -573,12 +579,20 @@
         }
 
         .send-btn {
-            height: 44px;
-            min-width: 76px;
+            min-height: 56px;
+            height: auto;
+            min-width: 90px;
             font-weight: 600;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border: none;
+            color: white;
             border-radius: var(--radius);
             transition: transform var(--transition), box-shadow var(--transition);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
         }
 
         .send-btn:hover:not(:disabled) {
@@ -836,7 +850,7 @@
             }
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
             .brand-section {
                 padding: 18px 16px;
             }
@@ -1287,7 +1301,7 @@
             gap: 16px;
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
             }
@@ -1311,7 +1325,7 @@
             grid-template-columns: repeat(3, 1fr);
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
 
             .card-selector.cols-2,
             .card-selector.cols-3 {
@@ -1320,7 +1334,7 @@
         }
 
         /* Enhanced Mobile Wizard Styles */
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
             .profile-wizard {
                 position: fixed;
                 top: 0;
@@ -1379,13 +1393,23 @@
                 min-height: 60px;
             }
 
+            .radio-group {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
             .radio-option {
-                padding: 14px 18px;
-                font-size: 14px;
+                padding: 12px 8px;
+                font-size: 13px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                min-height: 44px;
             }
 
             .chip {
-                padding: 10px 16px;
+                padding: 10px 14px;
                 font-size: 13px;
             }
 
@@ -1417,24 +1441,27 @@
             }
         }
 
-        /* Mobile Hamburger Menu */
-        .hamburger-btn {
+        /* Mobile-only elements hidden by default */
+        .mobile-header {
             display: none;
-            position: fixed;
-            top: 12px;
-            left: 12px;
-            z-index: 101;
-            width: 44px;
-            height: 44px;
-            background: var(--primary);
-            border: none;
-            border-radius: var(--radius);
-            cursor: pointer;
-            padding: 10px;
-            box-shadow: var(--shadow);
         }
 
-        .hamburger-btn svg {
+        .close-sidebar-btn {
+            display: none;
+        }
+
+        /* Mobile Hamburger Menu */
+        .mobile-hamburger {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-hamburger svg {
             width: 24px;
             height: 24px;
             stroke: white;
@@ -1470,11 +1497,59 @@
             opacity: 1;
         }
 
-        @media (max-width: 640px) {
-            .hamburger-btn {
+        @media (max-width: 768px) {
+            .mobile-header {
                 display: flex;
                 align-items: center;
+                justify-content: space-between;
+                background: var(--primary);
+                color: white;
+                padding: 0 12px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 100;
+                /* Lower than sidebar */
+                height: 56px;
+                box-shadow: var(--shadow-sm);
+            }
+
+            .chat-header {
+                display: none !important;
+            }
+
+            .mobile-header-brand {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
                 justify-content: center;
+                align-items: center;
+                color: white !important;
+            }
+
+            .mobile-header-main {
+                font-size: 16px;
+                font-weight: 700;
+                line-height: 1.2;
+                color: white !important;
+            }
+
+            .mobile-header-sub {
+                font-size: 10px;
+                opacity: 0.9;
+                color: white !important;
+            }
+
+            .mobile-header-logout {
+                background: rgba(255, 255, 255, 0.15);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                color: white;
+                padding: 4px 10px;
+                border-radius: var(--radius-sm);
+                font-size: 11px;
+                font-weight: 600;
+                cursor: pointer;
             }
 
             .mobile-overlay {
@@ -1484,6 +1559,7 @@
 
             .mobile-overlay.active {
                 pointer-events: auto;
+                z-index: 199;
             }
 
             .app {
@@ -1496,44 +1572,88 @@
                 top: 0;
                 left: 0;
                 bottom: 0;
-                width: 300px;
-                z-index: 100;
+                width: 85%;
+                max-width: 320px;
+                z-index: 200;
                 border-radius: 0;
                 transform: translateX(-100%);
-                transition: transform 0.3s ease;
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: var(--shadow-xl);
             }
 
             .sidebar.mobile-open {
                 transform: translateX(0);
             }
 
+            .close-sidebar-btn {
+                display: flex !important;
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                width: 32px;
+                height: 32px;
+                background: rgba(255, 255, 255, 0.15);
+                border: none;
+                border-radius: 50%;
+                color: white;
+                font-size: 24px;
+                line-height: 1;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                z-index: 101;
+                padding: 0;
+                padding-bottom: 2px;
+                /* Visual centering adjustment for &times; */
+            }
+
             .chat-wrap {
                 width: 100%;
                 border-radius: 0;
                 height: 100vh;
+                padding-top: 56px;
+                /* Space for mobile header */
             }
 
             .messages {
-                padding-top: 70px;
+                padding-top: 20px;
             }
 
             .input-section {
-                padding: 8px;
+                padding: 12px;
+                gap: 8px;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                border-bottom: none;
+            }
+
+            /* Fix button heights on mobile */
+            .input-section textarea,
+            .input-section button {
+                height: 48px !important;
+                min-height: 48px !important;
             }
         }
 
+
         .selector-card {
             padding: 14px;
-            border: 2px solid var(--border);
+            border: 1px solid #cbd5e1;
+            /* Increased visibility */
             border-radius: var(--radius);
             cursor: pointer;
             transition: all var(--transition);
             background: var(--surface);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            /* Added shadow for visibility */
         }
 
         .selector-card:hover {
-            border-color: var(--border-hover);
-            background: var(--background);
+            border-color: var(--primary);
+            /* Clear hover state */
+            background: rgba(13, 148, 136, 0.02);
+            transform: translateY(-1px);
         }
 
         .selector-card.selected {
@@ -1560,32 +1680,36 @@
 
         /* Radio Group */
         .radio-group {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 10px;
         }
 
         .radio-option {
             padding: 10px 16px;
-            border: 1px solid var(--border);
+            border: 1px solid #cbd5e1;
+            /* Increased visibility */
             border-radius: var(--radius);
             cursor: pointer;
             font-size: 13px;
             color: var(--text-secondary);
             transition: all var(--transition);
             background: var(--surface);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .radio-option:hover {
-            border-color: var(--border-hover);
-            background: var(--background);
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(13, 148, 136, 0.02);
         }
 
         .radio-option.selected {
             border-color: var(--primary);
             background: rgba(13, 148, 136, 0.06);
             color: var(--primary-dark);
-            font-weight: 500;
+            box-shadow: 0 0 0 1px var(--primary);
+            /* Use shadow to highlight without shifting */
         }
 
         /* Chip Selector (Side Effects, Symptoms) */
@@ -1597,18 +1721,21 @@
 
         .chip {
             padding: 8px 14px;
-            border: 1px solid var(--border);
+            border: 1px solid #cbd5e1;
+            /* Increased visibility */
             border-radius: var(--radius-full);
             cursor: pointer;
             font-size: 12px;
             color: var(--text-secondary);
             transition: all var(--transition);
             background: var(--surface);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .chip:hover {
-            border-color: var(--border-hover);
-            background: var(--background);
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(13, 148, 136, 0.02);
         }
 
         .chip.selected {
@@ -1894,43 +2021,6 @@
             opacity: 1;
         }
 
-        /* Embed Modal */
-        .embed-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .embed-modal {
-            background: var(--surface);
-            border-radius: var(--radius-lg);
-            padding: 24px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .embed-code-box {
-            background: var(--background);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 12px;
-            font-family: monospace;
-            font-size: 12px;
-            margin: 16px 0;
-            white-space: pre-wrap;
-            word-break: break-all;
-            max-height: 200px;
-            overflow-y: auto;
-        }
 
         /* Source Buttons in Chat */
         .msg-sources {
@@ -1997,18 +2087,26 @@
     </div>
 
     <div class="app" id="mainApp" style="display: none;">
-        <!-- Mobile Hamburger Menu Button -->
-        <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileMenu()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-        </button>
+        <!-- Mobile Header Bar -->
+        <div class="mobile-header">
+            <button class="mobile-hamburger" onclick="toggleMobileMenu()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <div class="mobile-header-brand">
+                <div class="mobile-header-main">WondrLink</div>
+                <div class="mobile-header-sub">Your Colon Cancer Care Guide</div>
+            </div>
+            <button class="mobile-header-logout" onclick="handleLogout()">Logout</button>
+        </div>
         <!-- Mobile Overlay -->
         <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
 
         <div class="sidebar" id="sidebar">
+            <button class="close-sidebar-btn" onclick="closeMobileMenu()">&times;</button>
             <div class="brand-section">
                 <div class="brand-main">WondrLink</div>
                 <div class="brand-sub">Your Colon Cancer Care Guide</div>
@@ -2036,14 +2134,6 @@
                     </select>
                 </div>
 
-                <!-- Embed Widget -->
-                <div class="section-card">
-                    <div class="section-header">
-                        <div class="section-title">Embed Tool</div>
-                    </div>
-                    <button class="small secondary" style="width: 100%;" onclick="showEmbedModal()">Get Widget
-                        Code</button>
-                </div>
 
                 <!-- Patient Profile -->
                 <div class="section-card">
@@ -2156,7 +2246,7 @@
             </div>
 
             <div class="input-section">
-                <textarea id="msgInput" placeholder="Ask me anything about your treatment..."></textarea>
+                <textarea id="msgInput" placeholder="Ask me about colon cancer"></textarea>
                 <button id="voiceBtn" class="voice-btn" title="Voice input">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -2422,7 +2512,6 @@
         // =====================
         const sidebar = document.getElementById("sidebar");
         const mobileOverlay = document.getElementById("mobileOverlay");
-        const hamburgerBtn = document.getElementById("hamburgerBtn");
 
         function toggleMobileMenu() {
             const isOpen = sidebar.classList.contains('mobile-open');
@@ -2433,27 +2522,17 @@
             }
         }
 
+
         function openMobileMenu() {
             sidebar.classList.add('mobile-open');
             mobileOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
-            // Change hamburger to X icon
-            hamburgerBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-                <line x1="6" y1="18" x2="18" y2="6"></line>
-            </svg>`;
         }
 
         function closeMobileMenu() {
             sidebar.classList.remove('mobile-open');
             mobileOverlay.classList.remove('active');
             document.body.style.overflow = '';
-            // Change X back to hamburger icon
-            hamburgerBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>`;
         }
 
         // =====================
@@ -2669,10 +2748,9 @@
                     ">
                         <div style="text-align: center; margin-bottom: 20px;">
                             <div style="font-size: 48px; margin-bottom: 12px;">🎗️</div>
-                            <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary);">Colon Cancer Support Tool</h3>
+                            <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary);">Colon Cancer Support</h3>
                             <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">
-                                WondrLink is designed <strong>specifically for patients diagnosed with colon cancer</strong>
-                                (also called colorectal cancer). This tool provides educational information only.
+                                Educational information specifically for patients diagnosed with colon cancer.
                             </p>
                         </div>
 
@@ -2680,8 +2758,7 @@
                             <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
                                 <input type="checkbox" id="consentCheckbox" style="margin-top: 3px; width: 18px; height: 18px; accent-color: var(--primary);">
                                 <span style="font-size: 13px; color: var(--text-primary); line-height: 1.5;">
-                                    I understand that this tool is designed <strong>specifically for colon cancer</strong> patients and caregivers,
-                                    and provides educational information only — not medical advice. Always consult your healthcare team for medical decisions.
+                                    I understand this tool provides educational information for colon cancer patients only and is not medical advice.
                                 </span>
                             </label>
                         </div>
@@ -2733,6 +2810,7 @@
         }
 
         function actuallyStartProfileWizard(editMode = false) {
+            closeMobileMenu(); // Ensure sidebar closes on mobile
             isEditMode = editMode;
             wizardTitle.textContent = editMode ? "Edit Your Profile" : "Build Your Profile";
 
@@ -3344,16 +3422,22 @@
                         patient portal, or ask your oncologist. You can also skip and add them later.
                     </div>
 
-                    ${biomarkerNames.map(bm => `
-                        <div class="form-group">
-                            <label class="form-label">${bm} Status</label>
-                            <div class="radio-group" id="wiz${bm}">
-                                ${BIOMARKER_OPTIONS.map(opt => `
-                                    <div class="radio-option ${wizardData.biomarkers[bm] === opt ? 'selected' : ''}" data-value="${opt}">${opt}</div>
-                                `).join('')}
+                    ${biomarkerNames.map(bm => {
+                let options = BIOMARKER_OPTIONS;
+                if (bm === 'MSI') options = ["MSI-H", "MSI-L", "MSS", "Pending", "Don't know"];
+                if (bm === 'MMR') options = ["dMMR", "pMMR", "Pending", "Don't know"];
+
+                return `
+                            <div class="form-group">
+                                <label class="form-label">${bm} Status</label>
+                                <div class="radio-group" id="wiz${bm}">
+                                    ${options.map(opt => `
+                                        <div class="radio-option ${wizardData.biomarkers[bm] === opt ? 'selected' : ''}" data-value="${opt}">${opt}</div>
+                                    `).join('')}
+                                </div>
                             </div>
-                        </div>
-                    `).join('')}
+                        `;
+            }).join('')}
                 </div>
             `;
 
@@ -3644,8 +3728,12 @@
             if (isAddingTreatment) return;
             isAddingTreatment = true;
 
+            const scrollPos = wizardContent.scrollTop;
             wizardData.treatments.push({ category: "", regimen: "", line: "1st line", status: "active", sideEffects: [], sideEffectGrades: {} });
             renderTreatmentStep();
+
+            // Restore scroll position
+            wizardContent.scrollTop = scrollPos;
 
             // Reset flag after a short delay
             setTimeout(() => { isAddingTreatment = false; }, 300);
@@ -4037,14 +4125,14 @@
         const voiceBtn = document.getElementById('voiceBtn');
 
         // SVG icons for voice button
-        const MIC_ICON = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        const MIC_ICON = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
             <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
             <line x1="12" y1="19" x2="12" y2="23"></line>
             <line x1="8" y1="23" x2="16" y2="23"></line>
         </svg>`;
 
-        const STOP_ICON = `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+        const STOP_ICON = `<svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" stroke="none">
             <rect x="6" y="6" width="12" height="12" rx="2"></rect>
         </svg>`;
 
@@ -4153,30 +4241,6 @@
                 await loadExistingProfile();
             }
         });
-        // =====================
-        // Embed Widget Code
-        // =====================
-        async function showEmbedModal() {
-            document.getElementById('embedModal').style.display = 'flex';
-            try {
-                const resp = await fetch("/api/widget/code");
-                const j = await resp.json();
-                document.getElementById('embedCodeBox').textContent = j.embed_code;
-            } catch (e) {
-                document.getElementById('embedCodeBox').textContent = "Error loading code: " + e.message;
-            }
-        }
-
-        function hideEmbedModal() {
-            document.getElementById('embedModal').style.display = 'none';
-        }
-
-        function copyEmbedCode() {
-            const code = document.getElementById('embedCodeBox').textContent;
-            navigator.clipboard.writeText(code).then(() => {
-                alert("Embed code copied to clipboard!");
-            });
-        }
     </script>
 </body>
 

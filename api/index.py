@@ -3,6 +3,7 @@ import os
 import sys
 import json
 import logging
+from datetime import datetime
 from functools import wraps
 from flask import Flask, request, jsonify
 
@@ -317,7 +318,9 @@ def api_chat():
 
         # Load patient profile from Supabase
         patient_profile = load_profile(user_id)
-        patient_context = extract_patient_context_complex(patient_profile) if patient_profile else {}
+        # load_profile returns {} if not found, which is falsy in Python. 
+        # We want to ensure extract_patient_context_complex is called even if profile is mostly empty.
+        patient_context = extract_patient_context_complex(patient_profile) if (patient_profile is not None and len(patient_profile) > 0) else {}
 
         # Check for cancer type mismatch
         mismatch_detected = False
@@ -384,35 +387,42 @@ def api_chat():
             add_conversation(session_id, user_id, message, answer)
 
             # --- Feature 1: Scan for profile updates ---
-            profile_updates = extract_profile_updates_from_query(original_message, patient_profile or {})
-            if profile_updates:
-                logger.info(f"Detected profile updates for user {user_id}: {profile_updates}")
-                source_info = {
-                    "source_type": "chat",
-                    "session_id": session_id,
-                    "timestamp": datetime.now().isoformat()
-                }
-                update_profile_with_sources(user_id, profile_updates, source_info)
+            profile_updates = {}
+            try:
+                profile_updates = extract_profile_updates_from_query(original_message, patient_profile or {})
+                if profile_updates:
+                    logger.info(f"Detected profile updates for user {user_id}: {profile_updates}")
+                    source_info = {
+                        "source_type": "chat",
+                        "session_id": session_id,
+                        "timestamp": datetime.now().isoformat()
+                    }
+                    update_profile_with_sources(user_id, profile_updates, source_info)
+            except Exception as e:
+                logger.error(f"Error in profile update scanning: {e}", exc_info=True)
 
             # Extract sources for the frontend button
             sources_metadata = []
-            seen_sources = set()
-            for chunk in retrieved:
-                if isinstance(chunk, dict) and chunk.get('filename'):
-                    fname = chunk['filename']
-                    # Clean filename for display (remove id prefix if present, usually not needed if simple)
-                    # Deduplicate
-                    if fname not in seen_sources:
-                        sources_metadata.append({
-                            "title": fname,
-                            "type": "document"
-                        })
-                        seen_sources.add(fname)
-            
-            # Prioritize the specific guide user mentioned
-            for s in sources_metadata:
-                if "Comprehensive_Colon_Cancer_Guide" in s["title"]:
-                    s["is_featured"] = True
+            try:
+                seen_sources = set()
+                for chunk in retrieved:
+                    if isinstance(chunk, dict) and chunk.get('filename'):
+                        fname = chunk['filename']
+                        # Clean filename for display (remove id prefix if present, usually not needed if simple)
+                        # Deduplicate
+                        if fname not in seen_sources:
+                            sources_metadata.append({
+                                "title": fname,
+                                "type": "document"
+                            })
+                            seen_sources.add(fname)
+                
+                # Prioritize the specific guide user mentioned
+                for s in sources_metadata:
+                    if "Comprehensive_Colon_Cancer_Guide" in s["title"]:
+                        s["is_featured"] = True
+            except Exception as e:
+                logger.error(f"Error extracting source metadata: {e}", exc_info=True)
 
             return jsonify({
                 "answer": final_answer,
@@ -469,26 +479,6 @@ def api_data_sources():
 
 
 # -------------------------
-# Widget Routes
-# -------------------------
-@app.route("/api/widget/code", methods=["GET"])
-def api_widget_code():
-    """Generate embed code for the widget."""
-    try:
-        base_url = os.environ.get("BASE_URL", "http://localhost:3000")
-        
-        script_code = f"""
-<!-- WondrLink Chat Widget -->
-<script src="{base_url}/widget.js" async></script>
-<div id="wondrlink-chat-widget" data-api-url="{base_url}/api"></div>
-"""
-        return jsonify({
-            "status": "ok",
-            "embed_code": script_code.strip()
-        })
-    except Exception as e:
-        logger.exception("get_widget_code error")
-        return jsonify({"error": str(e)}), 500
 
 # -------------------------
 # Debug Route

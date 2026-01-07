@@ -2,7 +2,8 @@
 import os
 import re
 import logging
-from typing import List, Dict, Any, Tuple, Optional
+import json
+from typing import List, Dict, Any, Tuple, Optional, Union
 
 logger = logging.getLogger("llm_utils")
 
@@ -215,8 +216,8 @@ TOKEN_BUDGET = {
 ENHANCED_SYSTEM_PROMPT = """ROLE: You are WondrLink, a Colon Cancer AI Concierge - a patient education assistant specializing in colon cancer. You provide evidence-based information in plain language to help patients and caregivers understand their diagnosis and treatment.
 
 PATIENT PROFILE USAGE:
-- Reference patient context ONLY when directly relevant to the specific question
-- Do NOT repeat diagnosis/treatment in every response - assume the patient knows their situation
+- You have access to the patient's full medical profile. Always use this information to personalize your answers.
+- If the user asks about their profile, who they are, or what you know about them, provide a warm summary of the information you have on file.
 - Proactively incorporate biomarker implications when relevant:
   * KRAS/NRAS mutations → EGFR inhibitors (cetuximab, panitumumab) are ineffective
   * MSS (Microsatellite Stable) → Checkpoint inhibitors (immunotherapy) unlikely to help
@@ -672,7 +673,7 @@ def truncate_to_tokens(text: str, max_tokens: int, preserve_end: bool = False) -
     return text[:char_limit] + "..."
 
 
-def select_chunks_within_budget(chunks: Union[List[str], List[Dict]], max_tokens: int) -> str:
+def select_chunks_within_budget(chunks: list, max_tokens: int) -> str:
     """Select and format chunks that fit within token budget.
        Accepts List[str] or List[Dict] (with 'content' key).
     """
@@ -741,11 +742,17 @@ def classify_query_type(message: str) -> str:
         'blood work', 'lab', 'marker', 'cea', 'biomarker', 'genetic'
     ]
 
+    profile_keywords = [
+        'profile', 'my info', 'about me', 'my data', 'my record',
+        'who am i', 'what do you know', 'patient info'
+    ]
+
     scores = {
         'treatment': sum(1 for kw in treatment_keywords if kw in message_lower),
         'side_effect': sum(1 for kw in side_effect_keywords if kw in message_lower),
         'prognosis': sum(1 for kw in prognosis_keywords if kw in message_lower),
-        'diagnosis': sum(1 for kw in diagnosis_keywords if kw in message_lower)
+        'diagnosis': sum(1 for kw in diagnosis_keywords if kw in message_lower),
+        'profile': sum(1 for kw in profile_keywords if kw in message_lower)
     }
 
     max_score = max(scores.values())
@@ -760,114 +767,88 @@ def classify_query_type(message: str) -> str:
 
 
 def filter_relevant_context(patient_context: Dict[str, Any], query_type: str, message: str) -> str:
-    """Filter patient context to include only information relevant to the query type."""
+    """Provides full patient context without selective filtering for richer AI understanding."""
     if not patient_context:
         return "No patient profile available."
 
-    filtered_parts = []
+    full_context = []
 
-    # Cancer type and stage (always relevant)
+    # Demographics
+    name = patient_context.get('patient_name')
+    age = patient_context.get('age')
+    if name and age:
+        full_context.append(f"Patient: {name}, {age} years old")
+    elif name:
+        full_context.append(f"Patient: {name}")
+
+    zip_code = patient_context.get('zip_code', 'unspecified')
+    if zip_code != 'unspecified':
+        full_context.append(f"Location: {zip_code}")
+        
+    race = patient_context.get('race_ethnicity', 'unspecified')
+    if race != 'unspecified':
+        full_context.append(f"Race/Ethnicity: {race}")
+
+    # Diagnosis & Stage
     cancer_type = patient_context.get('cancer_type', 'unspecified cancer')
     stage = patient_context.get('stage', 'unspecified')
     if stage != 'unspecified':
-        filtered_parts.append(f"Diagnosis: {cancer_type}, stage {stage}")
+        full_context.append(f"Diagnosis: {cancer_type}, stage {stage}")
     else:
-        filtered_parts.append(f"Diagnosis: {cancer_type}")
+        full_context.append(f"Diagnosis: {cancer_type}")
 
-    if query_type == 'treatment':
-        treatments = patient_context.get('current_treatments', [])
-        if treatments:
-            current_tx = [tx for tx in treatments if 'Currently on' in tx]
-            if current_tx:
-                filtered_parts.append(f"Current treatment: {current_tx[0]}")
+    # Treatment Info
+    treatments = patient_context.get('current_treatments', [])
+    if treatments:
+        full_context.append(f"Treatments: {', '.join(treatments)}")
 
-        # Add cycle context (Step 2)
-        current_cycle = patient_context.get('current_cycle_number')
-        treatment_line = patient_context.get('treatment_line')
-        current_regimen = patient_context.get('current_regimen')
-        if current_cycle and current_regimen:
-            cycle_info = get_cycle_context(current_regimen, treatment_line, current_cycle)
-            if cycle_info:
-                filtered_parts.append(f"Treatment progress: {cycle_info}")
+    current_cycle = patient_context.get('current_cycle_number')
+    treatment_line = patient_context.get('treatment_line')
+    current_regimen = patient_context.get('current_regimen')
+    if current_cycle and current_regimen:
+        from lib.llm_utils import get_cycle_context
+        cycle_info = get_cycle_context(current_regimen, treatment_line, current_cycle)
+        if cycle_info:
+            full_context.append(f"Treatment status: {cycle_info}")
 
-        biomarkers = patient_context.get('biomarkers', 'unspecified')
-        if biomarkers != 'unspecified' and biomarkers:
-            filtered_parts.append(f"Biomarkers: {biomarkers}")
-            # Highlight MSI status specifically (Step 3)
-            if 'MSS' in biomarkers or 'Microsatellite Stable' in biomarkers:
-                filtered_parts.append("⚠️ MSI Status: MSS - immunotherapy alone unlikely to be effective")
-            elif 'MSI-H' in biomarkers or 'MSI-High' in biomarkers or 'Unstable' in biomarkers:
-                filtered_parts.append("MSI Status: MSI-H - may respond well to immunotherapy")
+    # Biomarkers
+    biomarkers = patient_context.get('biomarkers', 'unspecified')
+    if biomarkers != 'unspecified' and biomarkers:
+        full_context.append(f"Biomarkers: {biomarkers}")
+        # Explicit warnings for AI
+        if 'MSS' in biomarkers or 'Microsatellite Stable' in biomarkers:
+            full_context.append("⚠️ MSI Status: MSS - immunotherapy/checkpoint inhibitors likely ineffective")
+        elif 'MSI-H' in biomarkers or 'MSI-High' in biomarkers or 'Unstable' in biomarkers:
+            full_context.append("✓ MSI Status: MSI-H - may respond to immunotherapy")
 
-        treatment_options = patient_context.get('treatment_options', [])
-        if treatment_options:
-            filtered_parts.append(f"Options being considered: {', '.join(treatment_options[:3])}")
+    # Medications & History
+    meds = patient_context.get('medications', [])
+    if meds:
+        full_context.append(f"Medications: {', '.join(meds)}")
 
-    elif query_type == 'side_effect':
-        medications = patient_context.get('medications', [])
-        if medications:
-            filtered_parts.append(f"Current medications: {', '.join(medications[:5])}")
+    history = patient_context.get('medical_history', [])
+    if history:
+        full_context.append(f"History: {', '.join(history)}")
 
-        symptoms = patient_context.get('symptoms', [])
-        if symptoms:
-            filtered_parts.append(f"Known symptoms: {', '.join(symptoms[:3])}")
+    allergies = patient_context.get('allergies', 'none reported')
+    if allergies != 'none reported':
+        full_context.append(f"Allergies: {allergies}")
 
-        treatments = patient_context.get('current_treatments', [])
-        if treatments:
-            current_tx = [tx for tx in treatments if 'Currently on' in tx]
-            if current_tx:
-                filtered_parts.append(f"Treatment: {current_tx[0]}")
+    # Status & Sites
+    status = patient_context.get('performance_status', 'unspecified')
+    if status != 'unspecified':
+        full_context.append(f"Performance: {status}")
 
-    elif query_type == 'prognosis':
-        disease_sites = patient_context.get('disease_sites', [])
-        if disease_sites:
-            filtered_parts.append(f"Disease sites: {', '.join(disease_sites[:3])}")
+    sites = patient_context.get('disease_sites', [])
+    if sites:
+        full_context.append(f"Disease sites: {', '.join(sites)}")
 
-        biomarkers = patient_context.get('biomarkers', 'unspecified')
-        if biomarkers != 'unspecified' and biomarkers:
-            filtered_parts.append(f"Biomarkers: {biomarkers}")
-            # Highlight MSI status specifically (Step 3)
-            if 'MSS' in biomarkers or 'Microsatellite Stable' in biomarkers:
-                filtered_parts.append("⚠️ MSI Status: MSS - immunotherapy alone unlikely to be effective")
-            elif 'MSI-H' in biomarkers or 'MSI-High' in biomarkers or 'Unstable' in biomarkers:
-                filtered_parts.append("MSI Status: MSI-H - may respond well to immunotherapy")
+    # Symptoms
+    symptoms = patient_context.get('symptoms', [])
+    if symptoms:
+        full_context.append(f"Recent symptoms: {', '.join(symptoms)}")
 
-        resistance = patient_context.get('resistance_mechanism', '')
-        if resistance:
-            filtered_parts.append(f"Resistance: {resistance}")
-
-    elif query_type == 'diagnosis':
-        biomarkers = patient_context.get('biomarkers', 'unspecified')
-        if biomarkers != 'unspecified' and biomarkers:
-            filtered_parts.append(f"Biomarkers: {biomarkers}")
-            # Highlight MSI status for diagnosis queries (V4 Step 1)
-            if 'MSS' in biomarkers or 'Microsatellite Stable' in biomarkers:
-                filtered_parts.append("⚠️ MSI Status: MSS (Microsatellite Stable) - immunotherapy/checkpoint inhibitors (pembrolizumab, nivolumab) unlikely to be effective as standalone treatment")
-            elif 'MSI-H' in biomarkers or 'MSI-High' in biomarkers or 'Unstable' in biomarkers:
-                filtered_parts.append("✓ MSI Status: MSI-H - may respond well to immunotherapy (checkpoint inhibitors)")
-
-    else:  # general
-        performance_status = patient_context.get('performance_status', 'unspecified')
-        if performance_status != 'unspecified':
-            filtered_parts.append(f"Performance status: {performance_status}")
-
-        treatments = patient_context.get('current_treatments', [])
-        if treatments:
-            current_tx = [tx for tx in treatments if 'Currently on' in tx]
-            if current_tx:
-                filtered_parts.append(f"Current treatment: {current_tx[0]}")
-
-    # Add medical history if mentioned in query
-    if any(word in message.lower() for word in ['history', 'previous', 'past', 'before', 'allergy', 'allergic']):
-        medical_history = patient_context.get('medical_history', [])
-        if medical_history:
-            filtered_parts.append(f"Medical history: {', '.join(medical_history[:3])}")
-
-        allergies = patient_context.get('allergies', 'none reported')
-        if allergies != 'none reported':
-            filtered_parts.append(f"Allergies: {allergies}")
-
-    return " | ".join(filtered_parts)
+    return " | ".join(full_context)
 
 
 def get_response_settings(response_length: str) -> Dict[str, Any]:
@@ -940,7 +921,7 @@ def format_conversation_context(history: List[Dict[str, str]], max_tokens: int =
     return "PREVIOUS CONVERSATION:\n" + "\n\n".join(formatted_parts)
 
 
-def assemble_prompt(message: str, retrieved: Union[List[str], List[Dict]], patient: dict,
+def assemble_prompt(message: str, retrieved: list, patient: dict,
                     response_length: str = "normal", conversation_context: str = "",
                     patient_context: Dict[str, Any] = None) -> Tuple[str, dict]:
     """

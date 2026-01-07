@@ -248,11 +248,10 @@ def load_all_chunks() -> List[Dict[str, Any]]:
         offset = 0
 
         while offset < total_count:
-            # Select relevant columns. Assuming 'content' keeps the text.
-            # If 'chunk_text' was used for insert and 'content' for select, we try both or stick to 'content' if that's what works.
-            # We'll try to select filename too.
+            # Select only columns we know exist. 'chunk_text' corresponds to 'content' in usage.
+            # We must NOT select 'content' if it doesn't exist in the schema.
             result = client.table('pdf_chunks') \
-                .select('content, filename, chunk_index, chunk_text') \
+                .select('filename, chunk_index, chunk_text') \
                 .order('document_id') \
                 .order('chunk_index') \
                 .range(offset, offset + page_size - 1) \

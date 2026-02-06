@@ -251,6 +251,22 @@ TONE: Warm, empathetic, and empowering. Acknowledge emotional difficulty when ap
 
 
 # =============================================================================
+# FOLLOW-UP QUESTION DIVERSITY
+# =============================================================================
+
+FOLLOW_UP_INSTRUCTION = """
+FOLLOW-UP SUGGESTIONS:
+At the end of your response, suggest 2-3 related questions the patient might want to ask next.
+These should cover DIFFERENT aspects of their care (not all about the same drug/treatment):
+- A question about a different treatment option or drug
+- A question about side effect management or quality of life
+- A question about practical concerns or emotional support
+
+Format as: "You might also want to ask about: • [Question 1] • [Question 2] • [Question 3]"
+"""
+
+
+# =============================================================================
 # SYMPTOM URGENCY DETECTION
 # =============================================================================
 
@@ -340,25 +356,43 @@ PATIENT_RESOURCES = {
     'general': [
         {'name': 'National Cancer Institute', 'url': 'https://www.cancer.gov/types/colorectal', 'desc': 'Comprehensive cancer info'},
         {'name': 'American Cancer Society', 'url': 'https://www.cancer.org/cancer/colon-rectal-cancer.html', 'desc': 'Patient-friendly overviews'},
+        {'name': 'NCCN Patient Guidelines', 'url': 'https://www.nccn.org/patients/guidelines/content/PDF/colon-patient.pdf', 'desc': 'Evidence-based treatment guidelines'},
     ],
 
-    # Support Communities - peer support, patient advocacy
-    'support': [
-        {'name': 'Colontown', 'url': 'https://colontown.org', 'desc': 'Active peer support community'},
-        {'name': 'Fight Colorectal Cancer', 'url': 'https://fightcolorectalcancer.org', 'desc': 'Advocacy and resources'},
+    # Advocacy Organizations - patient advocacy, resources
+    'advocacy': [
+        {'name': 'Colorectal Cancer Alliance', 'url': 'https://colorectalcancer.org', 'desc': 'Patient support and resources'},
+        {'name': 'Fight Colorectal Cancer', 'url': 'https://fightcolorectalcancer.org', 'desc': 'Advocacy and patient resources'},
         {'name': 'Colon Cancer Coalition', 'url': 'https://coloncancercoalition.org', 'desc': 'Awareness and screening'},
+    ],
+
+    # Support Communities - peer support, online communities
+    'support': [
+        {'name': 'Colontown', 'url': 'https://colontown.org', 'desc': 'Active peer support community (11,000+ members)'},
+        {'name': 'Colontown University', 'url': 'https://learn.colontown.org', 'desc': 'Free patient education courses'},
+        {'name': 'Blue Hope Nation (CCA)', 'url': 'https://colorectalcancer.org/bluehq', 'desc': 'Online support hub'},
+        {'name': 'Smart Patients CRC', 'url': 'https://www.smartpatients.com/communities/colorectal-cancer', 'desc': 'Patient discussion community'},
     ],
 
     # Clinical Trials - trial search, trial finder
     'clinical_trials': [
         {'name': 'ClinicalTrials.gov', 'url': 'https://clinicaltrials.gov', 'desc': 'NIH database of all trials'},
-        {'name': 'Fight CRC Trial Finder', 'url': 'https://fightcolorectalcancer.org/fight/clinical-trials/', 'desc': 'Simplified trial search'},
+        {'name': 'NCI Trial Search', 'url': 'https://www.cancer.gov/research/participate/clinical-trials-search', 'desc': 'National Cancer Institute trials'},
+        {'name': 'CCA Trial Finder', 'url': 'https://colorectalcancer.org/treatment/types-treatment/clinical-trials/clinical-trial-finder', 'desc': 'Simplified trial search'},
+    ],
+
+    # Treatment Information - surgery, chemo, targeted therapy, immunotherapy
+    'treatment': [
+        {'name': 'ACS Colon Treatment', 'url': 'https://www.cancer.org/cancer/colon-rectal-cancer/treating.html', 'desc': 'Treatment overview'},
+        {'name': 'NCI Treatment (PDQ)', 'url': 'https://www.cancer.gov/types/colorectal/patient/colon-treatment-pdq', 'desc': 'Detailed treatment info'},
+        {'name': 'Chemocare Drug Info', 'url': 'https://chemocare.com/chemotherapy/drug-info/default.aspx', 'desc': 'Chemotherapy drug details'},
     ],
 
     # Side Effects (General) - chemo side effects, symptom management
     'side_effects_chemo': [
-        {'name': 'Chemocare.com', 'url': 'https://chemocare.com', 'desc': 'Drug-specific side effects'},
-        {'name': 'OncoLink', 'url': 'https://www.oncolink.org', 'desc': 'Penn Medicine patient education'},
+        {'name': 'Chemocare Side Effects', 'url': 'https://chemocare.com/chemotherapy/side-effects/default.aspx', 'desc': 'Drug-specific side effects'},
+        {'name': 'NCI Side Effects', 'url': 'https://www.cancer.gov/about-cancer/treatment/side-effects', 'desc': 'Managing treatment effects'},
+        {'name': 'ACS Side Effects', 'url': 'https://www.cancer.org/cancer/managing-cancer/side-effects.html', 'desc': 'Side effect management'},
     ],
 
     # Neuropathy - tingling, numbness, nerve damage
@@ -370,7 +404,7 @@ PATIENT_RESOURCES = {
     # Fatigue - tiredness, energy, exhaustion
     'fatigue': [
         {'name': 'Cancer.org Fatigue', 'url': 'https://www.cancer.org/treatment/treatments-and-side-effects/physical-side-effects/fatigue.html', 'desc': 'Fatigue management'},
-        {'name': 'OncoLink Fatigue', 'url': 'https://www.oncolink.org/support/side-effects/fatigue', 'desc': 'Practical tips'},
+        {'name': 'NCI Late Effects', 'url': 'https://www.cancer.gov/about-cancer/coping/survivorship/late-effects', 'desc': 'Long-term effects'},
     ],
 
     # Nausea - vomiting, appetite, anti-nausea
@@ -381,26 +415,40 @@ PATIENT_RESOURCES = {
     # Emotional & Mental Health - anxiety, depression, coping, family
     'emotional': [
         {'name': 'Cancer Support Community', 'url': 'https://www.cancersupportcommunity.org', 'desc': 'Free support groups'},
-        {'name': 'CancerCare', 'url': 'https://www.cancercare.org', 'desc': 'Free counseling services'},
-        {'name': 'Cancer Support Helpline', 'url': 'https://www.cancersupportcommunity.org/hopeline', 'desc': '1-888-793-9355 (free, confidential)'},
+        {'name': 'CancerCare Counseling', 'url': 'https://www.cancercare.org', 'desc': 'Free counseling services'},
+        {'name': 'Imerman Angels', 'url': 'https://imermanangels.org', 'desc': 'Free 1-on-1 cancer support'},
+        {'name': 'Cancer Hope Network', 'url': 'https://www.cancerhopenetwork.org', 'desc': 'Peer support matching'},
     ],
 
     # Financial Assistance - costs, copays, insurance
     'financial': [
         {'name': 'Patient Advocate Foundation', 'url': 'https://www.patientadvocate.org', 'desc': 'Insurance and financial help'},
         {'name': 'CancerCare Financial', 'url': 'https://www.cancercare.org/financial', 'desc': 'Financial assistance programs'},
+        {'name': 'CCA Financial Resources', 'url': 'https://colorectalcancer.org/resources-support/resources/financial-assistance', 'desc': 'CRC-specific financial help'},
+        {'name': 'NeedyMeds', 'url': 'https://www.needymeds.org', 'desc': 'Medication assistance finder'},
+        {'name': 'PAN Foundation', 'url': 'https://www.panfoundation.org', 'desc': 'Co-pay assistance'},
     ],
 
     # Survivorship - after treatment, long-term, follow-up
     'survivorship': [
-        {'name': 'LIVESTRONG', 'url': 'https://www.livestrong.org', 'desc': 'Survivorship programs'},
+        {'name': 'ACS Survivorship', 'url': 'https://www.cancer.org/cancer/colon-rectal-cancer/after-treatment/follow-up.html', 'desc': 'Follow-up care guide'},
         {'name': 'Cancer Survivors Network', 'url': 'https://csn.cancer.org', 'desc': 'ACS peer support'},
+        {'name': 'NCI Follow-Up Care', 'url': 'https://www.cancer.gov/about-cancer/coping/survivorship/follow-up-care', 'desc': 'Survivorship care planning'},
     ],
 
     # Screening - colonoscopy, FIT test, prevention, early detection
     'screening': [
-        {'name': 'American Cancer Society Screening', 'url': 'https://www.cancer.org/cancer/colon-rectal-cancer/detection-diagnosis-staging/screening-tests-used.html', 'desc': 'Screening guidelines'},
-        {'name': 'Colon Cancer Coalition', 'url': 'https://coloncancercoalition.org', 'desc': 'Screening awareness'},
+        {'name': 'ACS Screening Guidelines', 'url': 'https://www.cancer.org/cancer/colon-rectal-cancer/detection-diagnosis-staging/acs-recommendations.html', 'desc': 'Screening recommendations'},
+        {'name': 'USPSTF Guidelines', 'url': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening', 'desc': 'Federal screening guidelines'},
+        {'name': 'CDC Screen for Life', 'url': 'https://www.cdc.gov/colorectal-cancer/screening/index.html', 'desc': 'CDC screening resources'},
+    ],
+
+    # Diagnosis - symptoms, staging, biomarker testing
+    'diagnosis': [
+        {'name': 'ACS Diagnosis', 'url': 'https://www.cancer.org/cancer/colon-rectal-cancer/detection-diagnosis-staging/how-diagnosed.html', 'desc': 'How CRC is diagnosed'},
+        {'name': 'ACS Staging', 'url': 'https://www.cancer.org/cancer/colon-rectal-cancer/detection-diagnosis-staging/staged.html', 'desc': 'Cancer staging explained'},
+        {'name': 'Biomarker Testing (CCA)', 'url': 'https://colorectalcancer.org/treatment/biomarker-testing', 'desc': 'Biomarker testing guide'},
+        {'name': 'NCI Biomarkers', 'url': 'https://www.cancer.gov/about-cancer/treatment/types/biomarker-testing-cancer-treatment', 'desc': 'Testing for treatment'},
     ],
 
     # Nutrition - diet, eating, weight, dietitian
@@ -413,6 +461,44 @@ PATIENT_RESOURCES = {
     'ostomy': [
         {'name': 'UOAA', 'url': 'https://www.ostomy.org', 'desc': 'Ostomy education and support'},
         {'name': 'UOAA Support Groups', 'url': 'https://www.ostomy.org/support-group-finder/', 'desc': 'Find local support'},
+        {'name': 'ACS Colostomy Guide', 'url': 'https://www.cancer.org/cancer/managing-cancer/treatment-types/surgery/ostomies/colostomy.html', 'desc': 'Living with colostomy'},
+        {'name': 'MSK Ostomy Care', 'url': 'https://www.mskcc.org/cancer-care/patient-education/caring-for-your-ileostomy-colostomy', 'desc': 'Practical ostomy care'},
+    ],
+
+    # Hereditary & Genetic - Lynch syndrome, genetic testing, family history
+    'hereditary': [
+        {'name': 'NCI Genetics (PDQ)', 'url': 'https://www.cancer.gov/types/colorectal/patient/colorectal-genetics-pdq', 'desc': 'Genetics of CRC'},
+        {'name': 'Find Genetic Counselor', 'url': 'https://www.findageneticcounselor.com', 'desc': 'NSGC counselor finder'},
+        {'name': 'Lynch Syndrome Info', 'url': 'https://www.cancer.net/cancer-types/lynch-syndrome', 'desc': 'Lynch syndrome guide'},
+        {'name': 'FORCE', 'url': 'https://www.facingourrisk.org', 'desc': 'Hereditary cancer support'},
+    ],
+
+    # Helplines - phone support, crisis lines
+    'helplines': [
+        {'name': 'American Cancer Society', 'url': 'tel:1-800-227-2345', 'desc': '1-800-227-2345 (24/7)'},
+        {'name': 'CCA Helpline', 'url': 'tel:1-877-422-2030', 'desc': '1-877-422-2030 (M-F 9am-9pm ET)'},
+        {'name': 'NCI Cancer Info', 'url': 'tel:1-800-422-6237', 'desc': '1-800-422-6237 (M-F 9am-9pm ET)'},
+        {'name': 'Cancer Support Helpline', 'url': 'tel:1-888-793-9355', 'desc': '1-888-793-9355 (free, confidential)'},
+    ],
+
+    # Caregiver resources
+    'caregiver': [
+        {'name': 'ACS Caregiver Guide', 'url': 'https://www.cancer.org/cancer/caregivers.html', 'desc': 'Caregiver resource guide'},
+        {'name': 'NCI Caregiver Support', 'url': 'https://www.cancer.gov/about-cancer/coping/caregiver-support', 'desc': 'Support for caregivers'},
+        {'name': 'Caregiver Action Network', 'url': 'https://www.caregiveraction.org', 'desc': 'Caregiver advocacy'},
+    ],
+
+    # Surgery specific
+    'surgery': [
+        {'name': 'ACS Colon Surgery', 'url': 'https://www.cancer.org/cancer/colon-rectal-cancer/treating/surgery.html', 'desc': 'Surgery for colon cancer'},
+        {'name': 'ASCRS Patient Info', 'url': 'https://www.fascrs.org/patients', 'desc': 'Colorectal surgery info'},
+    ],
+
+    # Prevention - risk reduction, lifestyle
+    'prevention': [
+        {'name': 'ACS Prevention', 'url': 'https://www.cancer.org/cancer/colon-rectal-cancer/causes-risks-prevention/prevention.html', 'desc': 'CRC prevention'},
+        {'name': 'NCI Prevention (PDQ)', 'url': 'https://www.cancer.gov/types/colorectal/patient/colorectal-prevention-pdq', 'desc': 'Prevention strategies'},
+        {'name': 'CCA Risk Factors', 'url': 'https://colorectalcancer.org/prevention-screening/risk-factors', 'desc': 'Risk factor info'},
     ],
 }
 
@@ -443,25 +529,43 @@ def get_relevant_resources(query_type: str, include_resources: bool = True, quer
         categories = ['fatigue', 'side_effects_chemo']
     elif 'ostomy' in query_lower or 'colostomy' in query_lower or 'ileostomy' in query_lower or 'stoma' in query_lower:
         categories = ['ostomy', 'support']
-    elif 'screening' in query_lower or 'colonoscopy' in query_lower or 'fit test' in query_lower or 'prevention' in query_lower:
+    elif 'screening' in query_lower or 'colonoscopy' in query_lower or 'fit test' in query_lower:
         categories = ['screening', 'general']
+    elif 'prevention' in query_lower or 'prevent' in query_lower or 'risk factor' in query_lower:
+        categories = ['prevention', 'screening']
     elif 'diet' in query_lower or 'nutrition' in query_lower or 'eating' in query_lower or 'food' in query_lower or 'weight' in query_lower:
         categories = ['nutrition', 'support']
     elif 'trial' in query_lower or 'clinical' in query_lower or 'study' in query_lower:
         categories = ['clinical_trials', 'support']
-    elif 'financial' in query_lower or 'cost' in query_lower or 'insurance' in query_lower or 'afford' in query_lower:
+    elif 'financial' in query_lower or 'cost' in query_lower or 'insurance' in query_lower or 'afford' in query_lower or 'pay' in query_lower:
         categories = ['financial', 'support']
+    elif 'genetic' in query_lower or 'hereditary' in query_lower or 'lynch' in query_lower or 'family history' in query_lower:
+        categories = ['hereditary', 'general']
+    elif 'surgery' in query_lower or 'resection' in query_lower or 'operation' in query_lower:
+        categories = ['surgery', 'treatment']
+    elif 'caregiver' in query_lower or 'family member' in query_lower or 'spouse' in query_lower or 'loved one' in query_lower:
+        categories = ['caregiver', 'emotional']
+    elif 'helpline' in query_lower or 'call' in query_lower or 'phone' in query_lower or 'talk to someone' in query_lower:
+        categories = ['helplines', 'emotional']
+    elif 'support group' in query_lower or 'community' in query_lower or 'others' in query_lower or 'connect' in query_lower:
+        categories = ['support', 'emotional']
+    elif 'biomarker' in query_lower or 'kras' in query_lower or 'msi' in query_lower or 'braf' in query_lower or 'testing' in query_lower:
+        categories = ['diagnosis', 'treatment']
+    elif 'stage' in query_lower or 'staging' in query_lower or 'diagnosis' in query_lower or 'diagnosed' in query_lower:
+        categories = ['diagnosis', 'general']
+    elif any(word in query_lower for word in ['anxious', 'anxiety', 'scared', 'fear', 'worried', 'depressed', 'depression', 'cope', 'coping', 'mental']):
+        categories = ['emotional', 'helplines']
     else:
         # Fall back to query type mapping
         type_mapping = {
-            'emotional': ['emotional', 'support'],
-            'treatment': ['general', 'clinical_trials'],
+            'emotional': ['emotional', 'helplines'],
+            'treatment': ['treatment', 'clinical_trials'],
             'side_effect': ['side_effects_chemo', 'support'],
             'prognosis': ['support', 'general'],
-            'diagnosis': ['general'],
-            'general': ['general'],
+            'diagnosis': ['diagnosis', 'general'],
+            'general': ['general', 'advocacy'],
             'survivorship': ['survivorship', 'support'],
-            'screening': ['screening', 'general']
+            'screening': ['screening', 'prevention']
         }
         categories = type_mapping.get(query_type, ['general'])
 
@@ -469,17 +573,17 @@ def get_relevant_resources(query_type: str, include_resources: bool = True, quer
 
     for cat in categories:
         if cat in PATIENT_RESOURCES:
-            resources.extend(PATIENT_RESOURCES[cat][:1])  # Max 1 per category
+            resources.extend(PATIENT_RESOURCES[cat][:2])  # Max 2 per category
 
     if not resources:
         return ""
 
-    # Limit to 2 resources max to avoid cluttering responses
-    resources = resources[:2]
+    # Limit to 5 resources max to provide more helpful links
+    resources = resources[:5]
 
-    formatted = "\n\n📚 Helpful Resources:\n"
-    for r in resources:
-        formatted += f"• {r['name']}: {r['url']}\n"
+    # Format as pipe-separated for compact display
+    links = [f'<a href="{r["url"]}" target="_blank" rel="noopener noreferrer">{r["name"]}</a>' for r in resources]
+    formatted = "\n\n📚 " + " | ".join(links)
 
     return formatted
 
@@ -534,6 +638,30 @@ STANDARD_CYCLE_GUIDANCE = {
         }
     }
 }
+
+
+# =============================================================================
+# TREATMENT RESPONSE STRUCTURE
+# =============================================================================
+
+TREATMENT_RESPONSE_STRUCTURE = """
+TREATMENT DISCUSSION FORMAT:
+When discussing treatment options for this patient, structure your response as follows:
+
+1. PRIMARY OPTION: Identify the most commonly used/first-line treatment for their specific situation (considering cancer type, stage, and biomarkers). Explain briefly why it's typically preferred.
+
+2. ALTERNATIVES (2-3): List backup treatments that may be considered if:
+   - The primary option isn't well tolerated
+   - The patient doesn't respond to primary treatment
+   - There are specific contraindications based on their profile
+
+For EACH option mentioned, briefly note:
+- How it works (in simple terms)
+- Key side effects to expect
+- Why it might or might not be suitable for THIS patient based on their biomarkers
+
+Remind the patient that treatment selection involves many factors and should be discussed with their oncologist.
+"""
 
 
 def get_cycle_context(regimen: str, line: str, current_cycle: int) -> str:
@@ -764,6 +892,53 @@ def classify_query_type(message: str) -> str:
             return category
 
     return 'general'
+
+
+def should_suggest_clinical_trials(query_type: str, patient_context: Dict[str, Any], message: str) -> bool:
+    """
+    Determine if we should proactively mention clinical trials availability.
+
+    Triggers when:
+    - Query is about treatment AND patient is metastatic (Stage IV)
+    - Query suggests treatment resistance or progression
+    - Patient is asking about next options or alternatives
+
+    Args:
+        query_type: The classified query type ('treatment', 'side_effect', etc.)
+        patient_context: Patient profile data
+        message: The user's question
+
+    Returns:
+        True if clinical trials should be proactively suggested
+    """
+    if query_type != 'treatment':
+        return False
+
+    if not patient_context:
+        return False
+
+    message_lower = message.lower()
+
+    # Check for metastatic/Stage IV disease
+    stage = str(patient_context.get('stage', '')).upper()
+    is_metastatic = 'IV' in stage or '4' in stage or 'METASTATIC' in stage.upper()
+
+    # Check for treatment resistance/progression language
+    resistance_indicators = [
+        'not working', 'stopped working', 'progressed', 'spread',
+        'failed', 'resistant', 'progression', 'growing', 'worse'
+    ]
+    has_resistance_context = any(ind in message_lower for ind in resistance_indicators)
+
+    # Check for "next options" language
+    next_options_indicators = [
+        'next step', 'other option', 'alternative', 'what else',
+        'if this fails', 'after this', 'what\'s next', 'backup',
+        'second line', 'third line', 'more options'
+    ]
+    asking_about_options = any(ind in message_lower for ind in next_options_indicators)
+
+    return is_metastatic or has_resistance_context or asking_about_options
 
 
 def filter_relevant_context(patient_context: Dict[str, Any], query_type: str, message: str) -> str:
@@ -1161,7 +1336,16 @@ Provide interim management tips while they await medical consultation."""
     elif query_type == 'emotional':
         prompt_parts.append("• For emotional concerns: validate feelings, mention oncology social workers and support groups")
     elif query_type == 'treatment':
-        prompt_parts.append("• For treatment questions: explain in plain terms, mention 'discuss options with your oncologist' as supporting context")
+        prompt_parts.append(TREATMENT_RESPONSE_STRUCTURE)
+        prompt_parts.append("• Reference the patient's specific biomarkers when discussing treatment eligibility")
+
+    # Add follow-up question suggestions for non-brief responses
+    if response_length != "brief":
+        prompt_parts.append(FOLLOW_UP_INSTRUCTION)
+
+    # Check if clinical trials should be proactively suggested
+    if should_suggest_clinical_trials(query_type, patient_context, message):
+        prompt_parts.append("• Given the patient's situation, include a brief mention that clinical trials may be worth exploring. Phrase naturally: 'There may also be clinical trials available for your situation - just ask if you'd like me to search for trials near you.'")
 
     prompt_parts.extend([
         "",
@@ -1527,40 +1711,144 @@ def call_llm(prompt: str, response_length: str = "normal", temperature: float = 
     raise RuntimeError(error_msg)
 
 
+def _quick_extract_profile_updates(message: str) -> dict:
+    """
+    Quick regex-based extraction for common profile field updates.
+    This runs before the LLM call for faster response on simple updates.
+    """
+    import re
+    updates = {}
+    msg_lower = message.lower()
+
+    # Zip code patterns
+    zip_patterns = [
+        r"(?:my\s+)?(?:new\s+)?zip\s*(?:code)?\s*(?:is|:)?\s*(\d{5}(?:-\d{4})?)",
+        r"(?:i\s+)?(?:live|moved)\s+(?:in|to)\s+(?:zip\s*(?:code)?\s*)?(\d{5}(?:-\d{4})?)",
+        r"zip\s*(?:code)?[:\s]+(\d{5}(?:-\d{4})?)",
+    ]
+    for pattern in zip_patterns:
+        match = re.search(pattern, msg_lower)
+        if match:
+            if "patient" not in updates:
+                updates["patient"] = {}
+            updates["patient"]["zipCode"] = match.group(1)
+            break
+
+    # Age patterns
+    age_patterns = [
+        r"(?:i\s+am|i'm|my\s+age\s+is)\s+(\d{1,3})\s*(?:years?\s*old)?",
+        r"(?:my\s+)?age[:\s]+(\d{1,3})",
+        r"(\d{1,3})\s*(?:years?\s*old|yo|y\.?o\.?)",
+    ]
+    for pattern in age_patterns:
+        match = re.search(pattern, msg_lower)
+        if match:
+            age = int(match.group(1))
+            if 1 <= age <= 120:  # Reasonable age range
+                if "patient" not in updates:
+                    updates["patient"] = {}
+                updates["patient"]["age"] = str(age)
+                break
+
+    # Weight patterns (lbs)
+    weight_patterns = [
+        r"(?:i\s+)?weigh\s+(\d{2,3})\s*(?:lbs?|pounds?)?",
+        r"(?:my\s+)?weight\s*(?:is|:)?\s*(\d{2,3})\s*(?:lbs?|pounds?)?",
+        r"(\d{2,3})\s*(?:lbs?|pounds?)",
+    ]
+    for pattern in weight_patterns:
+        match = re.search(pattern, msg_lower)
+        if match:
+            weight = int(match.group(1))
+            if 50 <= weight <= 500:  # Reasonable weight range
+                if "patient" not in updates:
+                    updates["patient"] = {}
+                updates["patient"]["weight"] = str(weight)
+                break
+
+    # Stage patterns
+    stage_patterns = [
+        r"(?:i\s+am|i'm|i\s+have|diagnosed\s+with)\s+stage\s+(i{1,3}v?|[1-4])",
+        r"(?:my\s+)?(?:cancer\s+)?stage\s*(?:is|:)?\s*(i{1,3}v?|[1-4])",
+    ]
+    for pattern in stage_patterns:
+        match = re.search(pattern, msg_lower)
+        if match:
+            stage_raw = match.group(1).upper()
+            stage_map = {"1": "Stage I", "2": "Stage II", "3": "Stage III", "4": "Stage IV",
+                         "I": "Stage I", "II": "Stage II", "III": "Stage III", "IV": "Stage IV"}
+            if stage_raw in stage_map:
+                if "primaryDiagnosis" not in updates:
+                    updates["primaryDiagnosis"] = {}
+                updates["primaryDiagnosis"]["stage"] = stage_map[stage_raw]
+                break
+
+    # Name patterns
+    name_patterns = [
+        r"(?:my\s+name\s+is|i'm|call\s+me)\s+([A-Z][a-z]+)",
+    ]
+    for pattern in name_patterns:
+        match = re.search(pattern, message)  # Case-sensitive for names
+        if match:
+            if "patient" not in updates:
+                updates["patient"] = {}
+            updates["patient"]["firstName"] = match.group(1)
+            break
+
+    return updates
+
+
 def extract_profile_updates_from_query(message: str, current_profile: dict) -> dict:
     """
     Scan user query for profile-relevant updates using LLM.
-    
+
     Returns: Dict of updates found.
     """
+    # First, try quick regex-based extraction for common simple updates
+    quick_updates = _quick_extract_profile_updates(message)
+    if quick_updates:
+        logger.info(f"Quick extraction found updates: {quick_updates}")
+        return quick_updates
+
     client = get_together_client() or get_groq_client()
     if not client:
         logger.warning("No LLM client available for profile extraction")
         return {}
 
     system_prompt = """
-    You are a medical data extraction assistant. Analyze the user's message and identify any NEW or UPDATED information 
+    You are a medical data extraction assistant. Analyze the user's message and identify any NEW or UPDATED information
     relevant to their patient profile. Use the CURRENT profile as context to only extract CHANGED or NEW information.
-    
+
+    IMPORTANT: Look for ANY mention of personal or medical information updates, including:
+    - "my zip code is...", "I live in...", "my new address..."
+    - "I am X years old", "my age is...", "I'm..."
+    - "my name is...", "call me..."
+    - "I weigh...", "my weight is..."
+    - "I'm X feet X inches", "my height is..."
+    - "I started...", "I'm now on...", "my new treatment is..."
+    - "I have...", "I was diagnosed with..."
+    - "my biomarker is...", "my KRAS is...", "I'm MSI-high"
+    - "I'm experiencing...", "I have side effects like..."
+
     Extract fields like:
     - Age (or date of birth)
     - Symptoms (toxicities)
     - Treatments (regimens, cycle numbers, status)
-    - Biomarkers
+    - Biomarkers (KRAS, NRAS, BRAF, MSI, MMR, HER2, etc.)
     - Comorbidities
     - Basic info (name, zip code, race/ethnicity, height, weight)
 
     CURRENT PROFILE:
     {current_profile_json}
 
-    Return ONLY a JSON object with the updates. If no updates are found, return {}.
+    Return ONLY a JSON object with the updates. If no updates are found, return {{}}.
     The JSON structure should follow the patient profile format:
-    {
-      "patient": { "age": ..., "firstName": ..., "zipCode": ..., ... },
-      "primaryDiagnosis": { "biomarkers": { ... }, ... },
-      "treatments": [ ... ],
+    {{
+      "patient": {{ "age": ..., "firstName": ..., "zipCode": ..., "weight": ..., "heightFt": ..., "heightIn": ... }},
+      "primaryDiagnosis": {{ "biomarkers": {{ ... }}, "stage": ..., "histology": ... }},
+      "treatments": [ {{ "category": ..., "regimen": ..., "status": ... }} ],
       "symptoms": [ ... ]
-    }
+    }}
     Include ONLY the fields that have changed.
     """
     

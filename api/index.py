@@ -19,7 +19,9 @@ from auth_helpers import register_user, login_user, logout_user, get_current_use
 from supabase_storage import (
     save_profile, load_profile, clear_profile,
     load_all_chunks, get_conversation_history, add_conversation,
-    get_document_metadata, update_profile_with_sources
+    get_document_metadata, update_profile_with_sources,
+    check_acknowledgement, save_acknowledgement,
+    save_chat_message, load_chat_history, clear_chat_history
 )
 from profile_utils import (
     extract_patient_context_complex, format_patient_summary_complex,
@@ -30,7 +32,10 @@ from llm_utils import (
     assemble_prompt, call_llm, classify_query_type,
     trim_incomplete_sentence, validate_response, enhanced_medical_validation,
     format_conversation_context, get_llm_status, sanitize_query,
-    extract_profile_updates_from_query
+    extract_profile_updates_from_query, get_relevant_resources
+)
+from clinical_trials import (
+    search_trials_for_patient, format_trials_for_chat, is_clinical_trial_query
 )
 
 # -------------------------
@@ -213,7 +218,9 @@ def api_upload_profile():
             profile = json.loads(content.decode('utf-8'))
 
         # Save to Supabase
-        save_profile(user_id, profile)
+        if not save_profile(user_id, profile):
+            logger.error(f"Failed to save profile to database for user {user_id}")
+            return jsonify({"error": "Failed to save profile to database. Please check server logs."}), 500
 
         # Set in memory for this request
         set_profile(profile)
@@ -275,6 +282,98 @@ def api_clear_profile():
         return jsonify({"error": str(e)}), 500
 
 # -------------------------
+# Acknowledgement Routes
+# -------------------------
+@app.route("/api/check_acknowledgement", methods=["GET"])
+@require_auth
+def api_check_acknowledgement():
+    """Check if user has acknowledged the disclaimer."""
+    try:
+        user_id = request.user["user_id"]
+        acknowledged = check_acknowledgement(user_id)
+        return jsonify({"acknowledged": acknowledged})
+    except Exception as e:
+        logger.exception("check_acknowledgement error")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/save_acknowledgement", methods=["POST"])
+@require_auth
+def api_save_acknowledgement():
+    """Save user acknowledgement of the disclaimer."""
+    try:
+        user_id = request.user["user_id"]
+        success = save_acknowledgement(user_id)
+        if success:
+            return jsonify({"status": "ok", "message": "Acknowledgement saved"})
+        else:
+            return jsonify({"error": "Failed to save acknowledgement"}), 500
+    except Exception as e:
+        logger.exception("save_acknowledgement error")
+        return jsonify({"error": str(e)}), 500
+
+
+# -------------------------
+# Chat History Routes
+# -------------------------
+@app.route("/api/chat_history", methods=["GET"])
+@require_auth
+def api_get_chat_history():
+    """Load chat history for the authenticated user."""
+    try:
+        user_id = request.user["user_id"]
+        limit = request.args.get("limit", 50, type=int)
+        messages = load_chat_history(user_id, limit)
+        return jsonify({"messages": messages})
+    except Exception as e:
+        logger.exception("get_chat_history error")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/save_message", methods=["POST"])
+@require_auth
+def api_save_message():
+    """Save a chat message for the authenticated user."""
+    try:
+        user_id = request.user["user_id"]
+        data = request.get_json() or {}
+        role = data.get("role")
+        content = data.get("content")
+        metadata = data.get("metadata")  # Optional metadata (e.g., clinical_trials)
+
+        if not role or not content:
+            return jsonify({"error": "role and content are required"}), 400
+
+        if role not in ["user", "assistant"]:
+            return jsonify({"error": "role must be 'user' or 'assistant'"}), 400
+
+        success = save_chat_message(user_id, role, content, metadata)
+        if success:
+            return jsonify({"status": "ok"})
+        else:
+            return jsonify({"error": "Failed to save message"}), 500
+    except Exception as e:
+        logger.exception("save_message error")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/clear_chat", methods=["DELETE"])
+@require_auth
+def api_clear_chat():
+    """Clear all chat history for the authenticated user."""
+    try:
+        user_id = request.user["user_id"]
+        success = clear_chat_history(user_id)
+        if success:
+            return jsonify({"status": "ok", "message": "Chat history cleared"})
+        else:
+            return jsonify({"error": "Failed to clear chat history"}), 500
+    except Exception as e:
+        logger.exception("clear_chat error")
+        return jsonify({"error": str(e)}), 500
+
+
+# -------------------------
 # Chat Route
 # -------------------------
 @app.route("/api/chat", methods=["POST"])
@@ -305,7 +404,9 @@ def api_chat():
         original_message = message
         message, pii_warnings = sanitize_query(message)
         if pii_warnings:
-            logger.warning(f"PII detected and sanitized: {pii_warnings}")
+            # Log PII types detected but NOT the actual values (for privacy)
+            pii_types = [w.split(':')[0].strip() if ':' in w else w for w in pii_warnings]
+            logger.warning(f"PII detected and sanitized: {len(pii_warnings)} item(s) - types: {pii_types}")
 
         logger.info(f"Chat request (session: {session_id}): {message[:50]}...")
 
@@ -383,11 +484,43 @@ def api_chat():
 
             final_answer = validation['enhanced_response']
 
-            # Store conversation in Supabase
+            # Add relevant patient resources (unless brief response)
+            if response_length != "brief":
+                resources_text = get_relevant_resources(query_type, include_resources=True, query=message)
+                if resources_text:
+                    final_answer = final_answer + resources_text
+
+            # --- Feature: Clinical Trials Search ---
+            # Return trials data separately for frontend rendering (not as markdown in answer)
+            clinical_trials_data = None
+            if is_clinical_trial_query(message) and patient_context:
+                try:
+                    logger.info(f"Clinical trial query detected for user {user_id}")
+                    trials_result = search_trials_for_patient(patient_context, max_results=5)
+                    if not trials_result.get("error"):
+                        # Return full trials data for frontend rendering
+                        clinical_trials_data = {
+                            "found": len(trials_result.get("trials", [])),
+                            "total": trials_result.get("total_found", 0),
+                            "trials": trials_result.get("trials", []),
+                            "search_criteria": trials_result.get("search_criteria", {})
+                        }
+                        logger.info(f"Found {clinical_trials_data['found']} clinical trials for user")
+                    elif trials_result.get("error") == "no_zip_code":
+                        # Return error state so frontend can show appropriate message
+                        clinical_trials_data = {
+                            "error": "no_zip_code",
+                            "message": "To search for clinical trials near you, please add your zip code to your profile."
+                        }
+                except Exception as e:
+                    logger.error(f"Error searching clinical trials: {e}", exc_info=True)
+
+            # Store conversation in Supabase (store original answer without resources for cleaner history)
             add_conversation(session_id, user_id, message, answer)
 
             # --- Feature 1: Scan for profile updates ---
             profile_updates = {}
+            update_success = False
             try:
                 profile_updates = extract_profile_updates_from_query(original_message, patient_profile or {})
                 if profile_updates:
@@ -397,12 +530,18 @@ def api_chat():
                         "session_id": session_id,
                         "timestamp": datetime.now().isoformat()
                     }
-                    update_profile_with_sources(user_id, profile_updates, source_info)
+                    update_success = update_profile_with_sources(user_id, profile_updates, source_info)
+                    if update_success:
+                        logger.info(f"Successfully updated profile for user {user_id}")
+                    else:
+                        logger.error(f"Failed to save profile updates for user {user_id}")
             except Exception as e:
                 logger.error(f"Error in profile update scanning: {e}", exc_info=True)
 
             # Extract sources for the frontend button
             sources_metadata = []
+            guidelines_used = []
+            guideline_keywords = ['NCCN', 'guideline', 'ACS', 'ASCO', 'CDC', 'NCI', 'recommendation']
             try:
                 seen_sources = set()
                 for chunk in retrieved:
@@ -416,7 +555,12 @@ def api_chat():
                                 "type": "document"
                             })
                             seen_sources.add(fname)
-                
+
+                            # Check if this is a medical guideline source
+                            fname_lower = fname.lower()
+                            if any(kw.lower() in fname_lower for kw in guideline_keywords):
+                                guidelines_used.append(fname)
+
                 # Prioritize the specific guide user mentioned
                 for s in sources_metadata:
                     if "Comprehensive_Colon_Cancer_Guide" in s["title"]:
@@ -424,28 +568,43 @@ def api_chat():
             except Exception as e:
                 logger.error(f"Error extracting source metadata: {e}", exc_info=True)
 
-            return jsonify({
+            # Build response
+            response_data = {
                 "answer": final_answer,
                 "api_used": api_used,
                 "retrieved_count": len(retrieved),
                 "response_length": response_length,
                 "patient_context_used": bool(patient_context),
                 "mismatch_detected": mismatch_detected,
-                "pi_filtered": len(pii_warnings) > 0,
+                "pii_filtered": len(pii_warnings) > 0,
                 "validation_warnings": all_warnings,
                 "medical_safety_check": medical_validation['safe'],
                 "conversation_length": len(history) + 1,
                 "has_profile_updates": bool(profile_updates),
+                "profile_updates_saved": update_success if profile_updates else None,
                 "sources": sources_metadata,
+                "guidelines_used": guidelines_used,
+                "has_guidelines": len(guidelines_used) > 0,
+                "clinical_trials": clinical_trials_data,
                 "debug_info": {
                     "api_used": api_used,
                     "retrieved_count": len(retrieved),
                     "has_patient_profile": bool(patient_profile),
                     "query_type": query_type,
                     "session_id": session_id,
-                    "pii_warnings": pii_warnings if pii_warnings else None
                 }
-            })
+            }
+
+            # If profile was updated successfully, include the updated context
+            if profile_updates and update_success:
+                # Reload the updated profile to get fresh context
+                updated_profile = load_profile(user_id)
+                if updated_profile:
+                    updated_context = extract_patient_context_complex(updated_profile)
+                    response_data["updated_profile_context"] = updated_context
+                    response_data["profile_update_fields"] = list(profile_updates.keys())
+
+            return jsonify(response_data)
 
         except Exception as e:
             logger.exception(f"LLM API generation failed: {e}")
@@ -479,6 +638,60 @@ def api_data_sources():
 
 
 # -------------------------
+# Clinical Trials Route
+# -------------------------
+@app.route("/api/clinical_trials", methods=["GET"])
+@require_auth
+def api_clinical_trials():
+    """Search ClinicalTrials.gov for trials matching patient profile."""
+    try:
+        user_id = request.user["user_id"]
+        max_results = request.args.get("limit", 5, type=int)
+
+        # Load patient profile from Supabase
+        profile = load_profile(user_id)
+        if not profile:
+            return jsonify({
+                "error": "No patient profile found. Please build your profile first.",
+                "trials": []
+            }), 400
+
+        # Extract patient context
+        patient_context = extract_patient_context_complex(profile)
+
+        # Check for zip code
+        if not patient_context.get("zip_code") or patient_context.get("zip_code") == "unspecified":
+            return jsonify({
+                "error": "Please add your zip code to your profile for location-based trial search.",
+                "trials": []
+            }), 400
+
+        # Search for clinical trials
+        results = search_trials_for_patient(patient_context, max_results=max_results)
+
+        if results.get("error"):
+            return jsonify({
+                "status": "error",
+                "error": results.get("error_message", "Error searching for trials"),
+                "trials": []
+            }), 200  # Still 200 since it's a valid response
+
+        return jsonify({
+            "status": "ok",
+            "trials": results["trials"],
+            "total_found": results["total_found"],
+            "search_criteria": {
+                "condition": results["search_criteria"].get("query.cond"),
+                "location": patient_context.get("zip_code"),
+                "biomarkers": patient_context.get("biomarkers"),
+                "intervention": results["search_criteria"].get("query.intr")
+            }
+        })
+
+    except Exception as e:
+        logger.exception("clinical_trials error")
+        return jsonify({"error": str(e), "trials": []}), 500
+
 
 # -------------------------
 # Debug Route

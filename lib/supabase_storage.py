@@ -56,7 +56,8 @@ def save_profile(user_id: str, profile_data: dict) -> bool:
         logger.info(f"Saved patient profile for user {user_id}")
         return True
     except Exception as e:
-        logger.error(f"Failed to save profile: {e}")
+        logger.error(f"Failed to save profile for user {user_id}: {e}")
+        logger.exception("Full traceback:")
         return False
 
 
@@ -128,23 +129,26 @@ def merge_profile_updates(target: dict, updates: dict) -> dict:
 def update_profile_with_sources(user_id: str, updates: dict, source_info: dict) -> bool:
     """
     Update patient profile with new data and track sources.
-    
+
     source_info should look like: {"source_type": "chat", "session_id": "...", "timestamp": "..."}
     """
     if not updates:
+        logger.debug(f"No updates to apply for user {user_id}")
         return True
 
     try:
+        logger.info(f"Applying profile updates for user {user_id}: {list(updates.keys())}")
         current_profile = load_profile(user_id)
-        
+        logger.debug(f"Current profile has {len(current_profile)} keys")
+
         # Merge updates into current profile
         updated_profile = merge_profile_updates(current_profile, updates)
-        
+
         # Handle field-specific sources
         # We'll store sources in a special '_sources' field within the profile
         if '_sources' not in updated_profile:
             updated_profile['_sources'] = {}
-        
+
         def track_sources(data, path=""):
             for key, value in data.items():
                 current_path = f"{path}.{key}" if path else key
@@ -154,11 +158,17 @@ def update_profile_with_sources(user_id: str, updates: dict, source_info: dict) 
                     updated_profile['_sources'][current_path] = source_info
 
         track_sources(updates)
-        
+
         # Save the updated profile back
-        return save_profile(user_id, updated_profile)
+        result = save_profile(user_id, updated_profile)
+        if result:
+            logger.info(f"Profile update saved successfully for user {user_id}")
+        else:
+            logger.error(f"save_profile returned False for user {user_id} - check database schema")
+        return result
     except Exception as e:
-        logger.error(f"Failed to update profile with sources: {e}")
+        logger.error(f"Failed to update profile with sources for user {user_id}: {e}")
+        logger.exception("Full traceback:")
         return False
 
 
@@ -539,4 +549,150 @@ def clear_conversation_history(session_id: str, user_id: str) -> bool:
         return True
     except Exception as e:
         logger.error(f"Failed to clear conversation history: {e}")
+        return False
+
+
+# -------------------------
+# User Acknowledgement Operations
+# -------------------------
+
+def check_acknowledgement(user_id: str) -> bool:
+    """
+    Check if a user has acknowledged the disclaimer.
+
+    Args:
+        user_id: The user's UUID
+
+    Returns:
+        True if acknowledged, False otherwise
+    """
+    try:
+        client = get_admin_client()
+        result = client.table('user_acknowledgements') \
+            .select('id') \
+            .eq('user_id', user_id) \
+            .limit(1) \
+            .execute()
+
+        return bool(result.data)
+    except Exception as e:
+        logger.error(f"Failed to check acknowledgement for user {user_id}: {e}")
+        return False
+
+
+def save_acknowledgement(user_id: str) -> bool:
+    """
+    Save a user's acknowledgement of the disclaimer.
+
+    Args:
+        user_id: The user's UUID
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        client = get_admin_client()
+        client.table('user_acknowledgements').upsert({
+            'user_id': user_id,
+            'acknowledged_at': datetime.now().isoformat(),
+            'acknowledgement_version': '1.0'
+        }, on_conflict='user_id').execute()
+
+        logger.info(f"Saved acknowledgement for user {user_id}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to save acknowledgement for user {user_id}: {e}")
+        return False
+
+
+# -------------------------
+# Chat Message Persistence
+# -------------------------
+
+def save_chat_message(user_id: str, role: str, content: str, metadata: dict = None) -> bool:
+    """
+    Save a chat message for a user.
+
+    Args:
+        user_id: The user's UUID
+        role: 'user' or 'assistant'
+        content: The message content
+        metadata: Optional metadata (e.g., clinical_trials data)
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        client = get_admin_client()
+        data = {
+            'user_id': user_id,
+            'role': role,
+            'content': content
+        }
+        # Add metadata if provided (requires metadata JSONB column in chat_messages table)
+        if metadata:
+            data['metadata'] = metadata
+
+        client.table('chat_messages').insert(data).execute()
+
+        logger.debug(f"Saved {role} message for user {user_id}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to save chat message for user {user_id}: {e}")
+        return False
+
+
+def load_chat_history(user_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+    """
+    Load chat history for a user.
+
+    Args:
+        user_id: The user's UUID
+        limit: Maximum number of messages to return
+
+    Returns:
+        List of message dicts with role, content, created_at, metadata (oldest first)
+    """
+    try:
+        client = get_admin_client()
+        result = client.table('chat_messages') \
+            .select('role, content, created_at, metadata') \
+            .eq('user_id', user_id) \
+            .order('created_at', desc=True) \
+            .limit(limit) \
+            .execute()
+
+        if not result.data:
+            return []
+
+        # Reverse to chronological order (oldest first)
+        messages = list(reversed(result.data))
+        logger.info(f"Loaded {len(messages)} chat messages for user {user_id}")
+        return messages
+    except Exception as e:
+        logger.error(f"Failed to load chat history for user {user_id}: {e}")
+        return []
+
+
+def clear_chat_history(user_id: str) -> bool:
+    """
+    Clear all chat history for a user.
+
+    Args:
+        user_id: The user's UUID
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        client = get_admin_client()
+        client.table('chat_messages') \
+            .delete() \
+            .eq('user_id', user_id) \
+            .execute()
+
+        logger.info(f"Cleared chat history for user {user_id}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to clear chat history for user {user_id}: {e}")
         return False

@@ -905,8 +905,10 @@ For emotional support:
 
 TONE_SENSITIVITY_LEVELS = {
     'high': ['terminal', 'hospice', 'palliative', 'end of life', 'stage iv', 'stage 4',
-             'metastatic', 'prognosis', 'how long', 'dying', 'death', 'cure', 'spread',
-             'no more options', 'nothing left', 'give up', 'worst case'],
+             'metastatic', 'prognosis', 'how long', 'dying', 'death', 'going to die',
+             'will i die', 'am i dying', 'kill me', 'cure', 'spread',
+             'no more options', 'nothing left', 'give up', 'worst case',
+             'fatal', 'survive', 'survival rate', 'life expectancy'],
     'medium': ['scared', 'anxious', 'worried', 'overwhelmed', 'stressed', 'depressed',
                'hopeless', "can't cope", 'giving up', 'losing hope', 'family', 'afraid',
                'what if', 'recurrence', 'come back'],
@@ -1206,15 +1208,19 @@ def classify_query_type(message: str) -> str:
 
     # Caregiver queries (Item 10)
     caregiver_keywords = [
-        'caregiver', 'caring for', 'my husband', 'my wife', 'my mother', 'my father',
-        'my partner', 'my spouse', 'family member', 'loved one', 'taking care of'
+        'caregiver', 'caring for', 'taking care of', 'family member', 'loved one',
+        'my husband', 'my wife', 'my mother', 'my father',
+        'my partner', 'my spouse', 'help my husband', 'help my wife',
+        'support my', 'helping my'
     ]
 
     # Screening ambassador queries (Item 9)
     family_screening_keywords = [
         'my family', 'my children', 'my kids', 'my sister', 'my brother',
-        'should they get tested', 'genetic risk', 'family screening',
-        'screening for my', 'colonoscopy for'
+        'should they get tested', 'should they get screened', 'genetic risk',
+        'family screening', 'screening for my', 'colonoscopy for',
+        'should my family', 'family get screened', 'family get tested',
+        'hereditary risk', 'risk for my'
     ]
 
     # Emotional/wellness queries (Items 8, 11)
@@ -1223,17 +1229,34 @@ def classify_query_type(message: str) -> str:
         'emotional', 'mindfulness', 'meditation', 'wellness', 'yoga', 'exercise'
     ]
 
+    # Weighted scoring: multi-word phrases get bonus to beat single-word overlaps
+    def _weighted_score(keywords, text):
+        score = 0
+        for kw in keywords:
+            if kw in text:
+                score += 2 if ' ' in kw else 1  # multi-word phrases count double
+        return score
+
     scores = {
-        'clinical_trial': sum(1 for kw in clinical_trial_keywords if kw in message_lower),
-        'treatment': sum(1 for kw in treatment_keywords if kw in message_lower),
-        'side_effect': sum(1 for kw in side_effect_keywords if kw in message_lower),
-        'prognosis': sum(1 for kw in prognosis_keywords if kw in message_lower),
-        'diagnosis': sum(1 for kw in diagnosis_keywords if kw in message_lower),
-        'profile': sum(1 for kw in profile_keywords if kw in message_lower),
-        'caregiver': sum(1 for kw in caregiver_keywords if kw in message_lower),
-        'screening_ambassador': sum(1 for kw in family_screening_keywords if kw in message_lower),
-        'emotional': sum(1 for kw in emotional_keywords_classify if kw in message_lower),
+        'clinical_trial': _weighted_score(clinical_trial_keywords, message_lower),
+        'treatment': _weighted_score(treatment_keywords, message_lower),
+        'side_effect': _weighted_score(side_effect_keywords, message_lower),
+        'prognosis': _weighted_score(prognosis_keywords, message_lower),
+        'diagnosis': _weighted_score(diagnosis_keywords, message_lower),
+        'profile': _weighted_score(profile_keywords, message_lower),
+        'caregiver': _weighted_score(caregiver_keywords, message_lower),
+        'screening_ambassador': _weighted_score(family_screening_keywords, message_lower),
+        'emotional': _weighted_score(emotional_keywords_classify, message_lower),
     }
+
+    # Boost: "side effect" phrase or specific symptoms strongly indicate side_effect category
+    if 'side effect' in message_lower or 'side effects' in message_lower:
+        scores['side_effect'] += 3
+    # Symptom words strongly indicate side_effect even when treatment drugs mentioned
+    symptom_words = ['nausea', 'diarrhea', 'vomiting', 'fatigue', 'neuropathy', 'pain', 'rash', 'fever',
+                     'numbness', 'tingling', 'mouth sores', 'hair loss', 'constipation']
+    if any(sw in message_lower for sw in symptom_words):
+        scores['side_effect'] += 3
 
     max_score = max(scores.values())
     if max_score == 0:

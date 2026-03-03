@@ -206,6 +206,182 @@ BIOMARKER_IMPLICATIONS = {
 }
 
 
+# =============================================================================
+# COMORBIDITY CLINICAL INTERACTIONS (Item 1 - Clinical Feedback)
+# =============================================================================
+
+COMORBIDITY_INTERACTIONS = {
+    'Type 2 diabetes': {
+        'treatment_interactions': [
+            'Corticosteroids (dexamethasone, often given with chemo as anti-nausea) can significantly raise blood sugar. Monitor glucose closely on chemo days and for 2-3 days after.',
+            'Neuropathy from oxaliplatin can be harder to distinguish from diabetic neuropathy — report any new numbness or tingling promptly.',
+            'Dehydration from diarrhea or vomiting can cause blood sugar fluctuations and kidney strain. Stay well hydrated and contact your care team if unable to keep fluids down.'
+        ],
+        'monitoring_note': 'Discuss blood sugar monitoring schedule with your oncologist and endocrinologist during chemotherapy.'
+    },
+    'Hypertension': {
+        'treatment_interactions': [
+            'Bevacizumab (Avastin) and other anti-VEGF drugs commonly cause or worsen high blood pressure — blood pressure monitoring is essential during treatment.',
+            '5-FU and capecitabine carry a small risk of coronary vasospasm. Report any chest tightness immediately.',
+            'Some anti-nausea medications can affect cardiac rhythm at high doses — your care team monitors this.'
+        ],
+        'monitoring_note': 'Monitor blood pressure at home and report readings above your established threshold to your oncology team.'
+    },
+    'Heart disease': {
+        'treatment_interactions': [
+            '5-Fluorouracil (5-FU) and capecitabine carry a risk of cardiotoxicity — chest pain, palpitations, or shortness of breath during or after infusion should be reported immediately.',
+            'Bevacizumab is typically used cautiously or avoided in patients with recent cardiac events.',
+            'Your oncologist should coordinate with your cardiologist before starting or changing chemotherapy regimens.'
+        ],
+        'monitoring_note': 'Ensure your oncologist has your full cardiac history. A cardio-oncology consultation may be valuable.'
+    },
+    'Kidney disease': {
+        'treatment_interactions': [
+            'Many chemotherapy drugs are renally cleared — kidney function (creatinine, GFR) is monitored regularly and doses adjusted accordingly.',
+            'Oxaliplatin and other nephrotoxic agents require dose modifications when kidney function is reduced.',
+            'Staying well hydrated helps protect kidneys during treatment, but discuss fluid restriction needs with your nephrologist.'
+        ],
+        'monitoring_note': 'Kidney function labs are typically checked before each cycle. Your oncologist adjusts doses based on these results.'
+    },
+    'Liver disease': {
+        'treatment_interactions': [
+            'Many chemotherapy drugs are metabolized by the liver — liver function tests (LFTs) are checked regularly.',
+            'Dose reductions may be needed for drugs like irinotecan if liver function is compromised.',
+            'Liver metastases (if present) can also affect drug metabolism differently than underlying liver disease.'
+        ],
+        'monitoring_note': 'Liver function is monitored before each cycle. Dose modifications are common and expected.'
+    },
+    'COPD/Lung disease': {
+        'treatment_interactions': [
+            'Fatigue from chemotherapy combined with COPD-related breathlessness can compound. Pulmonary rehab strategies can help.',
+            'Some targeted therapies have pulmonary side effects — report any new or worsening shortness of breath.'
+        ],
+        'monitoring_note': 'Ensure your pulmonologist is aware of your chemotherapy regimen.'
+    },
+    'Obesity': {
+        'treatment_interactions': [
+            'Chemotherapy dosing is calculated on actual body weight or adjusted ideal body weight — your oncology team uses established dosing guidelines.',
+            'Obesity increases risk of lymphedema and wound complications after surgery.',
+            'Weight management and activity are important during and after treatment — an oncology dietitian can help.'
+        ],
+        'monitoring_note': 'Discuss weight-related treatment considerations with your oncologist.'
+    },
+    'Arthritis': {
+        'treatment_interactions': [
+            'Joint pain can be worsened by some targeted therapies.',
+            'NSAIDs (ibuprofen) for arthritis pain may interact with some chemo drugs or increase bleeding risk — always check with your oncologist before taking OTC pain medications.',
+            'Corticosteroids used in chemo regimens may temporarily relieve arthritis symptoms but can cause flares when tapered.'
+        ],
+        'monitoring_note': 'Keep your oncologist and rheumatologist informed of any changes in joint symptoms during treatment.'
+    }
+}
+
+
+# =============================================================================
+# TREATMENT LINE AUTO-DETECTION RULES (Item 2 - Clinical Feedback)
+# =============================================================================
+
+TREATMENT_LINE_RULES = {
+    # Third-line+ (highest confidence — these are virtually always 3L+)
+    'REGORAFENIB': {'line': '3L+', 'display': 'Third-line or later', 'confidence': 'high',
+                     'note': 'Regorafenib is approved for third-line or later CRC.'},
+    'TAS-102': {'line': '3L+', 'display': 'Third-line or later', 'confidence': 'high',
+                 'note': 'TAS-102 (trifluridine/tipiracil) is approved for third-line or later CRC.'},
+    'LONSURF': {'line': '3L+', 'display': 'Third-line or later', 'confidence': 'high',
+                 'note': 'Lonsurf is approved for third-line or later CRC.'},
+    'FRUQUINTINIB': {'line': '3L+', 'display': 'Third-line or later', 'confidence': 'high',
+                      'note': 'Fruquintinib is approved for third-line or later CRC.'},
+    # Second-line specific agents
+    'AFLIBERCEPT': {'line': '2L', 'display': 'Second-line', 'confidence': 'high',
+                     'note': 'Aflibercept is used in second-line CRC (with FOLFIRI).'},
+    'RAMUCIRUMAB': {'line': '2L', 'display': 'Second-line', 'confidence': 'high',
+                     'note': 'Ramucirumab is used in second-line CRC (with FOLFIRI).'},
+    # First-line intensive
+    'FOLFOXIRI': {'line': '1L', 'display': 'First-line (intensive)', 'confidence': 'high',
+                   'note': 'FOLFOXIRI is an intensive first-line regimen typically for fit patients.'},
+    # Standard backbone regimens (can span lines)
+    'FOLFOX': {'line': '1L_or_adj', 'display': 'First-line or adjuvant', 'confidence': 'medium',
+                'note': 'FOLFOX is used in both adjuvant (post-surgery) and first-line metastatic settings.'},
+    'CAPOX': {'line': '1L_or_adj', 'display': 'First-line or adjuvant', 'confidence': 'medium',
+               'note': 'CAPOX (XELOX) is used in both adjuvant and first-line metastatic settings.'},
+    'FOLFIRI': {'line': '1L_or_2L', 'display': 'First or second-line', 'confidence': 'medium',
+                'note': 'FOLFIRI is used in both first-line and second-line settings.'},
+    # Immunotherapy
+    'PEMBROLIZUMAB': {'line': '1L_msi_h', 'display': 'First-line (MSI-H only)', 'confidence': 'high',
+                       'note': 'Pembrolizumab is first-line for MSI-H/dMMR metastatic CRC.'},
+    'NIVOLUMAB': {'line': '2L+_msi_h', 'display': 'Second-line or later (MSI-H)', 'confidence': 'high',
+                   'note': 'Nivolumab is approved for MSI-H/dMMR CRC after prior therapy.'},
+    # Targeted therapy
+    'ENCORAFENIB': {'line': '2L+_braf', 'display': 'Second-line or later (BRAF V600E)', 'confidence': 'high',
+                     'note': 'Encorafenib + cetuximab is for BRAF V600E-mutant CRC after first-line.'},
+}
+
+
+def auto_detect_treatment_line(regimen: str, biomarkers: dict = None) -> dict:
+    """
+    Attempt to auto-detect treatment line from regimen name.
+
+    Args:
+        regimen: The regimen string (e.g., 'FOLFOX + Bevacizumab')
+        biomarkers: Optional biomarker dict for MSI/BRAF-aware detection
+
+    Returns:
+        Dict with 'detected', 'line', 'display', 'confidence', 'note'
+        or {'detected': False} if no match
+    """
+    if not regimen:
+        return {'detected': False}
+
+    regimen_upper = regimen.upper()
+
+    for drug_key, rule in TREATMENT_LINE_RULES.items():
+        if drug_key in regimen_upper:
+            result = {'detected': True, **rule, 'drug_matched': drug_key}
+
+            # Refine MSI-H specific rules
+            if '_msi_h' in rule['line'] and biomarkers:
+                msi_val = str(biomarkers.get('MSI', '')).lower()
+                if not any(kw in msi_val for kw in ['msi-h', 'msi-high', 'unstable', 'msih']):
+                    result['note'] += ' NOTE: This agent is typically only first-line for MSI-H tumors. Verify biomarker status.'
+                    result['confidence'] = 'low'
+
+            return result
+
+    return {'detected': False}
+
+
+def get_comorbidity_interactions(comorbidities: list, query_type: str = None) -> list:
+    """
+    Get relevant comorbidity-treatment interaction notes.
+
+    Args:
+        comorbidities: List of comorbidity strings from patient profile
+        query_type: Current query type to filter relevance
+
+    Returns:
+        List of interaction strings
+    """
+    if not comorbidities or not isinstance(comorbidities, list):
+        return []
+
+    # Only inject comorbidity context for relevant query types
+    relevant_query_types = ['treatment', 'side_effect', 'prognosis', None]
+    if query_type not in relevant_query_types:
+        return []
+
+    interactions = []
+    for comorbidity in comorbidities[:3]:  # Cap at 3 comorbidities to control token budget
+        comorbidity_str = str(comorbidity).strip()
+        if comorbidity_str in COMORBIDITY_INTERACTIONS:
+            entry = COMORBIDITY_INTERACTIONS[comorbidity_str]
+            for note in entry['treatment_interactions'][:2]:  # Max 2 notes per comorbidity
+                interactions.append(f"[{comorbidity_str}] {note}")
+            if entry.get('monitoring_note'):
+                interactions.append(f"[{comorbidity_str} monitoring] {entry['monitoring_note']}")
+
+    return interactions
+
+
 def get_biomarker_implications(biomarkers: Dict) -> List[str]:
     """
     Extract clinical implications from biomarker status.
@@ -285,7 +461,7 @@ def format_biomarker_context(biomarkers: Dict, query_type: str = None) -> str:
         implications = get_biomarker_implications(biomarkers)
         if implications:
             # Limit to top 2 most relevant implications
-            impl_text = " | ".join(implications[:2])
+            impl_text = " | ".join(implications)
             return f"Biomarkers: {summary}\nImplications: {impl_text}"
 
     return f"Biomarkers: {summary}"

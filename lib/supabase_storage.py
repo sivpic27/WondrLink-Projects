@@ -696,3 +696,61 @@ def clear_chat_history(user_id: str) -> bool:
     except Exception as e:
         logger.error(f"Failed to clear chat history for user {user_id}: {e}")
         return False
+
+
+# =============================================================================
+# SCREENING SCORES (Items 3, 4, 5 - PHQ-9/GAD-7/PSS-10/ISI)
+# =============================================================================
+
+def save_screening_score(user_id: str, instrument: str, scores: dict,
+                          total_score: int, severity_label: str) -> bool:
+    """Save a completed screening instrument score."""
+    try:
+        client = get_admin_client()
+        client.table('screening_scores').insert({
+            'user_id': user_id,
+            'instrument': instrument,
+            'scores': scores,
+            'total_score': total_score,
+            'severity_label': severity_label,
+            'completed_at': datetime.now().isoformat()
+        }).execute()
+        logger.info(f"Saved {instrument} score for user {user_id}: {total_score} ({severity_label})")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to save screening score: {e}")
+        return False
+
+
+def load_latest_screening_score(user_id: str, instrument: str) -> dict:
+    """Load the most recent score for a given instrument."""
+    try:
+        client = get_admin_client()
+        result = client.table('screening_scores') \
+            .select('*') \
+            .eq('user_id', user_id) \
+            .eq('instrument', instrument) \
+            .order('completed_at', desc=True) \
+            .limit(1) \
+            .execute()
+        return result.data[0] if result.data else None
+    except Exception as e:
+        logger.error(f"Failed to load screening score: {e}")
+        return None
+
+
+def load_screening_history(user_id: str, instrument: str, limit: int = 5) -> list:
+    """Load recent screening history for trend tracking."""
+    try:
+        client = get_admin_client()
+        result = client.table('screening_scores') \
+            .select('total_score, severity_label, completed_at') \
+            .eq('user_id', user_id) \
+            .eq('instrument', instrument) \
+            .order('completed_at', desc=True) \
+            .limit(limit) \
+            .execute()
+        return result.data or []
+    except Exception as e:
+        logger.error(f"Failed to load screening history: {e}")
+        return []

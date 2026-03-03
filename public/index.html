@@ -37,7 +37,7 @@
             --border-hover: #cbd5e1;
             --text-primary: #0f172a;
             --text-secondary: #475569;
-            --text-muted: #94a3b8;
+            --text-muted: #64748b;
             --text-inverse: #ffffff;
             --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
             --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -192,6 +192,16 @@
             white-space: nowrap;
         }
 
+        .help-tip {
+            display: inline-block;
+            color: var(--text-muted);
+            cursor: help;
+            font-size: 10px;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
         .settings-row .response-dropdown {
             flex: 1;
             min-width: 0;
@@ -247,8 +257,13 @@
             padding: 10px 14px;
         }
 
+        .sidebar-actions {
+            display: flex;
+            gap: 8px;
+        }
+
         .clear-chat-btn {
-            width: 100%;
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -267,6 +282,71 @@
             border-color: var(--danger);
             color: var(--danger);
             background: rgba(239, 68, 68, 0.05);
+        }
+
+        .export-chat-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: transparent;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            color: var(--text-secondary);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+        }
+
+        .export-chat-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(74, 143, 134, 0.05);
+        }
+
+        /* Feedback Buttons */
+        .msg-feedback {
+            display: flex;
+            gap: 4px;
+            margin-top: 6px;
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        .msg.bot:hover .msg-feedback,
+        .msg-feedback.has-selection {
+            opacity: 1;
+        }
+
+        .feedback-btn {
+            background: none;
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            padding: 2px 6px;
+            font-size: 14px;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: all var(--transition);
+            line-height: 1;
+        }
+
+        .feedback-btn:hover {
+            opacity: 1;
+            background: var(--background-alt);
+            border-color: var(--border);
+        }
+
+        .feedback-btn.selected {
+            opacity: 1;
+            background: rgba(74, 143, 134, 0.1);
+            border-color: var(--primary-lighter);
+        }
+
+        .feedback-btn.selected.down {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.2);
         }
 
         .section-header {
@@ -699,6 +779,452 @@
             color: var(--text-muted);
         }
 
+        .input-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 4px 0;
+        }
+
+        .char-counter {
+            font-size: 11px;
+            color: var(--text-muted);
+            transition: color var(--transition);
+        }
+
+        .char-counter.warning {
+            color: #f59e0b;
+        }
+
+        .char-counter.danger {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        /* Urgency Banner */
+        .urgency-banner {
+            padding: 14px 18px;
+            border-radius: var(--radius);
+            margin: 8px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            animation: bannerSlideIn 0.3s ease;
+        }
+
+        @keyframes bannerSlideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .urgency-banner.emergency {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .urgency-banner.urgent {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #92400e;
+        }
+
+        .urgency-banner-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .urgency-banner-content {
+            flex: 1;
+        }
+
+        .urgency-banner-title {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .urgency-banner-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 13px;
+            text-decoration: none;
+            transition: opacity var(--transition);
+        }
+
+        .urgency-banner-cta:hover {
+            opacity: 0.85;
+        }
+
+        .urgency-banner.emergency .urgency-banner-cta {
+            background: #dc2626;
+            color: white;
+        }
+
+        .urgency-banner.urgent .urgency-banner-cta {
+            background: #d97706;
+            color: white;
+        }
+
+        /* ============================================= */
+        /* JARGON TOOLTIPS (Item 7)                     */
+        /* ============================================= */
+        .jargon-term {
+            border-bottom: 1px dashed var(--primary);
+            cursor: help;
+            position: relative;
+            display: inline;
+        }
+        .jargon-term .jargon-tooltip {
+            position: absolute;
+            bottom: calc(100% + 4px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: white;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm, 6px);
+            font-size: 12px;
+            line-height: 1.5;
+            max-width: 280px;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            white-space: normal;
+        }
+        .jargon-term:hover .jargon-tooltip {
+            opacity: 1;
+        }
+
+        /* ============================================= */
+        /* SCREENING MODAL (Items 3,4,5)                */
+        /* ============================================= */
+        .screening-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .screening-container {
+            background: var(--surface);
+            border-radius: var(--radius-lg, 12px);
+            max-width: 540px;
+            width: 100%;
+            box-shadow: var(--shadow-lg);
+            animation: modalSlideIn 0.3s ease;
+            overflow: hidden;
+        }
+        .screening-header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            padding: 20px 24px;
+            color: white;
+        }
+        .screening-progress {
+            padding: 12px 24px;
+            background: var(--background);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .screening-progress-bar {
+            flex: 1;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .screening-progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .screening-question {
+            padding: 24px;
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+        .screening-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 0 24px 24px;
+        }
+        .screening-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius, 8px);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            background: var(--surface);
+        }
+        .screening-option:hover {
+            border-color: var(--primary);
+            background: var(--background);
+        }
+        .screening-option.selected {
+            border-color: var(--primary);
+            background: rgba(74, 143, 134, 0.08);
+        }
+        .screening-option-score {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--background);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .screening-result {
+            padding: 24px;
+            text-align: center;
+        }
+        .screening-result-score {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .screening-result-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        .screening-result-message {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: var(--background);
+            border-radius: var(--radius, 8px);
+        }
+
+        /* Crisis Modal */
+        .crisis-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(239, 68, 68, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            padding: 20px;
+        }
+        .crisis-container {
+            background: var(--surface);
+            border-radius: var(--radius-lg, 12px);
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.2);
+            border: 2px solid var(--danger);
+            animation: modalSlideIn 0.3s ease;
+            overflow: hidden;
+        }
+        .crisis-header {
+            background: var(--danger);
+            padding: 20px 24px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .crisis-resource {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius, 8px);
+            margin-bottom: 10px;
+            background: var(--background);
+        }
+        .crisis-resource-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--danger);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        /* Policy Modal */
+        .policy-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1002;
+        }
+
+        .policy-modal {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            width: 100%;
+            max-width: 520px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-lg);
+            animation: modalSlideIn 0.3s ease;
+            margin: 16px;
+        }
+
+        .policy-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .policy-modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .policy-modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 22px;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            transition: color var(--transition);
+        }
+
+        .policy-modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .policy-modal-body {
+            overflow-y: auto;
+            flex: 1;
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .policy-modal-body h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 16px 0 6px;
+        }
+
+        .policy-modal-body h3:first-child {
+            margin-top: 0;
+        }
+
+        .policy-modal-body p {
+            margin-bottom: 10px;
+        }
+
+        .policy-modal-body ul {
+            margin: 0 0 10px 18px;
+        }
+
+        .policy-modal-body li {
+            margin-bottom: 4px;
+        }
+
+        /* Suggested Questions */
+        .suggested-questions {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .suggestions-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .suggestion-chip {
+            background: rgba(74, 143, 134, 0.08);
+            border: 1px solid rgba(74, 143, 134, 0.2);
+            color: var(--primary-dark);
+            padding: 7px 14px;
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .suggestion-chip:hover {
+            background: rgba(74, 143, 134, 0.15);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .chat-footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 4px 0 0;
+            font-size: 11px;
+        }
+
+        .chat-footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color var(--transition);
+        }
+
+        .chat-footer-links a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .chat-footer-links span {
+            color: var(--border);
+        }
+
         .voice-btn {
             width: 56px;
             min-height: 56px;
@@ -1044,6 +1570,63 @@
             font-weight: 600;
         }
 
+        .trial-match {
+            font-size: 9px;
+            padding: 2px 7px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .trial-match.strong {
+            background: rgba(16, 185, 129, 0.10);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.20);
+        }
+
+        .trial-match.moderate {
+            background: rgba(245, 158, 11, 0.10);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.20);
+        }
+
+        .trial-match.general {
+            background: rgba(107, 114, 128, 0.10);
+            color: #6b7280;
+            border: 1px solid rgba(107, 114, 128, 0.20);
+        }
+
+        .trial-reasons {
+            font-size: 9px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+
+        .trial-warnings {
+            font-size: 9px;
+            color: #d97706;
+            margin-top: 2px;
+            line-height: 1.3;
+        }
+
+        .trial-ineligible {
+            font-size: 9px;
+            color: #dc2626;
+            margin-top: 2px;
+            font-style: italic;
+        }
+
+        .trial-profile-tip {
+            font-size: 10px;
+            color: var(--text-secondary);
+            padding: 6px 10px;
+            margin: 4px 8px;
+            background: rgba(37, 99, 235, 0.05);
+            border-radius: var(--radius-xs);
+            border-left: 2px solid var(--primary);
+        }
+
         .trial-link {
             display: inline-flex;
             align-items: center;
@@ -1089,6 +1672,139 @@
 
         .clinical-trials-no-results a:hover {
             text-decoration: underline;
+        }
+
+        /* Clinical trials disclaimer banner */
+        .clinical-trials-disclaimer {
+            padding: 8px 12px;
+            margin: 6px 8px;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: var(--radius-sm);
+            font-size: 10px;
+            color: #92400e;
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .clinical-trials-disclaimer-icon {
+            flex-shrink: 0;
+            font-size: 12px;
+        }
+
+        /* Clinical trials finder links */
+        .clinical-trials-finder-links {
+            margin-top: 4px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .clinical-trials-finder-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .clinical-trials-finder-links a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-separator {
+            color: var(--border);
+            font-size: 10px;
+        }
+
+        /* Trial bookmark/save */
+        .trial-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .trial-save-btn {
+            background: none;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 4px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all var(--transition);
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .trial-save-btn:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .trial-save-btn.saved {
+            color: var(--primary);
+            border-color: var(--primary);
+            background: rgba(50, 107, 100, 0.05);
+        }
+
+        /* Trial watchlist in sidebar */
+        .watchlist-content {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .watchlist-empty {
+            font-size: 10px;
+            color: var(--text-muted);
+            padding: 8px 0;
+            text-align: center;
+        }
+
+        .watchlist-item {
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .watchlist-item:last-child {
+            border-bottom: none;
+        }
+
+        .watchlist-item-title {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: block;
+            line-height: 1.3;
+        }
+
+        .watchlist-item-title:hover {
+            color: var(--primary);
+        }
+
+        .watchlist-item-meta {
+            font-size: 9px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .watchlist-remove {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 10px;
+            padding: 0 2px;
+            margin-left: auto;
+        }
+
+        .watchlist-remove:hover {
+            color: #dc2626;
         }
 
         /* Loading */
@@ -1496,6 +2212,9 @@
             padding: 32px;
             width: 100%;
             max-width: 420px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
             box-shadow: var(--shadow-lg);
             animation: modalSlideIn 0.3s ease;
             margin: 16px;
@@ -1520,6 +2239,8 @@
             color: var(--text-secondary);
             line-height: 1.6;
             margin-bottom: 20px;
+            overflow-y: auto;
+            max-height: 40vh;
         }
 
         .acknowledgement-text p {
@@ -2925,6 +3646,7 @@
                 <p>This tool provides information to help you understand your diagnosis, treatment options, and care
                     journey. However, it is <strong>not a substitute for professional medical advice</strong>.</p>
                 <p>Always consult your healthcare team for medical decisions.</p>
+                <p style="font-size:12px; margin-top:12px;"><a href="#" onclick="showPolicyModal('privacyOverlay'); return false;" style="color:var(--primary);">Privacy Policy</a> &middot; <a href="#" onclick="showPolicyModal('termsOverlay'); return false;" style="color:var(--primary);">Terms of Use</a></p>
             </div>
             <div class="acknowledgement-checkbox">
                 <label>
@@ -2935,6 +3657,85 @@
             <button id="ackContinueBtn" class="acknowledgement-btn" disabled onclick="saveAcknowledgement()">
                 Continue to WondrLink
             </button>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div class="policy-overlay" id="privacyOverlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
+        <div class="policy-modal">
+            <div class="policy-modal-header">
+                <div class="policy-modal-title" id="privacyTitle">Privacy Policy</div>
+                <button class="policy-modal-close" onclick="closePolicyModal('privacyOverlay')" aria-label="Close">&times;</button>
+            </div>
+            <div class="policy-modal-body">
+                <p><strong>Effective Date:</strong> February 2026</p>
+
+                <h3>Information We Collect</h3>
+                <p>WondrLink collects the following information to provide personalized cancer care guidance:</p>
+                <ul>
+                    <li>Account information (email address for authentication)</li>
+                    <li>Patient profile data you voluntarily provide (diagnosis, treatments, biomarkers)</li>
+                    <li>Chat conversation history</li>
+                </ul>
+
+                <h3>How We Use Your Information</h3>
+                <ul>
+                    <li>To provide personalized, evidence-based cancer care information</li>
+                    <li>To match you with relevant clinical trials</li>
+                    <li>To improve response quality and accuracy</li>
+                </ul>
+
+                <h3>Data Storage & Security</h3>
+                <p>Your data is stored securely in encrypted databases. We use industry-standard security measures to protect your information. Conversations and profile data are associated with your account and are not accessible to other users.</p>
+
+                <h3>Data Sharing</h3>
+                <p>We do <strong>not</strong> sell or share your personal health information with third parties. Your data is used solely to provide and improve the WondrLink service.</p>
+
+                <h3>Your Rights</h3>
+                <ul>
+                    <li>You can view and update your profile at any time</li>
+                    <li>You can clear your conversation history</li>
+                    <li>You can request deletion of your account and all associated data by contacting support</li>
+                </ul>
+
+                <h3>Contact</h3>
+                <p>For privacy-related questions, please contact our team through the WondrLink support channel.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms of Use Modal -->
+    <div class="policy-overlay" id="termsOverlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
+        <div class="policy-modal">
+            <div class="policy-modal-header">
+                <div class="policy-modal-title" id="termsTitle">Terms of Use</div>
+                <button class="policy-modal-close" onclick="closePolicyModal('termsOverlay')" aria-label="Close">&times;</button>
+            </div>
+            <div class="policy-modal-body">
+                <p><strong>Effective Date:</strong> February 2026</p>
+
+                <h3>Purpose</h3>
+                <p>WondrLink is an <strong>educational support tool</strong> designed to help colon cancer patients understand their diagnosis, treatment options, and care journey using evidence-based medical guidelines.</p>
+
+                <h3>Not Medical Advice</h3>
+                <p>WondrLink does <strong>not</strong> provide medical advice, diagnosis, or treatment recommendations. All information is for educational and informational purposes only. Always consult your oncologist or healthcare team before making any medical decisions.</p>
+
+                <h3>Accuracy</h3>
+                <p>While WondrLink draws from established medical guidelines, AI-generated responses may occasionally contain errors. Always verify important information with your healthcare provider.</p>
+
+                <h3>Clinical Trials</h3>
+                <p>Clinical trial information is sourced from ClinicalTrials.gov. WondrLink provides trial matches as a convenience; eligibility must be confirmed by the trial's research team.</p>
+
+                <h3>Emergency Situations</h3>
+                <p>WondrLink is <strong>not</strong> an emergency service. If you experience severe symptoms, call 911 or go to the nearest emergency room immediately.</p>
+
+                <h3>User Responsibilities</h3>
+                <ul>
+                    <li>Provide accurate profile information for the best experience</li>
+                    <li>Do not rely on WondrLink as your sole source of medical information</li>
+                    <li>Consult your healthcare team for all medical decisions</li>
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -2950,6 +3751,77 @@
             <p class="success-message">Your patient profile has been created successfully.</p>
             <p class="success-note">You may update or add additional information as it becomes available.</p>
             <button class="success-btn" onclick="closeProfileSuccessModal()">Begin Asking Questions</button>
+        </div>
+    </div>
+
+    <!-- ============================================= -->
+    <!-- SCREENING MODAL (Items 3,4,5)                -->
+    <!-- ============================================= -->
+    <div id="screeningOverlay" class="screening-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Wellness Check-In">
+        <div class="screening-container">
+            <div class="screening-header">
+                <div id="screeningTitle" style="font-size:17px;font-weight:700;">Mental Health Check-In</div>
+                <div id="screeningSubtitle" style="font-size:13px;opacity:0.85;margin-top:4px;">
+                    Your answers are private and help us provide better support.
+                </div>
+            </div>
+            <div class="screening-progress">
+                <span id="screeningProgressText" style="font-size:13px;color:var(--text-muted);white-space:nowrap;">
+                    Question 1 of 9
+                </span>
+                <div class="screening-progress-bar">
+                    <div class="screening-progress-fill" id="screeningProgressFill" style="width:11%;"></div>
+                </div>
+            </div>
+            <div class="screening-question" id="screeningQuestion"></div>
+            <div class="screening-options" id="screeningOptions"></div>
+            <div class="screening-result" id="screeningResult" style="display:none;"></div>
+        </div>
+    </div>
+
+    <!-- CRISIS MODAL (PHQ-9 Q9 >= 1) -->
+    <div id="crisisOverlay" class="crisis-overlay" style="display:none;" role="alertdialog" aria-modal="true" aria-label="Crisis Support Resources">
+        <div class="crisis-container">
+            <div class="crisis-header">
+                <span style="font-size:24px;" aria-hidden="true">&#x1F198;</span>
+                <div>
+                    <div style="font-size:16px;font-weight:700;">You Are Not Alone</div>
+                    <div style="font-size:13px;opacity:0.9;">Immediate support is available right now.</div>
+                </div>
+            </div>
+            <div style="padding:24px;">
+                <p style="margin-bottom:16px;color:var(--text-secondary);line-height:1.6;">
+                    Thank you for sharing this. What you're feeling matters, and help is available 24/7.
+                    Please reach out to one of these resources:
+                </p>
+                <a href="tel:988" class="crisis-resource" style="text-decoration:none;color:inherit;">
+                    <div class="crisis-resource-icon">&#x1F4DE;</div>
+                    <div>
+                        <div style="font-weight:600;">988 Suicide &amp; Crisis Lifeline</div>
+                        <div style="font-size:13px;color:var(--text-muted);">Call or text <strong>988</strong> — available 24/7</div>
+                    </div>
+                </a>
+                <div class="crisis-resource">
+                    <div class="crisis-resource-icon">&#x1F4AC;</div>
+                    <div>
+                        <div style="font-weight:600;">Crisis Text Line</div>
+                        <div style="font-size:13px;color:var(--text-muted);">Text <strong>HOME</strong> to <strong>741741</strong></div>
+                    </div>
+                </div>
+                <a href="tel:911" class="crisis-resource" style="text-decoration:none;color:inherit;">
+                    <div class="crisis-resource-icon">&#x1F6A8;</div>
+                    <div>
+                        <div style="font-weight:600;">Emergency Services</div>
+                        <div style="font-size:13px;color:var(--text-muted);">Call <strong>911</strong> if you are in immediate danger</div>
+                    </div>
+                </a>
+                <button onclick="closeCrisisModal()" style="
+                    width:100%;margin-top:16px;padding:12px;
+                    background:var(--danger);color:white;border:none;
+                    border-radius:var(--radius, 8px);font-size:14px;font-weight:600;cursor:pointer;">
+                    I understand — close this window
+                </button>
+            </div>
         </div>
     </div>
 
@@ -2992,22 +3864,92 @@
                 <!-- Settings & Actions -->
                 <div class="section-card compact">
                     <div class="settings-row">
-                        <label class="settings-label" for="responseLength">Detail Level</label>
+                        <label class="settings-label" for="responseLength">Detail Level
+                            <span class="help-tip" title="Brief: 2-3 sentences. Normal: balanced with key details. Detailed: comprehensive with full context.">(?)</span>
+                        </label>
                         <select class="response-dropdown" id="responseLength">
-                            <option value="brief">Brief</option>
-                            <option value="normal" selected>Normal</option>
-                            <option value="detailed">Detailed</option>
+                            <option value="brief" title="Concise answers in 2-3 sentences">Brief</option>
+                            <option value="normal" selected title="Balanced responses with key details">Normal</option>
+                            <option value="detailed" title="Comprehensive responses with full context">Detailed</option>
                         </select>
                     </div>
-                    <button class="clear-chat-btn" onclick="confirmClearChat()">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                            </path>
-                        </svg>
-                        Clear History
-                    </button>
+                    <div class="sidebar-actions">
+                        <button class="clear-chat-btn" onclick="confirmClearChat()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                </path>
+                            </svg>
+                            Clear History
+                        </button>
+                        <button class="export-chat-btn" onclick="exportConversation()" title="Export conversation as text file">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Export
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trial Watchlist -->
+                <div class="section-card compact" id="watchlistPanel">
+                    <div class="section-header">
+                        <div class="section-title">Saved Trials</div>
+                        <div class="section-badge" id="watchlistBadge">None saved</div>
+                    </div>
+                    <div id="watchlistList" class="watchlist-content">
+                        <p class="watchlist-empty">No trials saved yet. Bookmark trials from search results to track them here.</p>
+                    </div>
+                </div>
+
+                <!-- Wellness Check-In (Items 3,4,5) -->
+                <div class="section-card compact">
+                    <div class="section-header">
+                        <div class="section-title">Wellness Check-In</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px;padding:0 12px 12px;">
+                        <button onclick="startScreening('PHQ9')" class="suggestion-chip" style="text-align:left;width:100%;font-size:12px;padding:8px 12px;">
+                            Depression (PHQ-9)
+                        </button>
+                        <button onclick="startScreening('GAD7')" class="suggestion-chip" style="text-align:left;width:100%;font-size:12px;padding:8px 12px;">
+                            Anxiety (GAD-7)
+                        </button>
+                        <button onclick="startScreening('PSS10')" class="suggestion-chip" style="text-align:left;width:100%;font-size:12px;padding:8px 12px;">
+                            Stress (PSS-10)
+                        </button>
+                        <button onclick="startScreening('ISI')" class="suggestion-chip" style="text-align:left;width:100%;font-size:12px;padding:8px 12px;">
+                            Sleep (ISI)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Screening Ambassador (Item 9) -->
+                <div class="section-card compact" id="ambassadorSection" style="display:none;">
+                    <div class="section-header">
+                        <div class="section-title">Share with Loved Ones</div>
+                    </div>
+                    <div style="padding:0 12px 12px;">
+                        <div style="font-size:12px;color:var(--text-muted);line-height:1.5;margin-bottom:8px;">
+                            Help protect your family — screening saves lives.
+                        </div>
+                        <div style="background:var(--background);border-radius:var(--radius-sm, 6px);padding:10px 12px;
+                                    border:1px solid var(--border);font-size:12px;line-height:1.5;">
+                            "Colorectal cancer is #2 in cancer deaths — but a colonoscopy or simple at-home stool test can find it early when it's most treatable."
+                        </div>
+                        <div style="display:flex;gap:6px;margin-top:8px;">
+                            <a href="https://www.cdc.gov/colorectal-cancer/screening/index.html" target="_blank"
+                               class="suggestion-chip" style="font-size:11px;text-decoration:none;padding:6px 10px;">
+                                CDC Screening Info
+                            </a>
+                            <button onclick="copyAmbassadorMessage()" class="suggestion-chip" style="font-size:11px;padding:6px 10px;">
+                                Copy Message
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Patient Profile -->
@@ -3082,20 +4024,29 @@
                             medical advice.</p>
                         <div class="welcome-features">
                             <div class="welcome-feature">
-                                <span class="feature-icon">📖</span>
+                                <span class="feature-icon" role="img" aria-label="Open book">📖</span>
                                 <span>Understand your diagnosis and treatment options</span>
                             </div>
                             <div class="welcome-feature">
-                                <span class="feature-icon">💬</span>
+                                <span class="feature-icon" role="img" aria-label="Speech bubble">💬</span>
                                 <span>Explain medical terms in plain English</span>
                             </div>
                             <div class="welcome-feature">
-                                <span class="feature-icon">⚠️</span>
+                                <span class="feature-icon" role="img" aria-label="Warning sign">⚠️</span>
                                 <span>Answer questions about side effects</span>
                             </div>
                             <div class="welcome-feature">
-                                <span class="feature-icon">📝</span>
+                                <span class="feature-icon" role="img" aria-label="Notepad">📝</span>
                                 <span>Help you prepare for appointments</span>
+                            </div>
+                        </div>
+                        <div class="suggested-questions" id="suggestedQuestions">
+                            <p class="suggestions-label">Try asking:</p>
+                            <div class="suggestion-chips">
+                                <button class="suggestion-chip" onclick="askSuggestion(this)">What does my stage mean?</button>
+                                <button class="suggestion-chip" onclick="askSuggestion(this)">What are common treatment options?</button>
+                                <button class="suggestion-chip" onclick="askSuggestion(this)">What side effects should I watch for?</button>
+                                <button class="suggestion-chip" onclick="askSuggestion(this)">How do I prepare for my next appointment?</button>
                             </div>
                         </div>
                         <div class="mobile-profile-cta">
@@ -3111,7 +4062,7 @@
 
             <div class="input-section" role="form" aria-label="Send a message">
                 <label for="msgInput" class="visually-hidden">Type your question about colon cancer</label>
-                <textarea id="msgInput" placeholder="Ask me about colon cancer" aria-label="Type your question"></textarea>
+                <textarea id="msgInput" placeholder="Ask me about colon cancer" aria-label="Type your question" maxlength="2000"></textarea>
                 <button id="voiceBtn" class="voice-btn" title="Voice input" aria-label="Start voice input" aria-pressed="false">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3122,6 +4073,14 @@
                     </svg>
                 </button>
                 <button id="sendBtn" class="send-btn" aria-label="Send message">Send</button>
+            </div>
+            <div class="input-footer">
+                <div class="chat-footer-links">
+                    <a href="#" onclick="showPolicyModal('privacyOverlay'); return false;">Privacy Policy</a>
+                    <span>&middot;</span>
+                    <a href="#" onclick="showPolicyModal('termsOverlay'); return false;">Terms of Use</a>
+                </div>
+                <span class="char-counter" id="charCounter">0 / 2,000</span>
             </div>
         </div>
 
@@ -3266,6 +4225,9 @@
                 userEmail.textContent = currentUser.email;
             }
 
+            // Initialize trial watchlist from localStorage
+            updateWatchlistPanel();
+
             // Load chat history after app is shown
             await loadChatHistory();
         }
@@ -3303,6 +4265,37 @@
                 btn.textContent = 'Continue to WondrLink';
             }
         }
+
+        function showPolicyModal(id) {
+            const overlay = document.getElementById(id);
+            overlay.style.display = 'flex';
+            // Focus first focusable element for accessibility
+            const closeBtn = overlay.querySelector('.policy-modal-close');
+            if (closeBtn) closeBtn.focus();
+        }
+
+        function closePolicyModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // Global Escape key handler for policy modals
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                ['privacyOverlay', 'termsOverlay'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && el.style.display === 'flex') {
+                        closePolicyModal(id);
+                    }
+                });
+            }
+        });
+
+        // Click overlay background to close policy modals
+        ['privacyOverlay', 'termsOverlay'].forEach(id => {
+            document.getElementById(id)?.addEventListener('click', function(e) {
+                if (e.target === this) closePolicyModal(id);
+            });
+        });
 
         function showAuthModal() {
             mainApp.style.display = "none";
@@ -4763,6 +5756,48 @@
             `;
         }
 
+        // Treatment line auto-detection (Item 2)
+        const DRUG_LINE_MAP = {
+            'REGORAFENIB': { display: 'Third-line or later', line: '3rd line', confidence: 'high' },
+            'TAS-102': { display: 'Third-line or later', line: '3rd line', confidence: 'high' },
+            'LONSURF': { display: 'Third-line or later', line: '3rd line', confidence: 'high' },
+            'FRUQUINTINIB': { display: 'Third-line or later', line: '3rd line', confidence: 'high' },
+            'AFLIBERCEPT': { display: 'Second-line', line: '2nd line', confidence: 'high' },
+            'RAMUCIRUMAB': { display: 'Second-line', line: '2nd line', confidence: 'high' },
+            'FOLFOXIRI': { display: 'First-line (intensive)', line: '1st line', confidence: 'high' },
+            'PEMBROLIZUMAB': { display: 'First-line (MSI-H)', line: '1st line', confidence: 'high' },
+            'ENCORAFENIB': { display: 'Second-line+ (BRAF)', line: '2nd line', confidence: 'high' },
+            'FOLFOX': { display: 'First-line or adjuvant', line: '1st line', confidence: 'medium' },
+            'CAPOX': { display: 'First-line or adjuvant', line: '1st line', confidence: 'medium' },
+            'FOLFIRI': { display: 'First or second-line', line: '1st line', confidence: 'medium' },
+        };
+
+        function suggestTreatmentLine(regimen, treatmentIndex) {
+            if (!regimen) return;
+            const regimenUpper = regimen.toUpperCase();
+            for (const [drug, info] of Object.entries(DRUG_LINE_MAP)) {
+                if (regimenUpper.includes(drug)) {
+                    const lineSelect = document.querySelector(`.treatment-line[data-index="${treatmentIndex}"]`);
+                    if (lineSelect && lineSelect.value === 'Unknown') {
+                        // Auto-select the suggested line
+                        const matchingOption = Array.from(lineSelect.options).find(o => o.value === info.line);
+                        if (matchingOption) {
+                            lineSelect.value = info.line;
+                            wizardData.treatments[treatmentIndex].line = info.line;
+                            // Brief visual highlight
+                            lineSelect.style.borderColor = 'var(--primary)';
+                            lineSelect.style.boxShadow = '0 0 0 2px rgba(74, 143, 134, 0.2)';
+                            setTimeout(() => {
+                                lineSelect.style.borderColor = '';
+                                lineSelect.style.boxShadow = '';
+                            }, 2000);
+                        }
+                    }
+                    return;
+                }
+            }
+        }
+
         function attachTreatmentListeners() {
             document.querySelectorAll(".treatment-category").forEach(el => {
                 el.addEventListener("change", e => {
@@ -4799,6 +5834,9 @@
                         regimenError.style.display = "none";
                     }
                     e.target.style.borderColor = "";
+
+                    // Auto-suggest treatment line (Item 2)
+                    suggestTreatmentLine(e.target.value, idx);
                 });
             });
 
@@ -5375,14 +6413,20 @@
                 const trialsData = metadata.clinical_trials;
 
                 if (trialsData.error) {
-                    // Show error message
+                    // Show error message (including incomplete_profile)
                     const errorDiv = document.createElement("div");
                     errorDiv.className = "clinical-trials-section";
-                    errorDiv.innerHTML = `
-                        <div class="clinical-trials-no-results">
-                            <p>${trialsData.message || 'Unable to search for clinical trials.'}</p>
-                        </div>
-                    `;
+                    let errorHtml = `<div class="clinical-trials-no-results">`;
+                    if (trialsData.error === 'incomplete_profile') {
+                        errorHtml += `<p>${trialsData.message || 'Please complete your profile to search for clinical trials.'}</p>`;
+                        if (trialsData.missing_critical && trialsData.missing_critical.length > 0) {
+                            errorHtml += `<p style="font-size:10px;color:var(--text-muted);">Missing: ${trialsData.missing_critical.join(', ')}</p>`;
+                        }
+                    } else {
+                        errorHtml += `<p>${trialsData.message || 'Unable to search for clinical trials.'}</p>`;
+                    }
+                    errorHtml += `</div>`;
+                    errorDiv.innerHTML = errorHtml;
                     bubble.appendChild(errorDiv);
                 } else if (trialsData.trials && trialsData.trials.length > 0) {
                     const trialsSection = document.createElement("div");
@@ -5390,7 +6434,7 @@
 
                     // Build trials HTML - more compact
                     let trialsHtml = `
-                        <div class="clinical-trials-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                        <div class="clinical-trials-header" onclick="this.parentElement.classList.toggle('collapsed'); if(!this.parentElement.classList.contains('collapsed')){addJargonTooltips(this.parentElement.querySelector('.clinical-trials-content'));}">
                             <div class="clinical-trials-header-left">
                                 <span class="clinical-trials-icon"></span>
                                 <span class="clinical-trials-title">Clinical Trials</span>
@@ -5403,6 +6447,10 @@
                             </div>
                         </div>
                         <div class="clinical-trials-content">
+                            <div class="clinical-trials-disclaimer">
+                                <span class="clinical-trials-disclaimer-icon" role="img" aria-label="Warning">&#x26A0;&#xFE0F;</span>
+                                <span>Trial information was retrieved from ClinicalTrials.gov and may have changed. Always verify availability directly with the trial site or your oncologist.</span>
+                            </div>
                     `;
 
                     trialsData.trials.forEach(trial => {
@@ -5417,26 +6465,80 @@
                             ? `<span class="trial-distance">${location.distance_miles} mi</span>`
                             : '';
 
+                        // Relevance match badge
+                        const score = trial.relevance_score || 50;
+                        let matchClass, matchText;
+                        if (score >= 70) { matchClass = 'strong'; matchText = 'Strong match'; }
+                        else if (score >= 55) { matchClass = 'moderate'; matchText = 'Moderate match'; }
+                        else { matchClass = 'general'; matchText = 'General match'; }
+                        const matchBadge = `<span class="trial-match ${matchClass}">${matchText}</span>`;
+
+                        // Relevance reasons
+                        const reasons = trial.relevance_reasons || [];
+                        const reasonsHtml = reasons.length > 0
+                            ? `<div class="trial-reasons">${reasons.slice(0, 3).join(' · ')}</div>`
+                            : '';
+
+                        // Warnings
+                        const warnings = trial.relevance_warnings || [];
+                        const warningsHtml = warnings.length > 0
+                            ? `<div class="trial-warnings">⚠ ${warnings.slice(0, 2).join('; ')}</div>`
+                            : '';
+
+                        // Eligibility concern
+                        const ineligibleHtml = trial.likely_eligible === false
+                            ? `<div class="trial-ineligible">May not meet some eligibility criteria</div>`
+                            : '';
+
                         // Truncate title
                         const title = trial.title.length > 80 ? trial.title.substring(0, 77) + '...' : trial.title;
 
+                        const safeTitle = title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                        const isSaved = isTrialSaved(trial.nct_id);
+
                         trialsHtml += `
                             <div class="trial-card">
-                                <div class="trial-title"><a href="${trial.url}" target="_blank" rel="noopener noreferrer">${title}</a></div>
+                                <div class="trial-card-header">
+                                    <div class="trial-title"><a href="${trial.url}" target="_blank" rel="noopener noreferrer">${title}</a></div>
+                                    <button class="trial-save-btn ${isSaved ? 'saved' : ''}"
+                                        onclick="toggleSaveTrial(this, '${trial.nct_id}', '${safeTitle}', '${trial.phase || ''}', '${trial.url}')"
+                                        title="${isSaved ? 'Remove from watchlist' : 'Save to watchlist'}"
+                                        aria-label="${isSaved ? 'Remove from watchlist' : 'Save to watchlist'}">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                                 <div class="trial-meta">
                                     <span class="trial-badge phase">${trial.phase || 'N/A'}</span>
                                     <span class="trial-badge ${statusClass}">${statusText}</span>
+                                    ${matchBadge}
                                     ${locationCity ? `<span class="trial-location-inline">${locationCity}</span>` : ''}
                                     ${distanceHtml}
                                 </div>
+                                ${reasonsHtml}
+                                ${warningsHtml}
+                                ${ineligibleHtml}
                             </div>
                         `;
                     });
 
+                    // Profile completeness tip
+                    if (trialsData.profile_completeness) {
+                        trialsHtml += `<div class="trial-profile-tip">${trialsData.profile_completeness}</div>`;
+                    }
+
                     trialsHtml += `
                         </div>
                         <div class="clinical-trials-footer">
-                            Discuss with your oncologist. <a href="https://clinicaltrials.gov/search?cond=colorectal+cancer" target="_blank" rel="noopener noreferrer">More trials →</a>
+                            <div>Discuss options with your oncologist before enrolling.</div>
+                            <div class="clinical-trials-finder-links">
+                                <a href="https://clinicaltrials.gov/search?cond=colorectal+cancer&aggFilters=status:rec" target="_blank" rel="noopener noreferrer">ClinicalTrials.gov</a>
+                                <span class="footer-separator">|</span>
+                                <a href="https://colorectalcancer.org/treatment/types-treatment/clinical-trials/clinical-trial-finder" target="_blank" rel="noopener noreferrer">CCA Trial Finder</a>
+                                <span class="footer-separator">|</span>
+                                <a href="https://www.cancer.gov/research/participate/clinical-trials-search" target="_blank" rel="noopener noreferrer">NCI Trial Search</a>
+                            </div>
                         </div>
                     `;
 
@@ -5448,15 +6550,65 @@
                     noTrialsDiv.className = "clinical-trials-section";
                     noTrialsDiv.innerHTML = `
                         <div class="clinical-trials-no-results">
-                            🔬 No recruiting trials found in your area. <a href="https://clinicaltrials.gov/search?cond=colorectal+cancer&aggFilters=status:rec" target="_blank" rel="noopener noreferrer">Search ClinicalTrials.gov →</a>
+                            <div>🔬 No recruiting trials found matching your profile in your area. Try searching:</div>
+                            <div class="clinical-trials-finder-links" style="margin-top:4px;">
+                                <a href="https://clinicaltrials.gov/search?cond=colorectal+cancer&aggFilters=status:rec" target="_blank" rel="noopener noreferrer">ClinicalTrials.gov</a>
+                                <span class="footer-separator">|</span>
+                                <a href="https://colorectalcancer.org/treatment/types-treatment/clinical-trials/clinical-trial-finder" target="_blank" rel="noopener noreferrer">CCA Trial Finder</a>
+                                <span class="footer-separator">|</span>
+                                <a href="https://www.cancer.gov/research/participate/clinical-trials-search" target="_blank" rel="noopener noreferrer">NCI Trial Search</a>
+                            </div>
                         </div>
                     `;
                     bubble.appendChild(noTrialsDiv);
                 }
             }
 
+            // Show urgency banner if emergency/urgent detected
+            if (who === "bot" && metadata && metadata.urgency && metadata.urgency.detected) {
+                showUrgencyBanner(metadata.urgency);
+            }
+
+            // Add feedback buttons to bot messages (skip thinking/loading indicators)
+            if (who === "bot" && !text.includes('thinking-dots')) {
+                const feedbackDiv = document.createElement("div");
+                feedbackDiv.className = "msg-feedback";
+                feedbackDiv.innerHTML = `
+                    <button class="feedback-btn" onclick="sendFeedback(this, 'up')" title="Helpful" aria-label="Mark as helpful">&#x1F44D;</button>
+                    <button class="feedback-btn" onclick="sendFeedback(this, 'down')" title="Not helpful" aria-label="Mark as not helpful">&#x1F44E;</button>
+                `;
+                div.appendChild(feedbackDiv);
+            }
+
             messages.appendChild(div);
             messages.scrollTop = messages.scrollHeight;
+        }
+
+        function showUrgencyBanner(urgency) {
+            // Remove any existing urgency banner
+            const existing = document.querySelector('.urgency-banner');
+            if (existing) existing.remove();
+
+            const isEmergency = urgency.level === 'emergency';
+            const banner = document.createElement('div');
+            banner.className = `urgency-banner ${isEmergency ? 'emergency' : 'urgent'}`;
+
+            const title = isEmergency ? 'Emergency — Seek Immediate Care' : 'Urgent — Contact Your Doctor';
+            const ctaText = isEmergency ? 'Call 911' : 'Call Your Oncologist';
+            const ctaHref = isEmergency ? 'tel:911' : '#';
+
+            banner.innerHTML = `
+                <div class="urgency-banner-icon">${isEmergency ? '🚨' : '⚠️'}</div>
+                <div class="urgency-banner-content">
+                    <div class="urgency-banner-title">${title}</div>
+                    <div>${urgency.guidance || (isEmergency ? 'This may require immediate medical attention.' : 'Please contact your healthcare provider.')}</div>
+                    <a class="urgency-banner-cta" href="${ctaHref}" ${isEmergency ? '' : 'onclick="return false;"'}>${ctaText}</a>
+                </div>
+            `;
+
+            // Insert at top of messages area
+            const messages = document.getElementById('messages');
+            messages.insertBefore(banner, messages.firstChild);
         }
 
         // Welcome message HTML to show at top of chat
@@ -5468,20 +6620,29 @@
                         medical advice.</p>
                     <div class="welcome-features">
                         <div class="welcome-feature">
-                            <span class="feature-icon">📖</span>
+                            <span class="feature-icon" role="img" aria-label="Open book">📖</span>
                             <span>Understand your diagnosis and treatment options</span>
                         </div>
                         <div class="welcome-feature">
-                            <span class="feature-icon">💬</span>
+                            <span class="feature-icon" role="img" aria-label="Speech bubble">💬</span>
                             <span>Explain medical terms in plain English</span>
                         </div>
                         <div class="welcome-feature">
-                            <span class="feature-icon">⚠️</span>
+                            <span class="feature-icon" role="img" aria-label="Warning sign">⚠️</span>
                             <span>Answer questions about side effects</span>
                         </div>
                         <div class="welcome-feature">
-                            <span class="feature-icon">📝</span>
+                            <span class="feature-icon" role="img" aria-label="Notepad">📝</span>
                             <span>Help you prepare for appointments</span>
+                        </div>
+                    </div>
+                    <div class="suggested-questions" id="suggestedQuestions">
+                        <p class="suggestions-label">Try asking:</p>
+                        <div class="suggestion-chips">
+                            <button class="suggestion-chip" onclick="askSuggestion(this)">What does my stage mean?</button>
+                            <button class="suggestion-chip" onclick="askSuggestion(this)">What are common treatment options?</button>
+                            <button class="suggestion-chip" onclick="askSuggestion(this)">What side effects should I watch for?</button>
+                            <button class="suggestion-chip" onclick="askSuggestion(this)">How do I prepare for my next appointment?</button>
                         </div>
                     </div>
                     <p class="welcome-cta"><em>Build your patient profile in the sidebar to get personalized guidance.</em></p>
@@ -5563,12 +6724,201 @@
             }
         }
 
+        // Feedback on bot messages
+        async function sendFeedback(btn, rating) {
+            const feedbackDiv = btn.parentElement;
+            const msgDiv = feedbackDiv.closest('.msg');
+            const bubble = msgDiv.querySelector('.bubble');
+            const messageText = bubble ? bubble.textContent.trim().substring(0, 200) : '';
+
+            // Toggle selection
+            feedbackDiv.querySelectorAll('.feedback-btn').forEach(b => {
+                b.classList.remove('selected', 'down');
+            });
+            btn.classList.add('selected');
+            if (rating === 'down') btn.classList.add('down');
+            feedbackDiv.classList.add('has-selection');
+
+            // Send to backend
+            try {
+                await authFetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rating: rating,
+                        message_preview: messageText
+                    })
+                });
+            } catch (e) {
+                console.error('Feedback error:', e);
+            }
+        }
+
+        // ---- Trial Watchlist (localStorage) ----
+        const WATCHLIST_KEY = 'wondrlink_trial_watchlist';
+
+        function getTrialWatchlist() {
+            try {
+                return JSON.parse(localStorage.getItem(WATCHLIST_KEY) || '[]');
+            } catch (e) { return []; }
+        }
+
+        function isTrialSaved(nctId) {
+            return getTrialWatchlist().some(t => t.nct_id === nctId);
+        }
+
+        function toggleSaveTrial(btn, nctId, title, phase, url) {
+            let watchlist = getTrialWatchlist();
+            const idx = watchlist.findIndex(t => t.nct_id === nctId);
+
+            if (idx >= 0) {
+                watchlist.splice(idx, 1);
+                btn.classList.remove('saved');
+                btn.querySelector('svg').setAttribute('fill', 'none');
+                btn.title = 'Save to watchlist';
+                btn.setAttribute('aria-label', 'Save to watchlist');
+            } else {
+                watchlist.push({
+                    nct_id: nctId,
+                    title: title,
+                    phase: phase,
+                    url: url,
+                    saved_at: new Date().toISOString()
+                });
+                btn.classList.add('saved');
+                btn.querySelector('svg').setAttribute('fill', 'currentColor');
+                btn.title = 'Remove from watchlist';
+                btn.setAttribute('aria-label', 'Remove from watchlist');
+            }
+
+            localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist));
+            updateWatchlistPanel();
+        }
+
+        function updateWatchlistPanel() {
+            const badge = document.getElementById('watchlistBadge');
+            const list = document.getElementById('watchlistList');
+            if (!badge || !list) return;
+
+            const watchlist = getTrialWatchlist();
+            badge.textContent = watchlist.length > 0 ? watchlist.length + ' saved' : 'None saved';
+
+            if (watchlist.length === 0) {
+                list.innerHTML = '<p class="watchlist-empty">No trials saved yet. Bookmark trials from search results to track them here.</p>';
+                return;
+            }
+
+            list.innerHTML = watchlist.map(t => {
+                const safeTitle = (t.title || 'Untitled trial').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return `<div class="watchlist-item">
+                    <a href="${t.url}" target="_blank" rel="noopener noreferrer" class="watchlist-item-title">${safeTitle}</a>
+                    <div class="watchlist-item-meta">
+                        <span>${t.nct_id}</span> | <span>${t.phase || 'Phase N/A'}</span>
+                        <button class="watchlist-remove" onclick="removeSavedTrial('${t.nct_id}')" title="Remove" aria-label="Remove saved trial">&#x2715;</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function removeSavedTrial(nctId) {
+            let watchlist = getTrialWatchlist();
+            watchlist = watchlist.filter(t => t.nct_id !== nctId);
+            localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist));
+            updateWatchlistPanel();
+            // Update any visible save buttons in chat
+            document.querySelectorAll('.trial-save-btn.saved').forEach(btn => {
+                const onclick = btn.getAttribute('onclick') || '';
+                if (onclick.includes(nctId)) {
+                    btn.classList.remove('saved');
+                    btn.querySelector('svg').setAttribute('fill', 'none');
+                    btn.title = 'Save to watchlist';
+                    btn.setAttribute('aria-label', 'Save to watchlist');
+                }
+            });
+        }
+
+        // Export conversation as text file
+        function exportConversation() {
+            const messagesEl = document.getElementById('messages');
+            const msgDivs = messagesEl.querySelectorAll('.msg');
+            if (msgDivs.length <= 1) {
+                alert('No conversation to export yet.');
+                return;
+            }
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+            let text = `WondrLink Conversation Export\n`;
+            text += `Date: ${dateStr} at ${timeStr}\n`;
+            text += `${'='.repeat(50)}\n\n`;
+
+            msgDivs.forEach(div => {
+                const isUser = div.classList.contains('user') || div.querySelector('.bubble.user');
+                const bubble = div.querySelector('.bubble');
+                if (!bubble) return;
+
+                // Skip welcome message
+                if (bubble.classList.contains('welcome-message')) return;
+
+                const role = isUser ? 'You' : 'WondrLink';
+                // Get text content, strip HTML
+                const content = bubble.textContent.trim().replace(/\s+/g, ' ');
+                if (content) {
+                    text += `${role}:\n${content}\n\n`;
+                }
+            });
+
+            text += `${'='.repeat(50)}\n`;
+            text += `DISCLAIMER: This is an educational support tool, not medical advice.\n`;
+            text += `Always consult your healthcare team for medical decisions.\n`;
+
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `wondrlink-conversation-${now.toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Suggested question chip click handler
+        let messageCount = 0;
+
+        function maybeShowWellnessChips() {
+            messageCount++;
+            if (messageCount > 0 && messageCount % 5 === 0) {
+                const chipsDiv = document.createElement('div');
+                chipsDiv.className = 'suggestion-chips';
+                chipsDiv.style.padding = '8px 16px';
+                chipsDiv.innerHTML = `
+                    <button class="suggestion-chip" onclick="askSuggestion(this)">How are you feeling emotionally today?</button>
+                    <button class="suggestion-chip" onclick="askSuggestion(this)">Tell me about stress management options</button>
+                `;
+                messages.appendChild(chipsDiv);
+                messages.scrollTop = messages.scrollHeight;
+            }
+        }
+
+        function askSuggestion(btn) {
+            msgInput.value = btn.textContent;
+            // Hide suggestions after use
+            const suggestionsEl = document.getElementById('suggestedQuestions');
+            if (suggestionsEl) suggestionsEl.style.display = 'none';
+            // Trigger send
+            sendBtn.click();
+        }
+
         sendBtn.addEventListener("click", async () => {
             const msg = msgInput.value.trim();
             if (!msg) return;
 
             sendBtn.disabled = true;
             addMessage(msg, "user");
+            checkForFamilyMention(msg);
             msgInput.value = "";
             msgInput.style.height = "44px";
             addMessage('<div class="thinking"><div class="thinking-dots"><span></span><span></span><span></span></div></div>', "bot");
@@ -5597,6 +6947,7 @@
                     addMessage(answer, "bot", j);
                     // Save assistant message to history (include metadata for clinical trials)
                     await saveChatMessage('assistant', answer, j);
+                    maybeShowWellnessChips();
                 } else {
                     addMessage("Error: " + (j.error || "Unknown error"), "bot");
                 }
@@ -5623,10 +6974,16 @@
             }
         });
 
-        // Auto-resize textarea
+        // Auto-resize textarea + character counter
+        const charCounter = document.getElementById('charCounter');
         msgInput.addEventListener("input", function () {
             this.style.height = "44px";
             this.style.height = Math.min(this.scrollHeight, 120) + "px";
+            // Update character counter
+            const len = this.value.length;
+            charCounter.textContent = `${len.toLocaleString()} / 2,000`;
+            charCounter.classList.toggle('warning', len >= 1800 && len < 1950);
+            charCounter.classList.toggle('danger', len >= 1950);
         });
 
         // =====================
@@ -5756,6 +7113,333 @@
                 await loadExistingProfile();
             }
         });
+
+        // =============================================================================
+        // SCREENING AMBASSADOR (Item 9) + WELLNESS SUGGESTIONS (Item 11)
+        // =============================================================================
+
+        function copyAmbassadorMessage() {
+            const msg = "Did you know? Colorectal cancer is the #2 cancer killer in the US — but a colonoscopy or simple at-home stool test can find it early when it's most treatable. If you're 45+, talk to your doctor about screening. Learn more: https://www.cdc.gov/colorectal-cancer/screening/";
+            navigator.clipboard.writeText(msg).then(() => {
+                const btn = event.target;
+                const original = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = original; }, 2000);
+            }).catch(() => {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = msg;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            });
+        }
+
+        // Show ambassador section when user mentions family members
+        function checkForFamilyMention(message) {
+            if (!message) return;
+            const familyPattern = /\b(my family|my children|my kids|my sister|my brother|my husband|my wife|my parent|my mother|my father|my daughter|my son)\b/i;
+            if (familyPattern.test(message)) {
+                const el = document.getElementById('ambassadorSection');
+                if (el) el.style.display = 'block';
+            }
+        }
+
+        // =============================================================================
+        // CLINICAL TRIAL JARGON TOOLTIPS (Item 7)
+        // =============================================================================
+
+        const CLINICAL_TRIAL_JARGON = {
+            'Phase I': 'A first-in-human study testing safety and finding the right dose. Usually 15-30 patients.',
+            'Phase II': 'Testing whether the treatment works and continues to be safe. Usually 100-300 patients.',
+            'Phase III': 'A large study comparing the new treatment to the current standard. This is the gold standard for proving a treatment works.',
+            'Phase 1': 'A first-in-human study testing safety and finding the right dose. Usually 15-30 patients.',
+            'Phase 2': 'Testing whether the treatment works and continues to be safe. Usually 100-300 patients.',
+            'Phase 3': 'A large study comparing the new treatment to the current standard. This is the gold standard for proving a treatment works.',
+            'Randomized': 'Patients are assigned to a treatment group by chance (like a coin flip). This ensures the comparison is fair.',
+            'Placebo': 'In cancer trials, the comparison group usually receives standard treatment — not a sugar pill.',
+            'Biomarker': 'A measurable substance (like KRAS, MSI, or a protein level) that helps predict how your cancer will respond to a specific treatment.',
+            'Informed consent': 'A document explaining everything about the trial — risks, benefits, alternatives, and your right to leave at any time.',
+            'Open-label': 'Both you and your doctor know which treatment you are receiving.',
+            'NCT': 'A unique identifier for every trial at ClinicalTrials.gov. Use it to look up any trial directly.',
+        };
+
+        function addJargonTooltips(containerEl) {
+            if (!containerEl) return;
+            let html = containerEl.innerHTML;
+            for (const [term, definition] of Object.entries(CLINICAL_TRIAL_JARGON)) {
+                const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(`(?<![\\w-])${escaped}(?![\\w-])`, 'g');
+                let replaced = false;
+                html = html.replace(regex, (match) => {
+                    if (replaced) return match; // Only replace first occurrence
+                    replaced = true;
+                    return `<span class="jargon-term">${match}<span class="jargon-tooltip">${definition}</span></span>`;
+                });
+            }
+            containerEl.innerHTML = html;
+        }
+
+        // =============================================================================
+        // SCREENING ENGINE (Items 3, 4, 5 - PHQ-9, GAD-7, PSS-10, ISI)
+        // =============================================================================
+
+        const SCREENING_INSTRUMENTS = {
+            PHQ9: {
+                title: 'Depression Screening (PHQ-9)',
+                subtitle: 'Over the last 2 weeks, how often have you been bothered by any of the following?',
+                normalization: 'Many people going through cancer treatment experience changes in mood. This check-in helps us support you better.',
+                options: [
+                    { label: 'Not at all', score: 0 },
+                    { label: 'Several days', score: 1 },
+                    { label: 'More than half the days', score: 2 },
+                    { label: 'Nearly every day', score: 3 }
+                ],
+                questions: [
+                    'Little interest or pleasure in doing things',
+                    'Feeling down, depressed, or hopeless',
+                    'Trouble falling or staying asleep, or sleeping too much',
+                    'Feeling tired or having little energy',
+                    'Poor appetite or overeating',
+                    'Feeling bad about yourself — or that you are a failure or have let yourself or your family down',
+                    'Trouble concentrating on things, such as reading or watching television',
+                    'Moving or speaking so slowly that other people could notice — or being so fidgety or restless that you have been moving around more than usual',
+                    'Thoughts that you would be better off dead, or of hurting yourself in some way'
+                ],
+                severity: [
+                    { max: 4, label: 'minimal', message: 'Your score suggests minimal depression symptoms.' },
+                    { max: 9, label: 'mild', message: 'Your score suggests mild depression symptoms. Consider mentioning this to your care team at your next visit.' },
+                    { max: 14, label: 'moderate', message: 'Your score suggests moderate depression symptoms. We recommend discussing this with your oncologist or a counselor.' },
+                    { max: 19, label: 'moderately severe', message: 'Your score suggests moderately severe depression. Please talk to your care team soon.' },
+                    { max: 27, label: 'severe', message: 'Your score suggests severe depression. Please reach out to your care team or a mental health professional today.' }
+                ],
+                crisis_question_index: 8
+            },
+            GAD7: {
+                title: 'Anxiety Screening (GAD-7)',
+                subtitle: 'Over the last 2 weeks, how often have you been bothered by the following problems?',
+                normalization: 'Anxiety is very common during cancer treatment. This check-in helps us understand how you are feeling.',
+                options: [
+                    { label: 'Not at all', score: 0 },
+                    { label: 'Several days', score: 1 },
+                    { label: 'More than half the days', score: 2 },
+                    { label: 'Nearly every day', score: 3 }
+                ],
+                questions: [
+                    'Feeling nervous, anxious, or on edge',
+                    'Not being able to stop or control worrying',
+                    'Worrying too much about different things',
+                    'Trouble relaxing',
+                    'Being so restless that it is hard to sit still',
+                    'Becoming easily annoyed or irritable',
+                    'Feeling afraid, as if something awful might happen'
+                ],
+                severity: [
+                    { max: 4, label: 'minimal', message: 'Your score suggests minimal anxiety symptoms.' },
+                    { max: 9, label: 'mild', message: 'Your score suggests mild anxiety. Consider mentioning this at your next appointment.' },
+                    { max: 14, label: 'moderate', message: 'Your score suggests moderate anxiety. We recommend discussing this with your care team.' },
+                    { max: 21, label: 'severe', message: 'Your score suggests severe anxiety. Please talk to your care team or a counselor.' }
+                ]
+            },
+            PSS10: {
+                title: 'Stress Assessment (PSS-10)',
+                subtitle: 'In the last month, how often have you felt the following?',
+                normalization: 'Living with a cancer diagnosis brings many challenges. This brief check-in helps us understand your stress levels.',
+                options: [
+                    { label: 'Never', score: 0 },
+                    { label: 'Almost never', score: 1 },
+                    { label: 'Sometimes', score: 2 },
+                    { label: 'Fairly often', score: 3 },
+                    { label: 'Very often', score: 4 }
+                ],
+                reverse_scored: [3, 4, 6, 7],
+                questions: [
+                    'Been upset because of something that happened unexpectedly?',
+                    'Felt that you were unable to control the important things in your life?',
+                    'Felt nervous and stressed?',
+                    'Felt confident about your ability to handle your personal problems?',
+                    'Felt that things were going your way?',
+                    'Found that you could not cope with all the things that you had to do?',
+                    'Been able to control irritations in your life?',
+                    'Felt that you were on top of things?',
+                    'Been angered because of things that were outside of your control?',
+                    'Felt difficulties were piling up so high that you could not overcome them?'
+                ],
+                severity: [
+                    { max: 13, label: 'low', message: 'Your stress level appears manageable. Keep using your coping strategies.' },
+                    { max: 26, label: 'moderate', message: 'You are experiencing moderate stress. This is very common during cancer treatment. Consider exploring stress management resources.' },
+                    { max: 40, label: 'high', message: 'Your stress level is elevated. Please let your care team know — support is available and effective.' }
+                ]
+            },
+            ISI: {
+                title: 'Sleep Quality Check-In (ISI)',
+                subtitle: 'Please rate the current severity of your sleep difficulties.',
+                normalization: 'About 70% of cancer patients experience sleep issues. Understanding yours helps us provide better guidance.',
+                options: [
+                    { label: 'None / Very satisfied', score: 0 },
+                    { label: 'Mild / Satisfied', score: 1 },
+                    { label: 'Moderate / Neutral', score: 2 },
+                    { label: 'Severe / Dissatisfied', score: 3 },
+                    { label: 'Very severe / Very dissatisfied', score: 4 }
+                ],
+                questions: [
+                    'Difficulty falling asleep',
+                    'Difficulty staying asleep',
+                    'Problems waking up too early',
+                    'How satisfied/dissatisfied are you with your current sleep pattern?',
+                    'How noticeable to others do you think your sleep problem is?',
+                    'How worried/distressed are you about your current sleep problem?',
+                    'To what extent do you consider your sleep problem to interfere with your daily functioning?'
+                ],
+                severity: [
+                    { max: 7, label: 'no insomnia', message: 'Your sleep appears to be within normal range.' },
+                    { max: 14, label: 'subthreshold', message: 'You have some sleep difficulties. This is common during cancer treatment. Good sleep hygiene can help.' },
+                    { max: 21, label: 'moderate insomnia', message: 'You have moderate insomnia. Please mention this to your care team — effective treatments like CBT-I are available.' },
+                    { max: 28, label: 'severe insomnia', message: 'Severe insomnia detected. Please discuss sleep support with your oncologist. CBT-I is recommended as first-line treatment.' }
+                ]
+            }
+        };
+
+        let screeningInstrument = null;
+        let screeningQuestionIndex = 0;
+        let screeningScores = {};
+
+        function startScreening(instrumentKey) {
+            screeningInstrument = SCREENING_INSTRUMENTS[instrumentKey];
+            screeningInstrument._key = instrumentKey;
+            screeningQuestionIndex = 0;
+            screeningScores = {};
+
+            document.getElementById('screeningTitle').textContent = screeningInstrument.title;
+            document.getElementById('screeningSubtitle').textContent = screeningInstrument.normalization || screeningInstrument.subtitle;
+            document.getElementById('screeningResult').style.display = 'none';
+            document.getElementById('screeningQuestion').style.display = '';
+            document.getElementById('screeningOptions').style.display = '';
+            document.getElementById('screeningOverlay').style.display = 'flex';
+
+            renderScreeningQuestion();
+        }
+
+        function renderScreeningQuestion() {
+            const q = screeningInstrument.questions[screeningQuestionIndex];
+            const total = screeningInstrument.questions.length;
+            const pct = Math.round(((screeningQuestionIndex + 1) / total) * 100);
+
+            document.getElementById('screeningProgressText').textContent = `Question ${screeningQuestionIndex + 1} of ${total}`;
+            document.getElementById('screeningProgressFill').style.width = pct + '%';
+            document.getElementById('screeningQuestion').textContent = q;
+
+            // Update subtitle to instrument-specific framing after first question
+            if (screeningQuestionIndex === 0) {
+                document.getElementById('screeningSubtitle').textContent = screeningInstrument.subtitle;
+            }
+
+            const optionsEl = document.getElementById('screeningOptions');
+            optionsEl.innerHTML = '';
+
+            screeningInstrument.options.forEach((opt) => {
+                const div = document.createElement('div');
+                div.className = 'screening-option';
+                div.setAttribute('role', 'button');
+                div.setAttribute('tabindex', '0');
+                div.innerHTML = `
+                    <div class="screening-option-score">${opt.score}</div>
+                    <div style="font-size:14px;">${opt.label}</div>
+                `;
+                div.onclick = () => selectScreeningAnswer(opt.score);
+                div.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectScreeningAnswer(opt.score); } };
+                optionsEl.appendChild(div);
+            });
+        }
+
+        function selectScreeningAnswer(score) {
+            let actualScore = score;
+
+            // Reverse scoring for PSS-10
+            if (screeningInstrument.reverse_scored && screeningInstrument.reverse_scored.includes(screeningQuestionIndex)) {
+                const maxScore = Math.max(...screeningInstrument.options.map(o => o.score));
+                actualScore = maxScore - score;
+            }
+
+            const qKey = `q${screeningQuestionIndex + 1}`;
+            screeningScores[qKey] = actualScore;
+
+            // Crisis check: PHQ-9 Q9
+            if (screeningInstrument._key === 'PHQ9' &&
+                screeningInstrument.crisis_question_index === screeningQuestionIndex &&
+                score >= 1) {
+                // Still save the partial score, then show crisis modal
+                finishScreening(true);
+                return;
+            }
+
+            screeningQuestionIndex++;
+            if (screeningQuestionIndex >= screeningInstrument.questions.length) {
+                finishScreening(false);
+            } else {
+                renderScreeningQuestion();
+            }
+        }
+
+        async function finishScreening(isCrisis) {
+            const total = Object.values(screeningScores).reduce((a, b) => a + b, 0);
+            const instrument = screeningInstrument;
+
+            // Determine severity
+            let severityLabel = 'unknown';
+            let severityMessage = 'Thank you for completing this check-in.';
+            for (const tier of instrument.severity) {
+                if (total <= tier.max) {
+                    severityLabel = tier.label;
+                    severityMessage = tier.message;
+                    break;
+                }
+            }
+
+            try {
+                const resp = await authFetch('/api/screening/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        instrument: instrument._key,
+                        scores: screeningScores,
+                        total_score: total,
+                        severity_label: severityLabel
+                    })
+                });
+                const data = await resp.json();
+
+                if (data.is_crisis || isCrisis) {
+                    document.getElementById('screeningOverlay').style.display = 'none';
+                    document.getElementById('crisisOverlay').style.display = 'flex';
+                    return;
+                }
+            } catch (e) {
+                console.error('Screening save error:', e);
+            }
+
+            // Show result
+            document.getElementById('screeningQuestion').style.display = 'none';
+            document.getElementById('screeningOptions').style.display = 'none';
+            const resultEl = document.getElementById('screeningResult');
+            resultEl.style.display = 'block';
+            resultEl.innerHTML = `
+                <div class="screening-result-score">${total}</div>
+                <div class="screening-result-label">${severityLabel}</div>
+                <div class="screening-result-message">${severityMessage}</div>
+                <button onclick="document.getElementById('screeningOverlay').style.display='none'" style="
+                    margin-top:16px;padding:10px 24px;
+                    background:var(--primary);color:white;border:none;
+                    border-radius:var(--radius, 8px);font-size:14px;font-weight:600;cursor:pointer;">
+                    Close
+                </button>
+            `;
+        }
+
+        function closeCrisisModal() {
+            document.getElementById('crisisOverlay').style.display = 'none';
+        }
     </script>
 </body>
 

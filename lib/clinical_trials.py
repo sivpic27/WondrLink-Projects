@@ -560,12 +560,17 @@ def build_search_query(patient_context: Dict[str, Any],
         # Default for this colon cancer app
         conditions.append("colorectal cancer")
 
-    # Add stage-specific terms for metastatic disease
+    # Add stage-specific terms to broaden results across all stages
     stage = patient_context.get("stage") or ""
-    if "IV" in stage.upper() or "4" in stage:
+    stage_upper = stage.upper()
+    if "IV" in stage_upper or "4" in stage:
         conditions.append("metastatic colorectal cancer")
-    elif "III" in stage.upper() or "3" in stage:
+    elif "III" in stage_upper or "3" in stage:
         conditions.append("stage III colorectal cancer")
+    elif "II" in stage_upper or "2" in stage:
+        conditions.append("stage II colorectal cancer")
+    elif "I" in stage_upper or "1" in stage:
+        conditions.append("stage I colorectal cancer")
 
     params["query.cond"] = " OR ".join(conditions)
 
@@ -580,13 +585,30 @@ def build_search_query(patient_context: Dict[str, Any],
         elif zip_code.strip():
             params["query.locn"] = zip_code.strip()
 
-    # NOTE: We intentionally do NOT filter by biomarker-specific interventions by default.
-    # This would be too restrictive and miss many relevant general colorectal cancer trials.
-    # The patient's biomarker status is important for eligibility, but filtering the search
-    # by specific drugs dramatically reduces results.
-    #
-    # Instead, we return all colorectal cancer trials in the patient's location,
-    # and they can discuss eligibility with their oncologist based on their biomarkers.
+    # Add biomarker-driven intervention terms (OR logic for breadth)
+    # These help surface relevant trials without being overly restrictive
+    intervention_terms = []
+    biomarkers = (patient_context.get("biomarkers") or "").upper()
+
+    if biomarkers and biomarkers not in ("UNSPECIFIED", "PENDING/UNSPECIFIED"):
+        if "MSI-H" in biomarkers or "MSI-HIGH" in biomarkers or "UNSTABLE" in biomarkers:
+            intervention_terms.append("immunotherapy")
+        if "BRAF" in biomarkers and ("V600E" in biomarkers or "MUTATION" in biomarkers.lower() or "MUTANT" in biomarkers.lower()):
+            intervention_terms.append("encorafenib")
+        if "HER2" in biomarkers and ("POSITIVE" in biomarkers or "AMPLIFIED" in biomarkers or "3+" in biomarkers):
+            intervention_terms.append("trastuzumab")
+
+    # Add treatment line context
+    treatment_line = patient_context.get("treatment_line") or ""
+    if treatment_line:
+        line_lower = treatment_line.lower()
+        if "second" in line_lower or "2nd" in line_lower:
+            intervention_terms.append("second-line")
+        elif "third" in line_lower or "3rd" in line_lower:
+            intervention_terms.append("third-line")
+
+    if intervention_terms:
+        params["query.intr"] = " OR ".join(intervention_terms)
 
     return params
 
@@ -731,6 +753,251 @@ def parse_trial_result(study: Dict[str, Any], preferred_state: Optional[str] = N
     }
 
 
+def _parse_age(age_str: str) -> Optional[int]:
+    """
+    Parse age string from ClinicalTrials.gov format (e.g., '18 Years', '65 Years').
+
+    Returns:
+        Integer age or None if cannot parse
+    """
+    if not age_str:
+        return None
+    import re
+    match = re.search(r'(\d+)', str(age_str))
+    if match:
+        return int(match.group(1))
+    return None
+
+
+def score_trial_relevance(trial: Dict[str, Any],
+                          patient_context: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Score a clinical trial's relevance to the patient profile.
+
+    Checks age eligibility, sex eligibility, biomarker alignment,
+    treatment line alignment, and distance.
+
+    Args:
+        trial: Parsed trial dict from parse_trial_result()
+        patient_context: Patient context from extract_patient_context_complex()
+
+    Returns:
+        Dict with: score (0-100), reasons (list), warnings (list), eligible (bool)
+    """
+    score = 50  # Base score
+    reasons = []
+    warnings = []
+    eligible = True
+
+    trial_text = (
+        (trial.get("title") or "") + " " +
+        (trial.get("official_title") or "") + " " +
+        (trial.get("brief_summary") or "")
+    ).lower()
+
+    # --- 1. Age eligibility ---
+    patient_age = patient_context.get("age")
+    if patient_age:
+        try:
+            patient_age = int(patient_age)
+        except (ValueError, TypeError):
+            patient_age = None
+
+    if patient_age:
+        min_age = _parse_age(trial.get("min_age", ""))
+        max_age = _parse_age(trial.get("max_age", ""))
+
+        if min_age and patient_age < min_age:
+            eligible = False
+            warnings.append(f"Minimum age is {min_age}, patient is {patient_age}")
+        elif max_age and patient_age > max_age:
+            eligible = False
+            warnings.append(f"Maximum age is {max_age}, patient is {patient_age}")
+        else:
+            if min_age or max_age:
+                reasons.append("Age within eligibility range")
+                score += 5
+
+    # --- 2. Sex eligibility ---
+    trial_sex = (trial.get("sex") or "All").lower()
+    patient_gender = (patient_context.get("gender") or "").lower()
+
+    if trial_sex != "all" and patient_gender and patient_gender != "unspecified":
+        if trial_sex == "female" and patient_gender in ("male", "m"):
+            eligible = False
+            warnings.append("Trial is for female patients only")
+        elif trial_sex == "male" and patient_gender in ("female", "f"):
+            eligible = False
+            warnings.append("Trial is for male patients only")
+        else:
+            reasons.append("Sex matches trial requirement")
+            score += 5
+
+    # --- 3. Biomarker alignment ---
+    biomarkers = (patient_context.get("biomarkers") or "").upper()
+
+    if biomarkers and biomarkers not in ("UNSPECIFIED", "PENDING/UNSPECIFIED"):
+        # MSI-H alignment
+        if "MSI-H" in biomarkers or "MSI-HIGH" in biomarkers or "UNSTABLE" in biomarkers:
+            if "msi" in trial_text or "immunotherapy" in trial_text or "pembrolizumab" in trial_text or "checkpoint" in trial_text:
+                reasons.append("MSI-H status aligns with immunotherapy trial")
+                score += 15
+        elif "MSS" in biomarkers or "STABLE" in biomarkers:
+            if "msi-h" in trial_text and "msi-h required" in trial_text:
+                warnings.append("Trial may require MSI-H; patient is MSS")
+
+        # KRAS alignment
+        if "KRAS" in biomarkers:
+            if "mutation" in biomarkers.lower() or "mutant" in biomarkers.lower() or "g12" in biomarkers.lower():
+                if "kras" in trial_text:
+                    reasons.append("KRAS mutation relevant to this trial")
+                    score += 10
+                if "cetuximab" in trial_text or "panitumumab" in trial_text:
+                    warnings.append("EGFR inhibitors in trial may not be effective with KRAS mutation")
+
+        # BRAF alignment
+        if "BRAF" in biomarkers and ("V600E" in biomarkers or "MUTATION" in biomarkers):
+            if "braf" in trial_text or "encorafenib" in trial_text:
+                reasons.append("BRAF V600E relevant to this trial")
+                score += 10
+
+        # HER2 alignment
+        if "HER2" in biomarkers and ("POSITIVE" in biomarkers or "AMPLIFIED" in biomarkers or "3+" in biomarkers):
+            if "her2" in trial_text or "trastuzumab" in trial_text:
+                reasons.append("HER2+ status relevant to this trial")
+                score += 10
+
+    # --- 4. Treatment line alignment ---
+    treatment_line = (patient_context.get("treatment_line") or "").lower()
+    if treatment_line:
+        if "first" in treatment_line or "1st" in treatment_line or "adjuvant" in treatment_line:
+            if "first-line" in trial_text or "first line" in trial_text or "adjuvant" in trial_text:
+                reasons.append("Matches first-line/adjuvant treatment setting")
+                score += 10
+        elif "second" in treatment_line or "2nd" in treatment_line:
+            if "second-line" in trial_text or "second line" in trial_text:
+                reasons.append("Matches second-line treatment setting")
+                score += 10
+        elif "third" in treatment_line or "3rd" in treatment_line:
+            if "third-line" in trial_text or "third line" in trial_text or "refractory" in trial_text:
+                reasons.append("Matches third-line/refractory setting")
+                score += 10
+
+    # --- 5. Distance bonus ---
+    nearest_distance = trial.get("nearest_distance_miles")
+    if nearest_distance is not None:
+        if nearest_distance <= 25:
+            reasons.append(f"Close to you (~{nearest_distance} mi)")
+            score += 10
+        elif nearest_distance <= 50:
+            reasons.append(f"Within 50 miles (~{nearest_distance} mi)")
+            score += 5
+
+    # Clamp score to 0-100
+    score = max(0, min(100, score))
+
+    return {
+        "score": score,
+        "reasons": reasons,
+        "warnings": warnings,
+        "eligible": eligible
+    }
+
+
+def validate_trial_search_readiness(patient_context: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Check whether the patient profile has enough data for a meaningful trial search.
+
+    Critical fields (blocks search if missing): zip_code, stage
+    Helpful fields (warns if missing): biomarkers, treatment_line, age
+
+    Returns:
+        Dict with: ready (bool), missing_critical (list), missing_helpful (list),
+                   prompt_message (str or None)
+    """
+    if not patient_context:
+        return {
+            "ready": False,
+            "missing_critical": ["zip_code", "stage"],
+            "missing_helpful": ["biomarkers", "treatment_line", "age"],
+            "prompt_message": (
+                "I don't have enough information to search for clinical trials yet. "
+                "Please update your profile with at least your **zip code** and **cancer stage** "
+                "so I can find relevant trials near you."
+            )
+        }
+
+    missing_critical = []
+    missing_helpful = []
+
+    # Critical fields
+    zip_code = patient_context.get("zip_code")
+    if not zip_code or zip_code == "unspecified":
+        missing_critical.append("zip_code")
+
+    stage = patient_context.get("stage")
+    if not stage or stage == "unspecified":
+        missing_critical.append("stage")
+
+    # Helpful fields
+    biomarkers = patient_context.get("biomarkers")
+    if not biomarkers or biomarkers == "unspecified" or biomarkers == "pending/unspecified":
+        missing_helpful.append("biomarkers")
+
+    treatment_line = patient_context.get("treatment_line")
+    if not treatment_line:
+        missing_helpful.append("treatment_line")
+
+    age = patient_context.get("age")
+    if not age:
+        missing_helpful.append("age")
+
+    gender = patient_context.get("gender")
+    if not gender or gender == "unspecified":
+        missing_helpful.append("gender")
+
+    # Build prompt message
+    if missing_critical:
+        field_names = {
+            "zip_code": "zip code",
+            "stage": "cancer stage"
+        }
+        missing_names = [field_names.get(f, f) for f in missing_critical]
+        prompt_message = (
+            f"Before I can search for clinical trials, I need your "
+            f"**{' and '.join(missing_names)}**. "
+            f"Please update your profile with this information so I can find the most relevant trials for you."
+        )
+        return {
+            "ready": False,
+            "missing_critical": missing_critical,
+            "missing_helpful": missing_helpful,
+            "prompt_message": prompt_message
+        }
+
+    # Ready but with helpful fields missing
+    prompt_message = None
+    if missing_helpful:
+        field_names = {
+            "biomarkers": "biomarker results",
+            "treatment_line": "current treatment line",
+            "age": "age",
+            "gender": "gender"
+        }
+        missing_names = [field_names.get(f, f) for f in missing_helpful]
+        prompt_message = (
+            f"Tip: Adding your {', '.join(missing_names)} to your profile "
+            f"would help me find even more relevant trials for you."
+        )
+
+    return {
+        "ready": True,
+        "missing_critical": [],
+        "missing_helpful": missing_helpful,
+        "prompt_message": prompt_message
+    }
+
+
 def search_trials_for_patient(patient_context: Dict[str, Any],
                                max_results: int = MAX_RESULTS) -> Dict[str, Any]:
     """
@@ -781,6 +1048,17 @@ def search_trials_for_patient(patient_context: Dict[str, Any],
     studies = response.get("studies", [])
     trials = [parse_trial_result(s, preferred_state=patient_state, patient_zip=zip_code) for s in studies[:max_results]]
 
+    # Score each trial for relevance to the patient profile
+    for trial in trials:
+        relevance = score_trial_relevance(trial, patient_context)
+        trial["relevance_score"] = relevance["score"]
+        trial["relevance_reasons"] = relevance["reasons"]
+        trial["relevance_warnings"] = relevance["warnings"]
+        trial["likely_eligible"] = relevance["eligible"]
+
+    # Sort trials by relevance score (highest first)
+    trials.sort(key=lambda t: t.get("relevance_score", 0), reverse=True)
+
     return {
         "trials": trials,
         "total_found": response.get("totalCount", len(trials)),
@@ -813,7 +1091,9 @@ def format_trials_for_chat(trials_data: Dict[str, Any]) -> str:
         return """I searched ClinicalTrials.gov but didn't find recruiting trials that closely match your specific profile criteria in your area. This doesn't mean there aren't options for you:
 
 **Next Steps:**
-- **Expand your search** directly at [ClinicalTrials.gov](https://clinicaltrials.gov/search?cond=colorectal+cancer&aggFilters=status:rec)
+- **Expand your search** at [ClinicalTrials.gov](https://clinicaltrials.gov/search?cond=colorectal+cancer&aggFilters=status:rec)
+- **Try CCA Trial Finder** at [colorectalcancer.org](https://colorectalcancer.org/treatment/types-treatment/clinical-trials/clinical-trial-finder) for a guided search
+- **NCI Trial Search** at [cancer.gov](https://www.cancer.gov/research/participate/clinical-trials-search)
 - **Ask your oncologist** about trials at nearby academic cancer centers
 - **Contact NCI** at 1-800-4-CANCER for personalized trial matching assistance
 
@@ -840,6 +1120,29 @@ Your oncology team may also know of trials not yet listed or trials at partner i
                 else:
                     output += f"**Location:** {location_str}\n"
 
+        # Show relevance match strength
+        relevance_score = t.get("relevance_score", 50)
+        if relevance_score >= 70:
+            output += "**Match:** Strong match for your profile\n"
+        elif relevance_score >= 55:
+            output += "**Match:** Moderate match for your profile\n"
+        else:
+            output += "**Match:** General match\n"
+
+        # Show relevance reasons (top 3)
+        reasons = t.get("relevance_reasons", [])
+        if reasons:
+            output += "**Why it may fit:** " + "; ".join(reasons[:3]) + "\n"
+
+        # Show warnings (top 2)
+        warnings = t.get("relevance_warnings", [])
+        if warnings:
+            output += "**Note:** " + "; ".join(warnings[:2]) + "\n"
+
+        # Eligibility flag
+        if t.get("likely_eligible") is False:
+            output += "**Eligibility concern:** Based on your profile, you may not meet some eligibility criteria. Discuss with your oncologist.\n"
+
         if t.get("brief_summary"):
             # Show first 200 chars of summary
             summary = t["brief_summary"][:200]
@@ -850,10 +1153,15 @@ Your oncology team may also know of trials not yet listed or trials at partner i
         output += f"\n[View Full Trial Details]({t['url']})\n\n---\n\n"
 
     output += """**Important Reminders:**
-- Clinical trial eligibility depends on many factors beyond what we can assess here
-- Always discuss these options with your oncologist to determine if you may qualify
-- Your care team can help you understand the potential benefits and risks of each trial
-- You can also search for more trials at [ClinicalTrials.gov](https://clinicaltrials.gov)"""
+- Clinical trial information changes frequently — always verify availability directly with the trial site
+- Eligibility depends on many factors beyond what we can assess here — your oncologist can review these with you
+- Many trials cover the cost of the experimental treatment; standard-of-care costs are typically billed to insurance
+- Ask the trial coordinator about financial assistance programs and travel grants
+
+**Find More Trials:**
+- [ClinicalTrials.gov](https://clinicaltrials.gov/search?cond=colorectal+cancer&aggFilters=status:rec)
+- [CCA Trial Finder](https://colorectalcancer.org/treatment/types-treatment/clinical-trials/clinical-trial-finder)
+- [NCI Trial Search](https://www.cancer.gov/research/participate/clinical-trials-search)"""
 
     return output
 

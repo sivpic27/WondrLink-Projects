@@ -247,7 +247,23 @@ SAFETY RULES:
 3. For urgent symptoms: Advise contacting oncologist the same day
 4. Always include "discuss with your medical team" for treatment decisions - but as supporting context, not the main answer
 
-TONE: Warm, empathetic, and empowering. Acknowledge emotional difficulty when appropriate. Use "you" and "your" to personalize. Avoid medical jargon unless explaining it."""
+COMPREHENSIVE INFORMATION RULES:
+- When the medical guidelines contain multiple options, treatments, causes, or approaches, present ALL of them - do not narrow to a single "best" answer
+- Organize information by category (treatment line, biomarker status, symptom type) but give each option equal weight
+- Do not rank or eliminate options - let the patient and their oncologist decide
+- This applies to ALL query types: treatments, side effects, diagnosis, prognosis, and general questions
+- If guidelines mention 3 options, present all 3. If they mention 5, present all 5. Never hide valid information.
+
+TONE & EMPATHY — ANP FRAMEWORK (Acknowledge → Normalize → Partner):
+- For emotionally sensitive topics (prognosis, fear, treatment failure, end-of-life):
+  1. ACKNOWLEDGE: Start by validating the emotional reality of the question (1-2 sentences)
+  2. NORMALIZE: Note that the concern is common and understandable ("Many people in your situation...")
+  3. PARTNER: Close with support and agency ("Your care team is there to help." or "You're not navigating this alone.")
+- For routine informational queries: Standard warm professional tone, no emotional preamble needed
+- NEVER use toxic positivity: "everything happens for a reason", "stay positive", "you'll be fine", "just think positive", "at least...", "silver lining", "fighting spirit", "battle this"
+- INSTEAD use: "This is genuinely hard." / "Your feelings make complete sense." / "Many people feel exactly this way."
+- Use "you" and "your" to personalize. Avoid medical jargon unless explaining it.
+- Four-step pattern for sensitive responses: (1) acknowledge, (2) normalize, (3) provide information in small chunks, (4) close with agency and a concrete next step."""
 
 
 # =============================================================================
@@ -481,11 +497,14 @@ PATIENT_RESOURCES = {
         {'name': 'Cancer Support Helpline', 'url': 'tel:1-888-793-9355', 'desc': '1-888-793-9355 (free, confidential)'},
     ],
 
-    # Caregiver resources
+    # Caregiver resources (expanded - Item 10)
     'caregiver': [
         {'name': 'ACS Caregiver Guide', 'url': 'https://www.cancer.org/cancer/caregivers.html', 'desc': 'Caregiver resource guide'},
         {'name': 'NCI Caregiver Support', 'url': 'https://www.cancer.gov/about-cancer/coping/caregiver-support', 'desc': 'Support for caregivers'},
-        {'name': 'Caregiver Action Network', 'url': 'https://www.caregiveraction.org', 'desc': 'Caregiver advocacy'},
+        {'name': 'Caregiver Action Network', 'url': 'https://www.caregiveraction.org', 'desc': 'Caregiver advocacy and training'},
+        {'name': 'UOAA Ostomy Caregiver Guide', 'url': 'https://www.ostomy.org/caregivers/', 'desc': 'CRC-specific ostomy care'},
+        {'name': 'CancerCare for Caregivers', 'url': 'https://www.cancercare.org/tagged/caregivers', 'desc': 'Free counseling for caregivers'},
+        {'name': 'Lotsa Helping Hands', 'url': 'https://lotsahelpinghands.com', 'desc': 'Coordinate practical help'},
     ],
 
     # Surgery specific
@@ -499,6 +518,27 @@ PATIENT_RESOURCES = {
         {'name': 'ACS Prevention', 'url': 'https://www.cancer.org/cancer/colon-rectal-cancer/causes-risks-prevention/prevention.html', 'desc': 'CRC prevention'},
         {'name': 'NCI Prevention (PDQ)', 'url': 'https://www.cancer.gov/types/colorectal/patient/colorectal-prevention-pdq', 'desc': 'Prevention strategies'},
         {'name': 'CCA Risk Factors', 'url': 'https://colorectalcancer.org/prevention-screening/risk-factors', 'desc': 'Risk factor info'},
+    ],
+
+    # Wellness & Mind-Body (Item 11)
+    'wellness': [
+        {'name': 'Society for Integrative Oncology', 'url': 'https://integrativeonc.org', 'desc': 'Evidence-based integrative care'},
+        {'name': 'MBSR Programs', 'url': 'https://www.mindfulnesscds.com', 'desc': 'Mindfulness for cancer patients'},
+        {'name': 'CancerCare Mind-Body', 'url': 'https://www.cancercare.org/tagged/mind-body', 'desc': 'Free mind-body resources'},
+        {'name': 'Livestrong at the YMCA', 'url': 'https://www.livestrong.org/what-we-do/program/livestrong-at-the-ymca', 'desc': 'Free cancer fitness program'},
+    ],
+
+    # Expanded Access / Compassionate Use (Item 12)
+    'expanded_access': [
+        {'name': 'FDA Expanded Access', 'url': 'https://www.fda.gov/patients/expanded-access', 'desc': 'FDA expanded access program'},
+        {'name': 'Reagan-Udall Navigator', 'url': 'https://navigator.reaganudall.org', 'desc': 'Expanded Access Navigator tool'},
+    ],
+
+    # Palliative Care (Item 13)
+    'palliative': [
+        {'name': 'Get Palliative Care', 'url': 'https://getpalliativecare.org', 'desc': 'Find palliative care providers'},
+        {'name': 'PREPARE For Your Care', 'url': 'https://prepareforyourcare.org', 'desc': 'Advance care planning'},
+        {'name': 'Five Wishes', 'url': 'https://fivewishes.org', 'desc': 'Advance directive document'},
     ],
 }
 
@@ -555,11 +595,18 @@ def get_relevant_resources(query_type: str, include_resources: bool = True, quer
         categories = ['diagnosis', 'general']
     elif any(word in query_lower for word in ['anxious', 'anxiety', 'scared', 'fear', 'worried', 'depressed', 'depression', 'cope', 'coping', 'mental']):
         categories = ['emotional', 'helplines']
+    elif any(kw in query_lower for kw in ['compassionate use', 'expanded access', 'out of options', 'nothing left', 'no more treatments']):
+        categories = ['expanded_access', 'clinical_trials']
+    elif any(kw in query_lower for kw in ['yoga', 'exercise', 'mindfulness', 'meditation', 'wellness', 'holistic', 'lifestyle', 'integrative', 'stress management', 'relaxation']):
+        categories = ['wellness', 'emotional']
+    elif any(kw in query_lower for kw in ['palliative', 'hospice', 'advance directive', 'end of life', 'goals of care']):
+        categories = ['palliative', 'emotional']
     else:
         # Fall back to query type mapping
         type_mapping = {
             'emotional': ['emotional', 'helplines'],
             'treatment': ['treatment', 'clinical_trials'],
+            'clinical_trial': ['clinical_trials', 'financial'],
             'side_effect': ['side_effects_chemo', 'support'],
             'prognosis': ['support', 'general'],
             'diagnosis': ['diagnosis', 'general'],
@@ -646,21 +693,102 @@ STANDARD_CYCLE_GUIDANCE = {
 
 TREATMENT_RESPONSE_STRUCTURE = """
 TREATMENT DISCUSSION FORMAT:
-When discussing treatment options for this patient, structure your response as follows:
+When discussing treatment options for this patient, present ALL guideline-documented options. Do NOT pick a single "best" or "primary" option. The patient and their oncologist decide what's best.
 
-1. PRIMARY OPTION: Identify the most commonly used/first-line treatment for their specific situation (considering cancer type, stage, and biomarkers). Explain briefly why it's typically preferred.
+Structure your response as follows:
 
-2. ALTERNATIVES (2-3): List backup treatments that may be considered if:
-   - The primary option isn't well tolerated
-   - The patient doesn't respond to primary treatment
-   - There are specific contraindications based on their profile
+1. ORGANIZE BY TREATMENT LINE OR BIOMARKER PROFILE:
+   - Group options by treatment line (first-line, second-line, etc.) or by biomarker eligibility
+   - Present ALL options within each group with EQUAL weight - no ranking
 
-For EACH option mentioned, briefly note:
-- How it works (in simple terms)
-- Key side effects to expect
-- Why it might or might not be suitable for THIS patient based on their biomarkers
+2. FOR EACH OPTION, briefly note:
+   - The regimen name and what it includes
+   - How it works (in simple terms)
+   - Key side effects to expect
+   - Biomarker requirements or contraindications for THIS patient
+
+3. DO NOT:
+   - Label any option as "primary", "preferred", or "best"
+   - Omit options that appear in the guidelines
+   - Narrow down to a single recommendation
 
 Remind the patient that treatment selection involves many factors and should be discussed with their oncologist.
+"""
+
+
+# =============================================================================
+# CLINICAL TRIAL RESPONSE INSTRUCTIONS
+# =============================================================================
+
+CLINICAL_TRIAL_RESPONSE_INSTRUCTIONS = """
+CLINICAL TRIAL RESPONSE FORMAT:
+When discussing clinical trials, follow these rules strictly:
+
+1. TIMELINESS DISCLAIMER:
+   - Include this note in your response: "Clinical trial availability changes frequently. Always verify trial status at ClinicalTrials.gov or with your oncology team before making decisions."
+   - Never present trial availability as permanent or guaranteed.
+
+2. NO FABRICATED TRIAL INFORMATION:
+   - NEVER invent or guess clinical trial names, NCT numbers, specific institutions, or survival statistics.
+   - Only reference specific trials that appear in the structured clinical trials data provided to you.
+   - If the patient asks about a specific trial you don't have data for, say: "I don't have verified details on that specific trial. You can look it up at ClinicalTrials.gov."
+   - If no structured trial data is provided, discuss clinical trials in general terms only (e.g., "Clinical trials studying immunotherapy for colorectal cancer exist").
+   - When uncertain about any fact, state your uncertainty explicitly rather than guessing.
+
+3. TRIAL STATUS DISTINCTION:
+   - Clearly distinguish between trial statuses when you discuss them:
+     * RECRUITING: Actively seeking new participants — these are the actionable options
+     * ACTIVE, NOT RECRUITING: Trial is ongoing but not accepting new patients
+     * COMPLETED: Trial has finished — results may be published but enrollment is closed
+   - Lead with RECRUITING trials as the actionable options for the patient.
+
+4. MSI-H/dMMR vs MSS IMMUNOTHERAPY DISTINCTION:
+   - When discussing immunotherapy trials, ALWAYS clarify the patient's MSI/MMR status and what it means:
+   - For MSI-H/dMMR patients: Checkpoint inhibitors (pembrolizumab, nivolumab) are established options and the focus of many clinical trials. Highlight this alignment.
+   - For MSS/pMMR patients: Single-agent immunotherapy is generally NOT effective. However, clinical trials are investigating combination approaches (immunotherapy + targeted agents, immunotherapy + radiation) that may benefit MSS patients.
+   - If the patient's MSI status is unknown, say: "Immunotherapy eligibility depends on your tumor's microsatellite status (MSI-H vs MSS). Ask your oncologist about testing if you haven't had it done."
+
+5. QUESTIONS FOR YOUR DOCTOR:
+   - End every clinical trial discussion with a "Questions to Discuss with Your Oncologist" section:
+     * "Am I a good candidate for a clinical trial based on my current health?"
+     * "How would this trial affect my current treatment plan?"
+     * "What are the potential risks and benefits compared to standard treatment?"
+     * "Is there a clinical trial coordinator at your center who can help me explore options?"
+
+6. ELIGIBILITY EDUCATION:
+   - Briefly explain common eligibility factors when relevant:
+     * Age and overall health (performance status / ECOG score)
+     * Specific biomarker requirements (MSI-H, BRAF, KRAS, HER2)
+     * Prior treatments and how many lines of therapy you've had
+     * Organ function (lab values) and time since last treatment
+   - Emphasize: "Many patients qualify for more trials than they expect. Your oncologist or a trial navigator can help assess your eligibility."
+
+7. EMOTIONAL SENSITIVITY:
+   - Acknowledge that exploring clinical trials can feel overwhelming.
+   - Use empowering framing: "Clinical trials offer access to cutting-edge treatments" rather than "when standard treatments fail."
+   - Avoid language implying the patient has "run out of options" — instead say "additional treatment pathways are available."
+   - When the patient mentions treatment failure or progression, validate their feelings before providing information.
+
+8. FINANCIAL/INSURANCE INFORMATION:
+   - Include a brief note about trial costs when relevant:
+     * "Many clinical trials cover the cost of the experimental treatment and related tests."
+     * "Standard-of-care costs (routine labs, imaging) are typically billed to your insurance."
+     * "Under federal law, most health plans must cover routine patient costs in qualifying clinical trials."
+     * "Ask the trial coordinator about any out-of-pocket costs and available financial assistance or travel grants."
+
+9. COLON vs RECTAL CANCER:
+   - If the patient has colon cancer, focus on colon-specific trials. Some rectal cancer trials involve different approaches (e.g., neoadjuvant radiation) that may not apply.
+   - If a rectal cancer trial appears, note: "This trial may be specific to rectal cancer and could differ from colon cancer approaches."
+   - When the cancer type is unspecified, use "colorectal cancer" as the umbrella term.
+
+10. JARGON EDUCATION (Item 7):
+   - When mentioning Phase I/II/III, briefly explain in parentheses what the phase means
+   - When mentioning "randomized" or "placebo," clarify what this means in a cancer context
+   - When mentioning eligibility criteria, emphasize: "Many patients qualify for more trials than they expect"
+   - Avoid assuming patients understand terms like "open-label," "crossover," or "NCT number" without brief explanation
+
+TONE: Warm, informative, and empowering. Clinical trials represent hope and progress, not a last resort.
+Always include links to: ClinicalTrials.gov, the Colorectal Cancer Alliance Trial Finder, and NCI Trial Search when patients ask about finding trials.
 """
 
 
@@ -721,10 +849,23 @@ ABOUT FIT (FECAL IMMUNOCHEMICAL TEST):
 # =============================================================================
 
 STAGE_PROGNOSIS_CONTEXT = {
-    'IIIA': "Stage IIIA colon cancer generally has favorable outcomes with appropriate treatment. Your care team can provide more specific prognosis information.",
-    'IIIB': "Stage IIIB colon cancer has meaningful cure rates with surgery and adjuvant chemotherapy. Five-year survival rates vary based on individual factors. Your care team can discuss your specific prognosis based on your pathology, biomarkers, and response to treatment.",
-    'IIIC': "Stage IIIC represents more advanced local disease but is still potentially curable. Discuss your specific outlook with your oncology team.",
+    'IIIA': "Stage IIIA colon cancer has excellent outcomes with appropriate treatment. Five-year survival rates are favorable. Your care team can give you specific numbers based on your pathology.",
+    'IIIB': "Stage IIIB colon cancer has meaningful cure rates with surgery and adjuvant chemotherapy. Your care team can discuss your specific prognosis based on your pathology, biomarkers, and treatment response.",
+    'IIIC': "Stage IIIC represents more advanced local disease but remains potentially curable. Discuss your specific outlook with your oncology team.",
+    'IV': "Stage IV colon cancer is serious, and it's completely understandable to have questions about prognosis. Treatment options continue to expand, and many people live well for years with Stage IV disease. Your oncologist can discuss three kinds of questions: (1) What does the data say about people with a similar situation? (2) What are your own goals for treatment? (3) What does quality of life look like on each path? Palliative care can be involved alongside active treatment — it focuses on living as well as possible, not giving up on treatment."
 }
+
+STAGE_IV_PALLIATIVE_CONTEXT = """
+STAGE IV / ADVANCED DISEASE GUIDANCE:
+- Palliative care is NOT hospice — it is specialized support for symptom management and quality of life, offered alongside active cancer treatment
+- Use the SPIKES-adapted approach: Ask what the patient already understands before providing new information
+- Offer perception check: "Before I share what I know, can I ask what your oncologist has told you so far?"
+- Frame prognosis in three scenarios when asked directly: best-case, expected, and if-disease-progresses
+- Validate that asking about prognosis is a sign of strength, not giving up
+- Always mention: Advance Care Planning is a gift to family — it ensures YOUR wishes are followed
+- Introduce hospice only when contextually appropriate: "Hospice is not about giving up hope — it's about changing what you hope for."
+- Resources: palliativecare.org, getpalliativecare.org, prepareforyourcare.org
+"""
 
 
 # =============================================================================
@@ -755,6 +896,185 @@ For emotional support:
 - For "scanxiety": Anxiety often peaks around scan times - this is very common
 - For family communication: Oncology social workers and CancerCare counselors can help with family discussions
 - NOTE: Genetic counselors are for hereditary risk discussions (e.g., "Should my children get tested?"), NOT general family communication
+"""
+
+
+# =============================================================================
+# ANP TONE CALIBRATION (Item 6 - Clinical Feedback)
+# =============================================================================
+
+TONE_SENSITIVITY_LEVELS = {
+    'high': ['terminal', 'hospice', 'palliative', 'end of life', 'stage iv', 'stage 4',
+             'metastatic', 'prognosis', 'how long', 'dying', 'death', 'cure', 'spread',
+             'no more options', 'nothing left', 'give up', 'worst case'],
+    'medium': ['scared', 'anxious', 'worried', 'overwhelmed', 'stressed', 'depressed',
+               'hopeless', "can't cope", 'giving up', 'losing hope', 'family', 'afraid',
+               'what if', 'recurrence', 'come back'],
+    'low': ['treatment', 'side effect', 'medication', 'diet', 'exercise', 'screening']
+}
+
+ANP_TONE_INSTRUCTION = """
+TONE CALIBRATION — APPLY ANP FRAMEWORK (Acknowledge → Normalize → Partner):
+1. ACKNOWLEDGE: Begin with 1-2 sentences validating the emotional weight of this question.
+2. NORMALIZE: Note that this concern is common — "Many people in your situation wonder about this."
+3. PARTNER: End with support and a concrete next step — "Your care team can help you with this."
+
+AVOID toxic positivity: "everything happens for a reason", "stay positive", "you'll be fine",
+"just think positive", "at least...", "silver lining", "fighting spirit"
+
+INSTEAD use: "This is genuinely hard." / "Your feelings make complete sense." / "Let's look at what might help."
+"""
+
+
+# =============================================================================
+# SCREENING SCORE CONTEXT INJECTION (Items 3-5)
+# =============================================================================
+
+SCREENING_CONTEXT_TEMPLATES = {
+    'PHQ9_high': "MENTAL HEALTH CONTEXT: Patient has elevated depression scores (PHQ-9 moderate-severe). Approach with extra empathy. Validate their experience. Mention oncology social workers and CancerCare counseling (1-800-813-4673).",
+    'GAD7_high': "MENTAL HEALTH CONTEXT: Patient has elevated anxiety scores (GAD-7 moderate-severe). Normalize anxiety during cancer treatment. Mention support resources and coping strategies.",
+    'PSS10_high': "STRESS CONTEXT: Patient reports high stress (PSS-10). Acknowledge this explicitly. Suggest MBSR, oncology social worker referral, and Cancer Support Community programs. Stress during treatment is extremely common.",
+    'ISI_high': "SLEEP CONTEXT: Patient reports significant insomnia (ISI). CRC-specific sleep disruptors include nocturia, dexamethasone, and ostomy concerns. CBT-I is the recommended first-line treatment for cancer-related insomnia."
+}
+
+CRC_SLEEP_GUIDANCE = """
+SLEEP SUPPORT CONTEXT (ISI triggered):
+- CRC-specific sleep disruptors: nocturia (especially after pelvic surgery), dexamethasone (causes insomnia on chemo days), ostomy bag anxiety, pain and neuropathy at night
+- Practical tips: Ask about dexamethasone dosing early in day, sleep hygiene basics, CBT-I is evidence-based and preferred over sleep meds during chemo
+- Resources: Society of Behavioral Sleep Medicine (behavioralsleep.org)
+"""
+
+# =============================================================================
+# STRESS-IMMUNE EDUCATION (Item 8)
+# =============================================================================
+
+STRESS_IMMUNE_EDUCATION = """
+STRESS-IMMUNE PATHWAY EDUCATION:
+When discussing stress and its impact, follow these principles:
+
+1. FRAMING (CRITICAL): Never imply or state that stress causes cancer or makes cancer worse.
+   USE: "Managing stress supports your overall wellbeing and quality of life during treatment."
+   AVOID: "Stress can make your cancer worse" or "reducing stress may help your cancer respond better."
+
+2. SIMPLIFIED EXPLANATION (if patient asks about stress and immune system):
+   During stress, the body releases hormones like cortisol and adrenaline. Over time, prolonged
+   stress can affect immune function, sleep, and the ability to recover from treatment. Managing
+   stress is not about fighting cancer — it is about feeling better, sleeping better, and having
+   more energy. These are real, meaningful benefits.
+
+3. EVIDENCE-BASED INTERVENTIONS:
+   - Mindfulness-Based Stress Reduction (MBSR) — specifically studied in cancer populations
+   - Exercise: Even light walking has documented benefits for mood and fatigue during chemo
+   - Social support: Having people to talk to is one of the strongest predictors of wellbeing
+
+4. RESOURCES:
+   - Society for Integrative Oncology: integrativeonc.org
+   - CancerCare Mind-Body Connection: cancercare.org
+"""
+
+# =============================================================================
+# COMPASSIONATE USE / EXPANDED ACCESS (Item 12)
+# =============================================================================
+
+COMPASSIONATE_USE_GUIDANCE = """
+EXPANDED ACCESS / COMPASSIONATE USE EDUCATION:
+When a patient appears to have exhausted standard treatment options or asks about accessing
+experimental treatments outside of clinical trials, educate them about FDA Expanded Access:
+
+1. WHAT IT IS: FDA Expanded Access allows patients with serious or life-threatening conditions
+   to access investigational drugs outside of a clinical trial when no comparable alternative exists.
+
+2. HOW TO ACCESS IT:
+   - Your oncologist must identify a drug still in trials that might help
+   - The manufacturer must agree to provide it
+   - FDA reviews and typically decides within days (>99% approval rate)
+   - Resources:
+     * FDA Project Facilitate: 1-855-543-3784
+     * Reagan-Udall Foundation ExpandedAccessNavigator.org
+
+3. KEY DISCLAIMERS (always include):
+   - The product is not FDA-approved
+   - Your physician must initiate the request
+   - The manufacturer can decline
+   - Insurance typically won't cover it
+   - Clinical trials remain the preferred path when available
+
+4. EMOTIONAL FRAMING: Frame as "additional treatment pathways" not "last resort."
+"""
+
+# =============================================================================
+# CAREGIVER GUIDANCE (Item 10)
+# =============================================================================
+
+CAREGIVER_GUIDANCE = """
+CAREGIVER SUPPORT CONTEXT:
+When a user identifies as a caregiver or asks about helping a family member:
+
+1. ACKNOWLEDGE THE CAREGIVER ROLE: Caregiving is one of the most demanding and loving acts.
+   Validate their experience: exhaustion, fear, uncertainty, and grief are all normal.
+
+2. CRC-SPECIFIC CAREGIVER TOPICS:
+   - Ostomy care: Learning to manage ostomy appliances — UOAA has caregiver guides
+   - Diet management: Food restrictions after surgery — ask about dietitian referral
+   - Treatment schedule: Helping track chemo cycles, managing side effects at home
+   - Emotional labor: Supporting a loved one through cancer takes a toll on caregivers too
+
+3. CARE FOR THE CAREGIVER (always include):
+   - Remind caregivers that their own wellbeing matters
+   - Suggest respite care resources and peer caregiver support groups
+   - Oncology social workers can support caregivers, not just patients
+
+4. RESOURCES: CancerCare caregiver groups (800-813-4673), Lotsa Helping Hands, Caregiver Action Network
+"""
+
+# =============================================================================
+# HOLISTIC WELLNESS (Item 11)
+# =============================================================================
+
+HOLISTIC_WELLNESS_GUIDANCE = """
+HOLISTIC WELLNESS CONTEXT:
+EVIDENCE-BASED WELLNESS INTERVENTIONS for CRC patients:
+
+1. EXERCISE: ASCO and ACS recommend regular activity during and after treatment.
+   - Even 30 minutes of walking 3x/week has documented benefits for fatigue and mood
+   - Ask oncologist about activity restrictions (especially after surgery)
+   - Livestrong at the YMCA: Free cancer-specific fitness programs
+
+2. MIND-BODY PRACTICES:
+   - MBSR: 8-week programs with strong evidence in cancer populations
+   - Yoga for Cancer: Gentle, modified yoga safe during treatment
+   - Progressive muscle relaxation: Can help with procedure anxiety
+
+3. NUTRITION:
+   - Ask for referral to oncology-certified dietitian (RD with CSO certification)
+   - AICR has CRC-specific nutrition guides
+
+4. SOCIAL CONNECTION:
+   - Colontown peer support community (colontown.org): 11,000+ CRC patients
+   - In-person support groups via Cancer Support Community
+"""
+
+# =============================================================================
+# SCREENING AMBASSADOR (Item 9)
+# =============================================================================
+
+SCREENING_AMBASSADOR_GUIDANCE = """
+SCREENING AMBASSADOR CONTEXT:
+When a user mentions a family member, friend, or asks about cancer prevention/screening for others:
+
+1. KEY MESSAGES:
+   - CRC is the #2 cancer killer in the US — but one of the most preventable with early screening
+   - People with a first-degree relative with CRC should start screening at age 40, or 10 years
+     before the relative's diagnosis, whichever is earlier
+   - Screening options (present all equally):
+     * Colonoscopy: Every 10 years; gold standard; removes polyps during the test
+     * FIT test: Annual stool test; non-invasive; done at home
+     * Cologuard: Every 3 years; stool DNA test; FDA-approved
+     * CT Colonography: Every 5 years; non-invasive imaging
+
+2. SHAREABLE FRAMING: "Getting screened means your family doesn't have to go through what you're going through."
+
+3. RESOURCES: CDC Screen for Life (cdc.gov/colorectal-cancer/screening), ACS guidelines, Fight CRC
 """
 
 
@@ -843,14 +1163,23 @@ def select_chunks_within_budget(chunks: list, max_tokens: int) -> str:
 def classify_query_type(message: str) -> str:
     """
     Classify the query into categories to determine what context is relevant.
-    Returns: treatment | side_effect | prognosis | diagnosis | general
+    Returns: clinical_trial | treatment | side_effect | prognosis | diagnosis | general
     """
     message_lower = message.lower()
+
+    clinical_trial_keywords = [
+        'clinical trial', 'clinical trials', 'clinical study', 'clinical studies',
+        'research study', 'research studies', 'experimental treatment',
+        'investigational', 'trial eligibility', 'find trials', 'search trials',
+        'trial options', 'trials near me', 'trial for my cancer',
+        'phase 1', 'phase 2', 'phase 3', 'phase i', 'phase ii', 'phase iii',
+        'nct', 'recruiting', 'enroll in a trial', 'participate in research'
+    ]
 
     treatment_keywords = [
         'treatment', 'therapy', 'chemotherapy', 'chemo', 'radiation', 'surgery',
         'medication', 'drug', 'regimen', 'folfox', 'folfiri', 'immunotherapy',
-        'targeted therapy', 'clinical trial', 'option', 'next step'
+        'targeted therapy', 'option', 'next step'
     ]
 
     side_effect_keywords = [
@@ -875,12 +1204,35 @@ def classify_query_type(message: str) -> str:
         'who am i', 'what do you know', 'patient info'
     ]
 
+    # Caregiver queries (Item 10)
+    caregiver_keywords = [
+        'caregiver', 'caring for', 'my husband', 'my wife', 'my mother', 'my father',
+        'my partner', 'my spouse', 'family member', 'loved one', 'taking care of'
+    ]
+
+    # Screening ambassador queries (Item 9)
+    family_screening_keywords = [
+        'my family', 'my children', 'my kids', 'my sister', 'my brother',
+        'should they get tested', 'genetic risk', 'family screening',
+        'screening for my', 'colonoscopy for'
+    ]
+
+    # Emotional/wellness queries (Items 8, 11)
+    emotional_keywords_classify = [
+        'stress', 'anxious', 'anxiety', 'scared', 'depressed', 'cope', 'coping',
+        'emotional', 'mindfulness', 'meditation', 'wellness', 'yoga', 'exercise'
+    ]
+
     scores = {
+        'clinical_trial': sum(1 for kw in clinical_trial_keywords if kw in message_lower),
         'treatment': sum(1 for kw in treatment_keywords if kw in message_lower),
         'side_effect': sum(1 for kw in side_effect_keywords if kw in message_lower),
         'prognosis': sum(1 for kw in prognosis_keywords if kw in message_lower),
         'diagnosis': sum(1 for kw in diagnosis_keywords if kw in message_lower),
-        'profile': sum(1 for kw in profile_keywords if kw in message_lower)
+        'profile': sum(1 for kw in profile_keywords if kw in message_lower),
+        'caregiver': sum(1 for kw in caregiver_keywords if kw in message_lower),
+        'screening_ambassador': sum(1 for kw in family_screening_keywords if kw in message_lower),
+        'emotional': sum(1 for kw in emotional_keywords_classify if kw in message_lower),
     }
 
     max_score = max(scores.values())
@@ -911,7 +1263,8 @@ def should_suggest_clinical_trials(query_type: str, patient_context: Dict[str, A
     Returns:
         True if clinical trials should be proactively suggested
     """
-    if query_type != 'treatment':
+    # Don't suggest trials if the query is already about clinical trials
+    if query_type not in ('treatment',):
         return False
 
     if not patient_context:
@@ -964,13 +1317,24 @@ def filter_relevant_context(patient_context: Dict[str, Any], query_type: str, me
     if race != 'unspecified':
         full_context.append(f"Race/Ethnicity: {race}")
 
-    # Diagnosis & Stage
+    # Diagnosis & Stage (with colon vs rectal distinction for CT-14)
     cancer_type = patient_context.get('cancer_type', 'unspecified cancer')
+    cancer_label = cancer_type
+    cancer_lower = cancer_type.lower() if cancer_type else ''
+    if 'rectal' in cancer_lower and 'colon' not in cancer_lower:
+        cancer_label = f"{cancer_type} (rectal cancer — treatment may differ from colon cancer)"
+    elif 'colon' in cancer_lower and 'rectal' not in cancer_lower:
+        cancer_label = f"{cancer_type} (colon cancer — not rectal)"
+
     stage = patient_context.get('stage', 'unspecified')
     if stage != 'unspecified':
-        full_context.append(f"Diagnosis: {cancer_type}, stage {stage}")
+        full_context.append(f"Diagnosis: {cancer_label}, stage {stage}")
+        # Advanced disease flag for Stage IV (Item 13)
+        stage_check = str(stage).upper()
+        if any(x in stage_check for x in ['IV', '4']) or 'METASTATIC' in stage_check:
+            full_context.append("ADVANCED DISEASE FLAG: Stage IV — apply palliative care awareness, SPIKES protocol, tone sensitivity")
     else:
-        full_context.append(f"Diagnosis: {cancer_type}")
+        full_context.append(f"Diagnosis: {cancer_label}")
 
     # Treatment Info
     treatments = patient_context.get('current_treatments', [])
@@ -985,6 +1349,21 @@ def filter_relevant_context(patient_context: Dict[str, Any], query_type: str, me
         cycle_info = get_cycle_context(current_regimen, treatment_line, current_cycle)
         if cycle_info:
             full_context.append(f"Treatment status: {cycle_info}")
+
+    # Auto-detect treatment line if not set but regimen is known (Item 2)
+    treatment_line_val = patient_context.get('treatment_line')
+    current_regimen_val = patient_context.get('current_regimen')
+    if not treatment_line_val and current_regimen_val:
+        try:
+            from profile_utils import auto_detect_treatment_line
+            detection = auto_detect_treatment_line(current_regimen_val)
+            if detection.get('detected') and detection.get('confidence') in ('high', 'medium'):
+                confidence_word = "" if detection['confidence'] == 'high' else " (likely)"
+                full_context.append(
+                    f"Treatment line{confidence_word}: {detection['display']} — {detection['note']}"
+                )
+        except ImportError:
+            pass
 
     # Biomarkers
     biomarkers = patient_context.get('biomarkers', 'unspecified')
@@ -1026,31 +1405,38 @@ def filter_relevant_context(patient_context: Dict[str, Any], query_type: str, me
     return " | ".join(full_context)
 
 
-def get_response_settings(response_length: str) -> Dict[str, Any]:
-    """Get max_tokens, temperature, and system message based on response length setting."""
+def get_response_settings(response_length: str, query_type: str = None) -> Dict[str, Any]:
+    """Get max_tokens, temperature, and system message based on response length setting.
+
+    When query_type is 'treatment', token budgets are boosted to accommodate
+    presenting ALL guideline options without truncation.
+    """
     # Use the enhanced system prompt for all response lengths
     base_system = ENHANCED_SYSTEM_PROMPT
+    is_treatment = query_type == 'treatment'
+    is_clinical_trial = query_type == 'clinical_trial'
+    needs_boost = is_treatment or is_clinical_trial
 
     if response_length == "brief":
         return {
-            "max_tokens": 150,
-            "temperature": 0.3,
+            "max_tokens": 200 if needs_boost else 150,
+            "temperature": 0.2 if is_clinical_trial else 0.3,
             "system_message": base_system + "\n\nRESPONSE LENGTH: Brief (1-2 sentences). Be concise but still warm and helpful.",
             "prompt_instruction": "Answer in 1-2 sentences using simple words. Be concise but complete.",
             "include_resources": False  # Don't add resources for brief responses
         }
     elif response_length == "detailed":
         return {
-            "max_tokens": 400,
-            "temperature": 0.4,
+            "max_tokens": 600 if needs_boost else 400,
+            "temperature": 0.2 if is_clinical_trial else 0.4,
             "system_message": base_system + "\n\nRESPONSE LENGTH: Detailed (4-6 sentences). Be thorough. Explain medical terms. Include relevant context.",
             "prompt_instruction": "Answer in 4-6 sentences. Explain any medical terms in plain language. Be thorough.",
             "include_resources": True
         }
     else:  # normal (default)
         return {
-            "max_tokens": 250,
-            "temperature": 0.35,
+            "max_tokens": 400 if needs_boost else 250,
+            "temperature": 0.2 if is_clinical_trial else 0.35,
             "system_message": base_system + "\n\nRESPONSE LENGTH: Normal (2-4 sentences). Balance conciseness with helpfulness.",
             "prompt_instruction": "Answer in 2-4 sentences using simple words. Be clear and helpful.",
             "include_resources": True
@@ -1111,8 +1497,8 @@ def assemble_prompt(message: str, retrieved: list, patient: dict,
         Tuple of (prompt_string, metadata_dict)
         metadata_dict includes urgency info, query_type, etc.
     """
-    settings = get_response_settings(response_length)
     query_type = classify_query_type(message)
+    settings = get_response_settings(response_length, query_type=query_type)
 
     if patient_context is None:
         patient_context = {}
@@ -1141,10 +1527,27 @@ def assemble_prompt(message: str, retrieved: list, patient: dict,
                 implications = get_biomarker_implications(raw_biomarkers)
                 if implications:
                     biomarker_context = "\n\nBIOMARKER IMPLICATIONS (use these to inform your answer):\n"
-                    for impl in implications[:2]:  # Max 2 implications
+                    for impl in implications:
                         biomarker_context += f"• {impl}\n"
             except ImportError:
                 pass  # profile_utils not available
+
+    # ==========================================================================
+    # STEP 3b: Add comorbidity interaction context (Item 1)
+    # ==========================================================================
+    comorbidity_context = ""
+    if query_type in ['treatment', 'side_effect', 'prognosis']:
+        comorbidities = patient_context.get('medical_history', [])
+        if comorbidities:
+            try:
+                from profile_utils import get_comorbidity_interactions
+                interactions = get_comorbidity_interactions(comorbidities, query_type)
+                if interactions:
+                    comorbidity_context = "\n\nCOMORBIDITY INTERACTIONS (personalize your answer with these):\n"
+                    for interaction in interactions:
+                        comorbidity_context += f"• {interaction}\n"
+            except ImportError:
+                pass
 
     # ==========================================================================
     # STEP 4: Add neuropathy guidance if relevant
@@ -1181,6 +1584,19 @@ def assemble_prompt(message: str, retrieved: list, patient: dict,
 
     if is_emotional_question or query_type == 'emotional':
         emotional_context = "\n\n" + EMOTIONAL_SUPPORT_GUIDANCE
+
+    # ==========================================================================
+    # STEP 4h: Tone calibration based on ANP framework (Item 6)
+    # ==========================================================================
+    tone_context = ""
+    tone_sensitivity = 'low'
+    if any(kw in message_lower for kw in TONE_SENSITIVITY_LEVELS['high']):
+        tone_sensitivity = 'high'
+    elif any(kw in message_lower for kw in TONE_SENSITIVITY_LEVELS['medium']):
+        tone_sensitivity = 'medium'
+
+    if tone_sensitivity in ('high', 'medium'):
+        tone_context = f"\n\n{ANP_TONE_INSTRUCTION}\nSENSITIVITY LEVEL: {tone_sensitivity.upper()} — Apply full ANP framework."
 
     # ==========================================================================
     # STEP 4d: Detect bevacizumab in adjuvant setting (V3 Step 7)
@@ -1221,23 +1637,73 @@ This is a reasonable question to bring to their next appointment. It doesn't mea
         fit_test_context = "\n\n" + FIT_TEST_GUIDANCE
 
     # ==========================================================================
-    # STEP 4g: Add prognosis context for stage questions (V4 Step 7)
+    # STEP 4g: Add prognosis context for stage questions (V4 Step 7 + Item 13)
     # ==========================================================================
     prognosis_context = ""
-    stage_keywords = ['stage iii', 'stage 3', 'what stage', 'my stage', 'stage iiib', 'stage 3b']
+    stage_keywords = ['stage iii', 'stage 3', 'what stage', 'my stage', 'stage iiib', 'stage 3b',
+                      'stage iv', 'stage 4', 'prognosis', 'how long', 'survival', 'cure',
+                      'palliative', 'hospice', 'end of life', 'advanced']
     is_stage_question = any(kw in message_lower for kw in stage_keywords)
     stage = patient_context.get('stage', '')
+    stage_upper = str(stage).upper()
 
-    if is_stage_question and stage:
-        stage_upper = stage.upper()
+    # Detect Stage IV
+    is_stage_iv = any(x in stage_upper for x in ['IV', '4']) or 'METASTATIC' in stage_upper
+
+    if is_stage_iv and (is_stage_question or query_type == 'prognosis'):
+        prognosis_context = f"\n\n{STAGE_IV_PALLIATIVE_CONTEXT}"
+        if 'IV' in STAGE_PROGNOSIS_CONTEXT:
+            prognosis_context += f"\n\nPROGNOSIS CONTEXT:\n{STAGE_PROGNOSIS_CONTEXT['IV']}"
+    elif is_stage_question and stage:
         if stage_upper in STAGE_PROGNOSIS_CONTEXT:
             prognosis_context = f"\n\nPROGNOSIS CONTEXT:\n{STAGE_PROGNOSIS_CONTEXT[stage_upper]}"
+
+    # ==========================================================================
+    # STEP 4i: Stress-immune education (Item 8)
+    # ==========================================================================
+    stress_education_context = ""
+    stress_immune_keywords = ['stress', 'immune', 'cortisol', 'mind-body', 'meditation', 'mindfulness', 'relaxation']
+    if any(kw in message_lower for kw in stress_immune_keywords) and query_type in ('emotional', 'general'):
+        stress_education_context = f"\n\n{STRESS_IMMUNE_EDUCATION}"
+
+    # ==========================================================================
+    # STEP 4j: Compassionate use context (Item 12)
+    # ==========================================================================
+    compassionate_use_context = ""
+    exhausted_keywords = ['out of options', 'nothing else', 'no more treatments',
+                           'compassionate use', 'expanded access', 'everything failed',
+                           'third line', 'fourth line', 'last option', 'nothing left']
+    if any(kw in message_lower for kw in exhausted_keywords):
+        compassionate_use_context = f"\n\n{COMPASSIONATE_USE_GUIDANCE}"
+
+    # ==========================================================================
+    # STEP 4k: Caregiver-specific context (Item 10)
+    # ==========================================================================
+    caregiver_context = ""
+    if query_type == 'caregiver':
+        caregiver_context = f"\n\n{CAREGIVER_GUIDANCE}"
+
+    # ==========================================================================
+    # STEP 4l: Screening ambassador context (Item 9)
+    # ==========================================================================
+    ambassador_context = ""
+    if query_type == 'screening_ambassador':
+        ambassador_context = f"\n\n{SCREENING_AMBASSADOR_GUIDANCE}"
+
+    # ==========================================================================
+    # STEP 4m: Holistic wellness context (Item 11)
+    # ==========================================================================
+    wellness_context = ""
+    wellness_keywords = ['yoga', 'exercise', 'mindfulness', 'wellness', 'holistic', 'integrative', 'lifestyle']
+    if any(kw in message_lower for kw in wellness_keywords) and query_type in ('emotional', 'general'):
+        wellness_context = f"\n\n{HOLISTIC_WELLNESS_GUIDANCE}"
 
     # ==========================================================================
     # STEP 5: Format retrieved guidelines with token budget
     # ==========================================================================
     if retrieved:
-        guideline_context = select_chunks_within_budget(retrieved, TOKEN_BUDGET['chunks'])
+        chunk_budget = 2500 if query_type in ('treatment', 'clinical_trial') else TOKEN_BUDGET['chunks']
+        guideline_context = select_chunks_within_budget(retrieved, chunk_budget)
         chunks_used = guideline_context.count('---GUIDELINE EXCERPT---') + 1 if guideline_context else 0
         guideline_note = f"Based on {chunks_used} relevant guideline section(s):"
         logger.info(f"Prompt using {chunks_used} chunks, {count_tokens(guideline_context)} tokens for guidelines")
@@ -1282,6 +1748,10 @@ Provide interim management tips while they await medical consultation."""
     if biomarker_context:
         prompt_parts.append(biomarker_context)
 
+    # Add comorbidity interactions if relevant (Item 1)
+    if comorbidity_context:
+        prompt_parts.append(comorbidity_context)
+
     # Add neuropathy guidance if relevant
     if neuropathy_context:
         prompt_parts.append(neuropathy_context)
@@ -1293,6 +1763,10 @@ Provide interim management tips while they await medical consultation."""
     # Add emotional support guidance if relevant (V3 Step 6)
     if emotional_context:
         prompt_parts.append(emotional_context)
+
+    # Add ANP tone calibration if relevant (Item 6)
+    if tone_context:
+        prompt_parts.append(tone_context)
 
     # Add treatment warning if relevant (V3 Step 7)
     if treatment_warning:
@@ -1309,6 +1783,18 @@ Provide interim management tips while they await medical consultation."""
     # Add prognosis context if relevant (V4 Step 7)
     if prognosis_context:
         prompt_parts.append(prognosis_context)
+
+    # Add Phase 3 contexts (Items 8, 10, 12, 9, 11)
+    if stress_education_context:
+        prompt_parts.append(stress_education_context)
+    if compassionate_use_context:
+        prompt_parts.append(compassionate_use_context)
+    if caregiver_context:
+        prompt_parts.append(caregiver_context)
+    if ambassador_context:
+        prompt_parts.append(ambassador_context)
+    if wellness_context:
+        prompt_parts.append(wellness_context)
 
     prompt_parts.extend([
         "",
@@ -1333,11 +1819,20 @@ Provide interim management tips while they await medical consultation."""
     # Query-specific instructions
     if query_type == 'side_effect':
         prompt_parts.append("• For side effects: provide interim management tips, mention when to contact the care team")
+        prompt_parts.append("• If guidelines mention multiple causes or management approaches for this side effect, list ALL of them - do not narrow to one")
     elif query_type == 'emotional':
         prompt_parts.append("• For emotional concerns: validate feelings, mention oncology social workers and support groups")
+    elif query_type == 'prognosis':
+        prompt_parts.append("• If guidelines mention multiple prognostic factors or outcomes, present ALL of them rather than a single estimate")
+    elif query_type == 'diagnosis':
+        prompt_parts.append("• If guidelines mention multiple diagnostic approaches or tests, list ALL of them - do not pick just one")
     elif query_type == 'treatment':
         prompt_parts.append(TREATMENT_RESPONSE_STRUCTURE)
         prompt_parts.append("• Reference the patient's specific biomarkers when discussing treatment eligibility")
+    elif query_type == 'clinical_trial':
+        prompt_parts.append(CLINICAL_TRIAL_RESPONSE_INSTRUCTIONS)
+        prompt_parts.append("• Reference the patient's specific biomarkers and MSI status when discussing trial relevance")
+        prompt_parts.append("• If structured trial data is provided below, reference those specific trials. If not, discuss trials in general terms only.")
 
     # Add follow-up question suggestions for non-brief responses
     if response_length != "brief":
@@ -1358,6 +1853,7 @@ Provide interim management tips while they await medical consultation."""
         'urgency_detected': urgency_info['detected'],
         'urgency_level': urgency_info.get('urgency'),
         'urgency_pattern': urgency_info.get('pattern'),
+        'urgency_guidance': urgency_info.get('guidance', ''),
         'is_neuropathy_question': is_neuropathy_question,
         'on_oxaliplatin': on_oxaliplatin,
         'include_resources': settings.get('include_resources', True)
@@ -1534,6 +2030,13 @@ def validate_response(response: str, user_question: str, patient_context: Dict[s
         # Emergency disclaimer already added by enhanced_medical_validation
         return validation_result
 
+    # CT-02: Check for potentially hallucinated NCT numbers in LLM-generated text
+    import re
+    nct_matches = re.findall(r'NCT\d{7,8}', current_response)
+    if nct_matches:
+        logger.warning(f"LLM response contains NCT numbers: {nct_matches} — verify these are from API data, not hallucinated")
+        validation_result['warnings'].append(f"Contains NCT numbers: {nct_matches}")
+
     # Use smart disclaimer logic
     needs_disclaimer, disclaimer_type = should_add_disclaimer(user_question, current_response)
 
@@ -1567,7 +2070,7 @@ def select_model_for_query(query: str, query_type: str, response_length: str) ->
 
     # Complex query indicators -> use larger Together model
     complex_indicators = [
-        query_type in ['treatment', 'prognosis'],  # Medical decision topics
+        query_type in ['treatment', 'prognosis', 'clinical_trial'],  # Medical decision topics
         'why' in query_lower,                      # Explanatory questions
         'should i' in query_lower,                 # Decision-making questions
         'compare' in query_lower,                  # Comparative analysis
@@ -1603,7 +2106,7 @@ def call_llm(prompt: str, response_length: str = "normal", temperature: float = 
 
     Returns: (response_text, api_used)
     """
-    settings = get_response_settings(response_length)
+    settings = get_response_settings(response_length, query_type=query_type)
 
     # Use settings temperature unless explicitly overridden
     effective_temperature = temperature if temperature is not None else settings["temperature"]

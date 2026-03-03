@@ -35,7 +35,8 @@ from llm_utils import (
     extract_profile_updates_from_query, get_relevant_resources
 )
 from clinical_trials import (
-    search_trials_for_patient, format_trials_for_chat, is_clinical_trial_query
+    search_trials_for_patient, format_trials_for_chat, is_clinical_trial_query,
+    validate_trial_search_readiness
 )
 
 # -------------------------
@@ -400,6 +401,10 @@ def api_chat():
         if not message:
             return jsonify({"error": "No message provided"}), 400
 
+        # Enforce max message length (safety net for frontend maxlength)
+        if len(message) > 2000:
+            message = message[:2000]
+
         # Sanitize PII from user message (compliance)
         original_message = message
         message, pii_warnings = sanitize_query(message)
@@ -437,11 +442,15 @@ def api_chat():
                         mismatch_detected = True
                         break
 
+        # Classify query type early so we can adjust chunk retrieval
+        query_type = classify_query_type(message)
+        effective_top_k = 8 if query_type in ('treatment', 'clinical_trial') else 5
+
         # Search relevant chunks
         retrieved = []
         try:
-            retrieved = search_chunks(message, indexed_chunks, top_k=5)
-            logger.info(f"search_chunks returned {len(retrieved)} chunks")
+            retrieved = search_chunks(message, indexed_chunks, top_k=effective_top_k)
+            logger.info(f"search_chunks returned {len(retrieved)} chunks (top_k={effective_top_k}, query_type={query_type})")
         except Exception:
             logger.exception("search_chunks failed")
 
@@ -462,10 +471,7 @@ def api_chat():
                 "debug_info": llm_status
             }), 500
 
-        # Classify query type for smart routing
-        query_type = classify_query_type(message)
-
-        # Call LLM with smart routing
+        # Call LLM with smart routing (query_type already classified above)
         try:
             answer, api_used = call_llm(prompt, response_length, query=message, query_type=query_type)
             if not answer:
@@ -496,22 +502,35 @@ def api_chat():
             if is_clinical_trial_query(message) and patient_context:
                 try:
                     logger.info(f"Clinical trial query detected for user {user_id}")
-                    trials_result = search_trials_for_patient(patient_context, max_results=5)
-                    if not trials_result.get("error"):
-                        # Return full trials data for frontend rendering
+
+                    # Pre-search validation: check if profile has enough data
+                    readiness = validate_trial_search_readiness(patient_context)
+                    if not readiness["ready"]:
                         clinical_trials_data = {
-                            "found": len(trials_result.get("trials", [])),
-                            "total": trials_result.get("total_found", 0),
-                            "trials": trials_result.get("trials", []),
-                            "search_criteria": trials_result.get("search_criteria", {})
+                            "error": "incomplete_profile",
+                            "message": readiness["prompt_message"],
+                            "missing_critical": readiness["missing_critical"],
+                            "missing_helpful": readiness["missing_helpful"]
                         }
-                        logger.info(f"Found {clinical_trials_data['found']} clinical trials for user")
-                    elif trials_result.get("error") == "no_zip_code":
-                        # Return error state so frontend can show appropriate message
-                        clinical_trials_data = {
-                            "error": "no_zip_code",
-                            "message": "To search for clinical trials near you, please add your zip code to your profile."
-                        }
+                    else:
+                        trials_result = search_trials_for_patient(patient_context, max_results=5)
+                        if not trials_result.get("error"):
+                            # Return full trials data for frontend rendering
+                            clinical_trials_data = {
+                                "found": len(trials_result.get("trials", [])),
+                                "total": trials_result.get("total_found", 0),
+                                "trials": trials_result.get("trials", []),
+                                "search_criteria": trials_result.get("search_criteria", {})
+                            }
+                            # Include profile completeness tip if helpful fields are missing
+                            if readiness.get("prompt_message"):
+                                clinical_trials_data["profile_completeness"] = readiness["prompt_message"]
+                            logger.info(f"Found {clinical_trials_data['found']} clinical trials for user")
+                        elif trials_result.get("error") == "no_zip_code":
+                            clinical_trials_data = {
+                                "error": "no_zip_code",
+                                "message": "To search for clinical trials near you, please add your zip code to your profile."
+                            }
                 except Exception as e:
                     logger.error(f"Error searching clinical trials: {e}", exc_info=True)
 
@@ -586,6 +605,11 @@ def api_chat():
                 "guidelines_used": guidelines_used,
                 "has_guidelines": len(guidelines_used) > 0,
                 "clinical_trials": clinical_trials_data,
+                "urgency": {
+                    "detected": prompt_metadata.get('urgency_detected', False),
+                    "level": prompt_metadata.get('urgency_level'),
+                    "guidance": prompt_metadata.get('urgency_guidance', '')
+                } if prompt_metadata.get('urgency_detected') else None,
                 "debug_info": {
                     "api_used": api_used,
                     "retrieved_count": len(retrieved),
@@ -618,6 +642,41 @@ def api_chat():
         return jsonify({"error": str(e)}), 500
 
 # -------------------------
+# Feedback Route
+# -------------------------
+@app.route("/api/feedback", methods=["POST"])
+def api_feedback():
+    """Save user feedback on bot responses."""
+    try:
+        user_id = get_user_id()
+        if not user_id:
+            return jsonify({"error": "Unauthorized"}), 401
+
+        data = request.get_json(silent=True) or {}
+        rating = data.get("rating")  # "up" or "down"
+        message_preview = data.get("message_preview", "")[:200]
+
+        if rating not in ("up", "down"):
+            return jsonify({"error": "Invalid rating"}), 400
+
+        # Store in Supabase chat_feedback table (create if needed)
+        try:
+            client = get_supabase_client()
+            client.table("chat_feedback").insert({
+                "user_id": user_id,
+                "rating": rating,
+                "message_preview": message_preview
+            }).execute()
+        except Exception as e:
+            # Table may not exist yet — log but don't fail
+            logger.warning(f"Could not save feedback (table may not exist): {e}")
+
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        logger.exception("Feedback error")
+        return jsonify({"error": str(e)}), 500
+
+# -------------------------
 # Data Sources Route
 # -------------------------
 @app.route("/api/data_sources", methods=["GET"])
@@ -634,6 +693,80 @@ def api_data_sources():
         })
     except Exception as e:
         logger.exception("get_data_sources error")
+        return jsonify({"error": str(e)}), 500
+
+
+# -------------------------
+# Screening Endpoints (Items 3, 4, 5 - PHQ-9/GAD-7/PSS-10/ISI)
+# -------------------------
+@app.route("/api/screening/save", methods=["POST"])
+@require_auth
+def api_save_screening():
+    """Save a completed screening instrument score."""
+    try:
+        user_id = request.user["user_id"]
+        data = request.get_json(silent=True) or {}
+
+        instrument = data.get('instrument')  # PHQ9, GAD7, PSS10, ISI
+        scores = data.get('scores', {})
+        total_score = data.get('total_score')
+        severity_label = data.get('severity_label', '')
+
+        if not instrument or total_score is None:
+            return jsonify({"error": "instrument and total_score required"}), 400
+
+        valid_instruments = ['PHQ9', 'GAD7', 'PSS10', 'ISI']
+        if instrument not in valid_instruments:
+            return jsonify({"error": f"instrument must be one of {valid_instruments}"}), 400
+
+        # Crisis check: PHQ-9 Q9 (suicidal ideation)
+        is_crisis = False
+        crisis_resources = None
+        if instrument == 'PHQ9':
+            q9_score = scores.get('q9', 0)
+            if isinstance(q9_score, (int, float)) and q9_score >= 1:
+                is_crisis = True
+                crisis_resources = {
+                    "message": "You indicated thoughts of self-harm. Please reach out for support immediately.",
+                    "resources": [
+                        {"name": "988 Suicide & Crisis Lifeline", "contact": "Call or text 988"},
+                        {"name": "Crisis Text Line", "contact": "Text HOME to 741741"},
+                        {"name": "Emergency Services", "contact": "Call 911"}
+                    ]
+                }
+
+        from supabase_storage import save_screening_score
+        success = save_screening_score(user_id, instrument, scores, total_score, severity_label)
+
+        return jsonify({
+            "status": "ok" if success else "error",
+            "is_crisis": is_crisis,
+            "crisis_resources": crisis_resources,
+            "total_score": total_score,
+            "severity_label": severity_label
+        })
+    except Exception as e:
+        logger.exception("Screening save error")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/screening/load", methods=["GET"])
+@require_auth
+def api_load_screening():
+    """Load most recent screening scores for all instruments."""
+    try:
+        user_id = request.user["user_id"]
+        from supabase_storage import load_latest_screening_score
+
+        result = {}
+        for instrument in ['PHQ9', 'GAD7', 'PSS10', 'ISI']:
+            score_data = load_latest_screening_score(user_id, instrument)
+            if score_data:
+                result[instrument] = score_data
+
+        return jsonify({"status": "ok", "scores": result})
+    except Exception as e:
+        logger.exception("Screening load error")
         return jsonify({"error": str(e)}), 500
 
 
@@ -659,10 +792,13 @@ def api_clinical_trials():
         # Extract patient context
         patient_context = extract_patient_context_complex(profile)
 
-        # Check for zip code
-        if not patient_context.get("zip_code") or patient_context.get("zip_code") == "unspecified":
+        # Validate profile readiness for trial search
+        readiness = validate_trial_search_readiness(patient_context)
+        if not readiness["ready"]:
             return jsonify({
-                "error": "Please add your zip code to your profile for location-based trial search.",
+                "error": readiness["prompt_message"],
+                "missing_critical": readiness["missing_critical"],
+                "missing_helpful": readiness["missing_helpful"],
                 "trials": []
             }), 400
 

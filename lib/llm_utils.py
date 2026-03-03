@@ -1193,7 +1193,9 @@ def classify_query_type(message: str) -> str:
     prognosis_keywords = [
         'prognosis', 'survival', 'outcome', 'life expectancy', 'cure',
         'remission', 'progression', 'spread', 'metastasis', 'stage',
-        'how long', 'will i', 'chance', 'likely'
+        'how long', 'will i', 'chance', 'likely',
+        'going to die', 'will i die', 'am i dying', 'die from',
+        'hope for', 'any hope'
     ]
 
     diagnosis_keywords = [
@@ -1226,7 +1228,9 @@ def classify_query_type(message: str) -> str:
     # Emotional/wellness queries (Items 8, 11)
     emotional_keywords_classify = [
         'stress', 'anxious', 'anxiety', 'scared', 'depressed', 'cope', 'coping',
-        'emotional', 'mindfulness', 'meditation', 'wellness', 'yoga', 'exercise'
+        'emotional', 'mindfulness', 'meditation', 'wellness', 'yoga', 'exercise',
+        'giving up', 'hopeless', 'overwhelmed', 'crying', 'can\'t stop',
+        'feeling down', 'losing hope', 'afraid', 'worried', 'immune system'
     ]
 
     # Weighted scoring: multi-word phrases get bonus to beat single-word overlaps
@@ -1257,6 +1261,21 @@ def classify_query_type(message: str) -> str:
                      'numbness', 'tingling', 'mouth sores', 'hair loss', 'constipation']
     if any(sw in message_lower for sw in symptom_words):
         scores['side_effect'] += 3
+
+    # Boost: caregiver context overrides side_effect when caring-for language present
+    if scores['caregiver'] > 0 and any(kw in message_lower for kw in
+            ['help my', 'my wife', 'my husband', 'caring for', 'caregiver', 'my mother', 'my father']):
+        scores['caregiver'] += 3
+
+    # Boost: clinical trial context for trial-related questions
+    if 'trial' in message_lower or 'randomized' in message_lower or 'placebo' in message_lower:
+        scores['clinical_trial'] += 2
+
+    # Boost: treatment when drug names or "safe" + drug mentioned
+    treatment_drug_names = ['bevacizumab', 'cetuximab', 'panitumumab', 'regorafenib', 'pembrolizumab',
+                            'nivolumab', 'encorafenib', 'capecitabine', 'oxaliplatin', 'irinotecan']
+    if any(d in message_lower for d in treatment_drug_names):
+        scores['treatment'] += 2
 
     max_score = max(scores.values())
     if max_score == 0:
@@ -1368,7 +1387,6 @@ def filter_relevant_context(patient_context: Dict[str, Any], query_type: str, me
     treatment_line = patient_context.get('treatment_line')
     current_regimen = patient_context.get('current_regimen')
     if current_cycle and current_regimen:
-        from lib.llm_utils import get_cycle_context
         cycle_info = get_cycle_context(current_regimen, treatment_line, current_cycle)
         if cycle_info:
             full_context.append(f"Treatment status: {cycle_info}")

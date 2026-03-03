@@ -1,0 +1,46 @@
+{
+  "patient": {
+    "name": "Maria Santos",
+    "dob": "1958-11-22",
+    "sex": "Female",
+    "ecog": 2,
+    "allergies": "None",
+    "comorbidities": ["Heart disease", "Kidney disease"]
+  },
+  "primaryDiagnosis": {
+    "site": "Ascending Colon",
+    "histology": "Adenocarcinoma",
+    "stage": "IV",
+    "dateOfDiagnosis": "2024-01-20",
+    "biomarkers": {
+      "KRAS": "Wild-type",
+      "NRAS": "Wild-type",
+      "BRAF": "V600E mutation",
+      "MSI": "MSI-H (Microsatellite Instability-High)",
+      "HER2": "Negative",
+      "MMR": "Deficient (dMMR)"
+    }
+  },
+  "treatments": [
+    {
+      "line": "Third-line",
+      "regimen": "Regorafenib",
+      "status": "active",
+      "startDate": "2025-10-15",
+      "cycleNumber": 3,
+      "toxicities": [
+        {"event": "Hand-foot syndrome", "grade": 2},
+        {"event": "Fatigue", "grade": 2},
+        {"event": "Diarrhea", "grade": 1}
+      ]
+    }
+  ],
+  "surgicalHistory": [
+    {
+      "procedure": "Right Hemicolectomy",
+      "date": "2024-02-15",
+      "outcome": "R1 resection, liver metastases present"
+    }
+  ],
+  "symptoms": ["Persistent fatigue", "Abdominal discomfort", "Poor sleep", "Anxiety"]
+}

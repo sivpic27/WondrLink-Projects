@@ -261,18 +261,14 @@ def load_all_chunks() -> List[Dict[str, Any]]:
             # Select only columns we know exist. 'chunk_text' corresponds to 'content' in usage.
             # We must NOT select 'content' if it doesn't exist in the schema.
             result = client.table('pdf_chunks') \
-                .select('filename, chunk_index, chunk_text') \
+                .select('document_id, chunk_index, content') \
                 .order('document_id') \
                 .order('chunk_index') \
                 .range(offset, offset + page_size - 1) \
                 .execute()
 
             if result.data:
-                # normalize content
                 for row in result.data:
-                    # Prefer content, fallback to chunk_text
-                    text = row.get('content') or row.get('chunk_text') or ""
-                    row['content'] = text
                     all_chunks.append(row)
 
             offset += page_size

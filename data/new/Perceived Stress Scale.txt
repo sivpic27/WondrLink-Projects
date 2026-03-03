@@ -1,0 +1,43 @@
+Perceived Stress Scale  
+ Why it’s considered the gold standard:
+Developed by Cohen, Kamarck & Mermelstein (1983)
+Measures perceived stress (how unpredictable, uncontrollable, and overloaded life feels)
+Validated across:
+General adult populations
+Medical patients
+Cancer populations
+International translations
+Strong internal consistency (Cronbach α typically 0.78–0.91)
+Correlates with:
+Cortisol levels
+Immune biomarkers
+Depression/anxiety scales
+Cardiovascular outcomes
+📋 Versions Available
+👉 PSS-10 is the most widely validated and recommended version.
+📊 What It Measures
+It assesses how often in the last month someone felt:
+Upset by unexpected events
+Unable to control important things
+Nervous or stressed
+Confident in handling problems (reverse scored)
+That difficulties were piling up
+Score range (PSS-10): 0–40
+0–13 → Low stress
+14–26 → Moderate stress
+27–40 → High stress
+Other Highly Validated Stress Scales
+2. Depression Anxiety Stress Scales (DASS-21 Stress Subscale)
+21 total items (7 stress items)
+Often used in clinical psychology
+Measures physiological arousal and tension
+3. Holmes and Rahe Stress Scale
+Measures life event stress load
+Less about perceived stress; more about objective stress exposure
+📌 Clinical & Research Recommendation
+For:
+Clinical screening
+Cancer populations
+Community health screening apps
+Longitudinal tracking
+➡️ PSS-10 is the most validated, efficient, and widely accepted tool.

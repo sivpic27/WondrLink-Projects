@@ -1343,17 +1343,10 @@ def filter_relevant_context(patient_context: Dict[str, Any], query_type: str, me
 
     full_context = []
 
-    # Demographics
-    name = patient_context.get('patient_name')
+    # Demographics (de-identified: no name, no zip code)
     age = patient_context.get('age')
-    if name and age:
-        full_context.append(f"Patient: {name}, {age} years old")
-    elif name:
-        full_context.append(f"Patient: {name}")
-
-    zip_code = patient_context.get('zip_code', 'unspecified')
-    if zip_code != 'unspecified':
-        full_context.append(f"Location: {zip_code}")
+    if age:
+        full_context.append(f"Patient: {age} years old")
         
     race = patient_context.get('race_ethnicity', 'unspecified')
     if race != 'unspecified':
@@ -1543,6 +1536,14 @@ def assemble_prompt(message: str, retrieved: list, patient: dict,
 
     if patient_context is None:
         patient_context = {}
+
+    # ==========================================================================
+    # STEP 0: De-identify patient data before sending to external LLM APIs
+    # ==========================================================================
+    from deidentify import deidentify_patient_context, deidentify_raw_profile, deidentify_conversation_context
+    patient_context = deidentify_patient_context(patient_context)
+    patient = deidentify_raw_profile(patient)
+    conversation_context = deidentify_conversation_context(conversation_context)
 
     # ==========================================================================
     # STEP 1: Detect symptom urgency FIRST

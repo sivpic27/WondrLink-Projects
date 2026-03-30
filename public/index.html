@@ -3641,11 +3641,11 @@
             </div>
             <div class="acknowledgement-title">Important Information</div>
             <div class="acknowledgement-text">
-                <p><strong>WondrLink</strong> is an educational support tool designed specifically for colon cancer
-                    patients.</p>
+                <p><strong>WondrLink</strong> is a health education tool designed specifically for colon cancer
+                    patients and their caregivers.</p>
                 <p>This tool provides information to help you understand your diagnosis, treatment options, and care
-                    journey. However, it is <strong>not a substitute for professional medical advice</strong>.</p>
-                <p>Always consult your healthcare team for medical decisions.</p>
+                    journey. It is <strong>not a substitute for professional medical advice, diagnosis, or treatment</strong>.</p>
+                <p>Always consult your healthcare team for medical decisions. If you use our screening tools (PHQ-9, GAD-7, PSS-10, ISI), please share your results with your healthcare provider.</p>
                 <p style="font-size:12px; margin-top:12px;"><a href="#" onclick="showPolicyModal('privacyOverlay'); return false;" style="color:var(--primary);">Privacy Policy</a> &middot; <a href="#" onclick="showPolicyModal('termsOverlay'); return false;" style="color:var(--primary);">Terms of Use</a></p>
             </div>
             <div class="acknowledgement-checkbox">
@@ -7208,11 +7208,11 @@
                     'Thoughts that you would be better off dead, or of hurting yourself in some way'
                 ],
                 severity: [
-                    { max: 4, label: 'minimal', message: 'Your score suggests minimal depression symptoms.' },
-                    { max: 9, label: 'mild', message: 'Your score suggests mild depression symptoms. Consider mentioning this to your care team at your next visit.' },
-                    { max: 14, label: 'moderate', message: 'Your score suggests moderate depression symptoms. We recommend discussing this with your oncologist or a counselor.' },
-                    { max: 19, label: 'moderately severe', message: 'Your score suggests moderately severe depression. Please talk to your care team soon.' },
-                    { max: 27, label: 'severe', message: 'Your score suggests severe depression. Please reach out to your care team or a mental health professional today.' }
+                    { max: 4, label: 'minimal', message: 'Your PHQ-9 score falls in the minimal range. Share this result with your healthcare provider at your next visit.' },
+                    { max: 9, label: 'mild', message: 'Your PHQ-9 score falls in the mild range. Share this result with your healthcare provider at your next visit.' },
+                    { max: 14, label: 'moderate', message: 'Your PHQ-9 score falls in the moderate range. Share this result with your healthcare provider.' },
+                    { max: 19, label: 'moderately severe', message: 'Your PHQ-9 score falls in the moderately severe range. Share this result with your healthcare provider.' },
+                    { max: 27, label: 'severe', message: 'Your PHQ-9 score falls in the severe range. Share this result with your healthcare provider.' }
                 ],
                 crisis_question_index: 8
             },
@@ -7236,10 +7236,10 @@
                     'Feeling afraid, as if something awful might happen'
                 ],
                 severity: [
-                    { max: 4, label: 'minimal', message: 'Your score suggests minimal anxiety symptoms.' },
-                    { max: 9, label: 'mild', message: 'Your score suggests mild anxiety. Consider mentioning this at your next appointment.' },
-                    { max: 14, label: 'moderate', message: 'Your score suggests moderate anxiety. We recommend discussing this with your care team.' },
-                    { max: 21, label: 'severe', message: 'Your score suggests severe anxiety. Please talk to your care team or a counselor.' }
+                    { max: 4, label: 'minimal', message: 'Your GAD-7 score falls in the minimal range. Share this result with your healthcare provider at your next visit.' },
+                    { max: 9, label: 'mild', message: 'Your GAD-7 score falls in the mild range. Share this result with your healthcare provider at your next visit.' },
+                    { max: 14, label: 'moderate', message: 'Your GAD-7 score falls in the moderate range. Share this result with your healthcare provider.' },
+                    { max: 21, label: 'severe', message: 'Your GAD-7 score falls in the severe range. Share this result with your healthcare provider.' }
                 ]
             },
             PSS10: {
@@ -7267,9 +7267,9 @@
                     'Felt difficulties were piling up so high that you could not overcome them?'
                 ],
                 severity: [
-                    { max: 13, label: 'low', message: 'Your stress level appears manageable. Keep using your coping strategies.' },
-                    { max: 26, label: 'moderate', message: 'You are experiencing moderate stress. This is very common during cancer treatment. Consider exploring stress management resources.' },
-                    { max: 40, label: 'high', message: 'Your stress level is elevated. Please let your care team know — support is available and effective.' }
+                    { max: 13, label: 'low', message: 'Your PSS-10 score falls in the low perceived stress range. Share this result with your healthcare provider at your next visit.' },
+                    { max: 26, label: 'moderate', message: 'Your PSS-10 score falls in the moderate perceived stress range. Share this result with your healthcare provider.' },
+                    { max: 40, label: 'high', message: 'Your PSS-10 score falls in the high perceived stress range. Share this result with your healthcare provider.' }
                 ]
             },
             ISI: {
@@ -7293,10 +7293,10 @@
                     'To what extent do you consider your sleep problem to interfere with your daily functioning?'
                 ],
                 severity: [
-                    { max: 7, label: 'no insomnia', message: 'Your sleep appears to be within normal range.' },
-                    { max: 14, label: 'subthreshold', message: 'You have some sleep difficulties. This is common during cancer treatment. Good sleep hygiene can help.' },
-                    { max: 21, label: 'moderate insomnia', message: 'You have moderate insomnia. Please mention this to your care team — effective treatments like CBT-I are available.' },
-                    { max: 28, label: 'severe insomnia', message: 'Severe insomnia detected. Please discuss sleep support with your oncologist. CBT-I is recommended as first-line treatment.' }
+                    { max: 7, label: 'no clinically significant insomnia', message: 'Your ISI score falls in the no clinically significant insomnia range. Share this result with your healthcare provider at your next visit.' },
+                    { max: 14, label: 'subthreshold insomnia', message: 'Your ISI score falls in the subthreshold insomnia range. Share this result with your healthcare provider.' },
+                    { max: 21, label: 'moderate insomnia', message: 'Your ISI score falls in the moderate clinical insomnia range. Share this result with your healthcare provider.' },
+                    { max: 28, label: 'severe insomnia', message: 'Your ISI score falls in the severe clinical insomnia range. Share this result with your healthcare provider.' }
                 ]
             }
         };

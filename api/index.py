@@ -27,7 +27,7 @@ from profile_utils import (
     extract_patient_context_complex, format_patient_summary_complex,
     set_profile, get_profile, parse_profile_json
 )
-from pdf_utils import search_chunks
+from pdf_utils import search_chunks, hybrid_search
 from llm_utils import (
     assemble_prompt, call_llm, classify_query_type,
     trim_incomplete_sentence, validate_response, enhanced_medical_validation,
@@ -446,13 +446,17 @@ def api_chat():
         query_type = classify_query_type(message)
         effective_top_k = 8 if query_type in ('treatment', 'clinical_trial') else 5
 
-        # Search relevant chunks
+        # Search relevant chunks (hybrid: TF + vector with RRF)
         retrieved = []
         try:
-            retrieved = search_chunks(message, indexed_chunks, top_k=effective_top_k)
-            logger.info(f"search_chunks returned {len(retrieved)} chunks (top_k={effective_top_k}, query_type={query_type})")
+            retrieved = hybrid_search(message, indexed_chunks, top_k=effective_top_k)
+            logger.info(f"hybrid_search returned {len(retrieved)} chunks (top_k={effective_top_k}, query_type={query_type})")
         except Exception:
-            logger.exception("search_chunks failed")
+            logger.exception("hybrid_search failed, falling back to TF-only")
+            try:
+                retrieved = search_chunks(message, indexed_chunks, top_k=effective_top_k)
+            except Exception:
+                logger.exception("search_chunks also failed")
 
         # Assemble prompt
         if mismatch_detected:

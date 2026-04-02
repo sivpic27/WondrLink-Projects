@@ -327,6 +327,81 @@ def search_chunks(query: str, chunks: List[Any], top_k: int = 5) -> List[Any]:
     return result_chunks
 
 
+def hybrid_search(query: str, chunks: List[Any], top_k: int = 5) -> List[Any]:
+    """
+    Hybrid search combining TF-based keyword search and vector similarity search
+    using Reciprocal Rank Fusion (RRF).
+
+    RRF formula: score = sum(1 / (k + rank)) where k=60
+    This merges ranked results from both retrieval methods without needing
+    score normalization or tuning.
+
+    Falls back to TF-only search if vector search is unavailable.
+
+    Args:
+        query: The user's query text
+        chunks: All loaded chunks (for TF search)
+        top_k: Number of results to return
+
+    Returns:
+        List of chunk content strings (same format as search_chunks)
+    """
+    RRF_K = 60  # Standard RRF constant
+
+    # 1. Run TF-based keyword search (existing method)
+    tf_results = search_chunks(query, chunks, top_k=top_k * 2)
+
+    # 2. Run vector search
+    try:
+        from vector_search import vector_search as vs
+        vector_results = vs(query, top_k=top_k * 2, threshold=0.3)
+    except Exception as e:
+        logger.warning(f"Vector search unavailable, using TF-only: {e}")
+        vector_results = []
+
+    # If no vector results, fall back to TF-only
+    if not vector_results:
+        logger.info("Hybrid search: TF-only (no vector results)")
+        return tf_results[:top_k]
+
+    # 3. Build RRF scores
+    # Map chunk content to RRF score
+    rrf_scores = {}
+    chunk_map = {}  # content -> original chunk object
+
+    # Score TF results
+    for rank, chunk in enumerate(tf_results):
+        if isinstance(chunk, dict):
+            content = chunk.get('content', '') or ''
+        else:
+            content = str(chunk)
+
+        key = content[:200]  # Use first 200 chars as dedup key
+        rrf_scores[key] = rrf_scores.get(key, 0) + 1.0 / (RRF_K + rank + 1)
+        chunk_map[key] = chunk
+
+    # Score vector results
+    for rank, result in enumerate(vector_results):
+        content = result.get('content', '')
+        key = content[:200]
+        rrf_scores[key] = rrf_scores.get(key, 0) + 1.0 / (RRF_K + rank + 1)
+        if key not in chunk_map:
+            chunk_map[key] = content  # Store as string if not already mapped
+
+    # 4. Sort by RRF score and return top_k
+    sorted_keys = sorted(rrf_scores.keys(), key=lambda k: rrf_scores[k], reverse=True)
+
+    results = []
+    for key in sorted_keys[:top_k]:
+        results.append(chunk_map[key])
+
+    tf_count = len(tf_results)
+    vec_count = len(vector_results)
+    logger.info(f"Hybrid search: TF={tf_count}, Vector={vec_count}, RRF merged → {len(results)} results")
+
+    return results
+
+
 def process_pdf(path: str) -> List[str]:
     """Extract text from PDF and chunk it with overlap."""
     logger.info("Processing PDF: %s", path)

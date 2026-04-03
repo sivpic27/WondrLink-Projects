@@ -7739,7 +7739,9 @@
                         <div class="dashboard-chart-title">${config.label}</div>
                         <div class="dashboard-chart-subtitle">Latest: ${latestScore} (${latestLabel}) &mdash; ${formatDate(latest.completed_at)}</div>
                         ${retakePrompt}
-                        <canvas id="chart_${key}" height="${data.length > 1 ? 160 : 60}"></canvas>
+                        <div style="position:relative;height:${data.length > 1 ? 180 : 60}px;width:100%;">
+                            <canvas id="chart_${key}"></canvas>
+                        </div>
                         <div class="dashboard-narrative">${narrative}</div>
                     </div>`;
             }

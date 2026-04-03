@@ -146,6 +146,49 @@ WondrChat 2.1 adds a HIPAA de-identification layer that strips all Protected Hea
 
 ---
 
+---
+
+## PRO-CTCAE Symptom Tracking
+
+**Problem:** Side effect monitoring is reactive — patients only report symptoms when they remember to mention them in chat. Published evidence shows PRO-CTCAE-based symptom tracking with automated alerts reduces hospitalizations by 39% and costs by $1,146 per patient (Patt et al., JCO 2023).
+
+**Solution:** 10-item symptom check-in using PRO-CTCAE severity scale, integrated into the existing screening engine, dashboard, and chat context.
+
+### Symptoms Tracked
+
+| Symptom | Why |
+|---------|-----|
+| Nausea | FOLFOX/FOLFIRI common |
+| Fatigue | Most reported side effect across all regimens |
+| Diarrhea | Irinotecan, 5-FU, targeted therapy |
+| Neuropathy | Oxaliplatin dose-limiting toxicity |
+| Pain | General cancer + treatment-related |
+| Appetite loss | Chemotherapy-induced |
+| Mouth sores | 5-FU, capecitabine |
+| Hand-foot syndrome | Capecitabine, regorafenib |
+| Constipation | Opioids, ondansetron |
+| Skin rash | Anti-EGFR (cetuximab, panitumumab) |
+
+### Severity Scale
+None (0) / Mild (1) / Moderate (2) / Severe (3) / Very Severe (4)
+
+### Grade 3+ Toxicity Alert
+When any individual symptom is rated Severe or Very Severe, an immediate alert displays the specific symptom names and instructs: "Contact your oncology team today to report these symptoms."
+
+### Chat Integration
+When a patient asks about side effects or treatment, the LLM prompt automatically includes their most recent symptom check-in data (moderate+ symptoms only), so the AI can reference what they've actually reported.
+
+### Dashboard
+Symptom burden trends appear in the "View Trends" dashboard alongside mental health instruments, with the same severity-banded chart format.
+
+**Files:**
+- Modified: `public/index.html` (SYMPTOM instrument, toxicity alert, sidebar button)
+- Modified: `api/index.py` (symptom context injection, SYMPTOM in load endpoint)
+- Modified: `lib/llm_utils.py` (symptom report in filter_relevant_context)
+- Modified: `lib/supabase_storage.py` (SYMPTOM in history instruments)
+
+---
+
 ## Commits
 
 ```
@@ -153,4 +196,5 @@ b77c787 Add HIPAA de-identification layer and update screening language
 7160cf1 Implement hybrid RAG with pgvector and add version docs
 ba3f657 Add mental health trend dashboard with severity-banded charts
 b3e0958 Fix dashboard chart infinite resize loop
+c262cc4 Add PRO-CTCAE symptom tracking with dashboard and chat integration
 ```

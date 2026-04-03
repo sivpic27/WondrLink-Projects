@@ -783,7 +783,7 @@ def api_load_screening():
         from supabase_storage import load_latest_screening_score
 
         result = {}
-        for instrument in ['PHQ9', 'GAD7', 'PSS10', 'ISI', 'SYMPTOM']:
+        for instrument in ['PHQ9', 'GAD7', 'PSS10', 'ISI', 'SYMPTOM', 'PREMM5']:
             score_data = load_latest_screening_score(user_id, instrument)
             if score_data:
                 result[instrument] = score_data
@@ -805,6 +805,39 @@ def api_screening_history():
         return jsonify({"status": "ok", "history": history})
     except Exception as e:
         logger.exception("Screening history error")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/surveillance", methods=["GET"])
+@require_auth
+def api_surveillance():
+    """Generate personalized surveillance schedule from patient profile."""
+    try:
+        user_id = request.user["user_id"]
+        from supabase_storage import load_profile
+        profile = load_profile(user_id)
+        if not profile:
+            return jsonify({"status": "ok", "schedule": None, "message": "No profile found"})
+
+        stage = profile.get('primaryDiagnosis', {}).get('stage', '')
+        surgery_date = None
+        for s in profile.get('surgicalHistory', []):
+            if isinstance(s, dict) and s.get('date'):
+                surgery_date = s['date']
+                break
+
+        diagnosis_date = profile.get('primaryDiagnosis', {}).get('dateOfDiagnosis')
+
+        if not stage or not surgery_date:
+            return jsonify({"status": "ok", "schedule": None,
+                           "message": "Stage and surgery date needed for surveillance schedule"})
+
+        from surveillance import generate_surveillance_schedule
+        schedule = generate_surveillance_schedule(stage, surgery_date,
+                                                   diagnosis_date=diagnosis_date)
+        return jsonify({"status": "ok", **schedule})
+    except Exception as e:
+        logger.exception("Surveillance error")
         return jsonify({"error": str(e)}), 500
 
 

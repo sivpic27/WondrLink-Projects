@@ -4095,6 +4095,19 @@
                                 Copy Message
                             </button>
                         </div>
+                        <button onclick="startScreening('PREMM5')" class="suggestion-chip" style="font-size:11px;padding:6px 10px;margin-top:6px;width:100%;text-align:left;">
+                            Check Lynch Syndrome Risk
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Surveillance Schedule -->
+                <div class="section-card compact" id="surveillanceSection" style="display:none;">
+                    <div class="section-header">
+                        <div class="section-title">Follow-Up Schedule</div>
+                    </div>
+                    <div id="surveillanceContent" style="padding:0 12px 12px;font-size:12px;color:var(--text-muted);">
+                        Loading...
                     </div>
                 </div>
 
@@ -4655,6 +4668,9 @@
             profileBadge.textContent = "Active";
             profileBadge.style.background = "rgba(16, 185, 129, 0.1)";
             profileBadge.style.color = "#10b981";
+
+            // Load surveillance schedule when profile is displayed
+            loadSurveillanceSchedule();
 
             const rows = [];
 
@@ -7445,6 +7461,33 @@
                     { max: 28, label: 'severe insomnia', message: 'Your ISI score falls in the severe clinical insomnia range. Share this result with your healthcare provider.' }
                 ]
             },
+            PREMM5: {
+                title: 'Lynch Syndrome Risk (PREMM5)',
+                subtitle: 'These questions help assess if genetic counseling may be recommended for you or your family.',
+                normalization: 'About 10% of colorectal cancers have a hereditary component. This brief check-in helps identify if further genetic evaluation could benefit you and your family.',
+                options: [
+                    { label: 'No', score: 0 },
+                    { label: 'Yes', score: 1 }
+                ],
+                questions: [
+                    'Were you diagnosed with colorectal cancer before age 50?',
+                    'Were you diagnosed with endometrial (uterine) cancer at any age?',
+                    'Have you had more than one cancer diagnosis (any type)?',
+                    'Has a first-degree relative (parent, sibling, child) been diagnosed with colorectal cancer?',
+                    'Has a first-degree relative been diagnosed with endometrial, ovarian, stomach, urinary tract, or brain cancer?',
+                    'Have two or more relatives on the same side of the family had colorectal cancer?',
+                    'Have two or more relatives on the same side had endometrial, ovarian, stomach, urinary tract, or brain cancer?',
+                    'Was any relative diagnosed with colorectal cancer before age 50?',
+                    'Has anyone in your family been diagnosed with Lynch syndrome or a mismatch repair gene mutation?',
+                    'Has your tumor been tested for microsatellite instability (MSI) or mismatch repair (MMR) and shown MSI-High or dMMR?'
+                ],
+                severity: [
+                    { max: 1, label: 'low risk', message: 'Your PREMM5 score suggests lower hereditary cancer risk. Share this result with your healthcare provider.' },
+                    { max: 3, label: 'moderate risk', message: 'Your PREMM5 score suggests moderate hereditary risk. Consider discussing genetic counseling with your healthcare provider. Find a counselor at nsgc.org.' },
+                    { max: 10, label: 'high risk', message: 'Your PREMM5 score suggests elevated hereditary cancer risk. Genetic counseling is recommended. Find a genetic counselor at nsgc.org or call 312-321-6834.' }
+                ],
+                is_premm5: true
+            },
             SYMPTOM: {
                 title: 'Symptom Check-In',
                 subtitle: 'In the last 7 days, rate the severity of each symptom at its worst.',
@@ -7912,6 +7955,50 @@
         function formatDate(isoStr) {
             const d = new Date(isoStr);
             return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        // =============================================
+        // SURVEILLANCE SCHEDULE
+        // =============================================
+        async function loadSurveillanceSchedule() {
+            try {
+                const resp = await authFetch('/api/surveillance');
+                const data = await resp.json();
+                const section = document.getElementById('surveillanceSection');
+                const content = document.getElementById('surveillanceContent');
+
+                if (!data || !data.schedule || data.schedule.length === 0) {
+                    section.style.display = 'none';
+                    return;
+                }
+
+                section.style.display = 'block';
+                let html = '';
+
+                if (data.overdue && data.overdue.length > 0) {
+                    html += `<div style="background:#FEF2F2;border:1px solid #EF4444;border-radius:6px;padding:8px 10px;margin-bottom:8px;color:#991B1B;font-size:11px;font-weight:600;">
+                        Overdue: ${data.overdue.map(o => o.type).join(', ')}
+                    </div>`;
+                }
+
+                for (const item of data.schedule) {
+                    const icon = item.status === 'overdue' ? '!' : item.status === 'due' ? '~' : '-';
+                    const color = item.status === 'overdue' ? '#EF4444' : item.status === 'due' ? '#F59E0B' : 'var(--text-muted)';
+                    html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);">
+                        <div>
+                            <div style="font-weight:600;color:var(--text-primary);font-size:12px;">${item.type}</div>
+                            <div style="font-size:11px;color:var(--text-muted);">${item.recommendation}</div>
+                        </div>
+                        <div style="font-size:11px;font-weight:600;color:${color};white-space:nowrap;margin-left:8px;">
+                            ${item.next_due || 'TBD'}
+                        </div>
+                    </div>`;
+                }
+
+                content.innerHTML = html;
+            } catch (e) {
+                console.debug('Surveillance load skipped:', e);
+            }
         }
     </script>
 </body>

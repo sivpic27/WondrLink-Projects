@@ -1747,6 +1747,30 @@ This is a reasonable question to bring to their next appointment. It doesn't mea
         wellness_context = f"\n\n{HOLISTIC_WELLNESS_GUIDANCE}"
 
     # ==========================================================================
+    # STEP 4j: Surveillance schedule context for follow-up questions
+    # ==========================================================================
+    surveillance_context = ""
+    surveillance_keywords = ['follow-up', 'follow up', 'next appointment', 'next colonoscopy',
+                              'surveillance', 'how often', 'when should i', 'after treatment',
+                              'monitoring', 'cea test', 'ct scan']
+    if any(kw in message_lower for kw in surveillance_keywords):
+        try:
+            from surveillance import generate_surveillance_schedule, format_surveillance_for_chat
+            stage = patient_context.get('stage', '')
+            # Try to get surgery date from raw profile
+            surgery_date = None
+            if patient:
+                for s in patient.get('surgicalHistory', []):
+                    if isinstance(s, dict) and s.get('date'):
+                        surgery_date = s['date']
+                        break
+            if stage and surgery_date:
+                sched = generate_surveillance_schedule(stage, surgery_date)
+                surveillance_context = "\n\n" + format_surveillance_for_chat(sched)
+        except Exception:
+            pass  # Surveillance not available
+
+    # ==========================================================================
     # STEP 5: Format retrieved guidelines with token budget
     # ==========================================================================
     if retrieved:
@@ -1843,6 +1867,8 @@ Provide interim management tips while they await medical consultation."""
         prompt_parts.append(ambassador_context)
     if wellness_context:
         prompt_parts.append(wellness_context)
+    if surveillance_context:
+        prompt_parts.append(surveillance_context)
 
     prompt_parts.extend([
         "",

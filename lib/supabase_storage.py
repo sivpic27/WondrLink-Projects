@@ -735,8 +735,8 @@ def load_latest_screening_score(user_id: str, instrument: str) -> dict:
         return None
 
 
-def load_screening_history(user_id: str, instrument: str, limit: int = 5) -> list:
-    """Load recent screening history for trend tracking."""
+def load_screening_history(user_id: str, instrument: str, limit: int = 20) -> list:
+    """Load screening history for trend tracking."""
     try:
         client = get_admin_client()
         result = client.table('screening_scores') \
@@ -750,3 +750,15 @@ def load_screening_history(user_id: str, instrument: str, limit: int = 5) -> lis
     except Exception as e:
         logger.error(f"Failed to load screening history: {e}")
         return []
+
+
+def load_all_screening_history(user_id: str) -> dict:
+    """Load screening history for all instruments, grouped by instrument."""
+    instruments = ['PHQ9', 'GAD7', 'PSS10', 'ISI']
+    history = {}
+    for inst in instruments:
+        data = load_screening_history(user_id, inst, limit=20)
+        if data:
+            # Return in chronological order (oldest first) for charting
+            history[inst] = list(reversed(data))
+    return history

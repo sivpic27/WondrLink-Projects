@@ -75,8 +75,41 @@ WondrChat 2.1 adds a HIPAA de-identification layer that strips all Protected Hea
 
 ---
 
-## Commit
+---
+
+## Hybrid RAG with pgvector
+
+**Problem:** TF-based keyword search misses semantic matches — a query about "feeling sick after chemo" won't find chunks that say "treatment-related nausea" because the keywords don't overlap.
+
+**Solution:** Hybrid retrieval combining existing TF keyword search with vector similarity search, merged via Reciprocal Rank Fusion (RRF).
+
+| Component | Detail |
+|-----------|--------|
+| Embedding model | intfloat/multilingual-e5-large-instruct (1024 dims) via Together AI (free) |
+| Vector store | Supabase pgvector with HNSW index |
+| Fusion method | RRF with k=60 — no tuning needed |
+| Fallback | TF-only if vector search unavailable |
+| Cost | $0/year (uses existing Together AI key) |
+
+**How it works:**
+1. User sends a query
+2. TF search returns top-k ranked results (keyword matching)
+3. Vector search returns top-k ranked results (semantic similarity)
+4. RRF merges both ranked lists: `score = sum(1 / (60 + rank))`
+5. Top-k merged results go to the LLM
+
+**Future improvement:** If budget allows, switching to OpenAI's text-embedding-3-small ($0.02 one-time, 1536 dims) would improve medical retrieval accuracy based on MEDRAG benchmark evidence.
+
+**Files:**
+- Created: `lib/vector_search.py`, `scripts/generate_embeddings.py`
+- Modified: `lib/pdf_utils.py` (hybrid_search function), `api/index.py` (uses hybrid_search)
+- Migration: pgvector extension, embedding column, HNSW index, match_chunks() RPC
+
+---
+
+## Commits
 
 ```
 b77c787 Add HIPAA de-identification layer and update screening language
+7160cf1 Implement hybrid RAG with pgvector and add version docs
 ```

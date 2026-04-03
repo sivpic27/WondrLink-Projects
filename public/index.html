@@ -7,6 +7,9 @@
     <title>WondrLink - Your Cancer Care Guide</title>
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Chart.js for mental health dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -1019,6 +1022,122 @@
             padding: 12px 16px;
             background: var(--background);
             border-radius: var(--radius, 8px);
+        }
+
+        /* Mental Health Dashboard */
+        .dashboard-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .dashboard-modal {
+            background: var(--surface);
+            border-radius: var(--radius-lg, 12px);
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .dashboard-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .dashboard-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 4px 8px;
+        }
+        .dashboard-chart-card {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius, 8px);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .dashboard-chart-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        .dashboard-chart-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        .dashboard-narrative {
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 10px 12px;
+            background: var(--surface);
+            border-radius: var(--radius-sm, 6px);
+            border-left: 3px solid var(--primary);
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+        .dashboard-alert {
+            padding: 12px 16px;
+            border-radius: var(--radius, 8px);
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+        .dashboard-alert-warning {
+            background: #FEF3C7;
+            border: 1px solid #F59E0B;
+            color: #92400E;
+        }
+        .dashboard-alert-info {
+            background: #DBEAFE;
+            border: 1px solid #3B82F6;
+            color: #1E40AF;
+        }
+        .dashboard-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+        .dashboard-empty-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+        .dashboard-retake-prompt {
+            background: var(--background);
+            border: 1px dashed var(--border);
+            border-radius: var(--radius, 8px);
+            padding: 12px 16px;
+            text-align: center;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .dashboard-retake-prompt button {
+            margin-top: 8px;
+            padding: 6px 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm, 6px);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
         }
 
         /* Crisis Modal */
@@ -3755,6 +3874,27 @@
     </div>
 
     <!-- ============================================= -->
+    <!-- MENTAL HEALTH DASHBOARD                       -->
+    <!-- ============================================= -->
+    <div id="dashboardOverlay" class="dashboard-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Wellness Trends">
+        <div class="dashboard-modal">
+            <div class="dashboard-header">
+                <div class="dashboard-title">Your Wellness Trends</div>
+                <button class="dashboard-close" onclick="closeDashboard()" aria-label="Close">&times;</button>
+            </div>
+            <div id="dashboardAlerts"></div>
+            <div id="dashboardContent">
+                <div class="dashboard-empty">
+                    <div class="dashboard-empty-icon">&#128202;</div>
+                    <p>Loading your screening history...</p>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--text-muted);">
+                Share these trends with your healthcare provider for a complete picture.
+            </div>
+        </div>
+    </div>
+
     <!-- SCREENING MODAL (Items 3,4,5)                -->
     <!-- ============================================= -->
     <div id="screeningOverlay" class="screening-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Wellness Check-In">
@@ -3910,6 +4050,9 @@
                 <div class="section-card compact">
                     <div class="section-header">
                         <div class="section-title">Wellness Check-In</div>
+                        <button onclick="openDashboard()" style="background:none;border:none;color:var(--primary);font-size:11px;font-weight:600;cursor:pointer;padding:2px 6px;">
+                            View Trends
+                        </button>
                     </div>
                     <div style="display:flex;flex-direction:column;gap:6px;padding:0 12px 12px;">
                         <button onclick="startScreening('PHQ9')" class="suggestion-chip" style="text-align:left;width:100%;font-size:12px;padding:8px 12px;">
@@ -7439,6 +7582,265 @@
 
         function closeCrisisModal() {
             document.getElementById('crisisOverlay').style.display = 'none';
+        }
+
+        // =============================================
+        // MENTAL HEALTH DASHBOARD
+        // =============================================
+        const DASHBOARD_CONFIG = {
+            PHQ9: {
+                label: 'Depression (PHQ-9)',
+                maxScore: 27,
+                bands: [
+                    { min: 0, max: 4, label: 'Minimal', color: 'rgba(34,197,94,0.15)', borderColor: '#22C55E' },
+                    { min: 5, max: 9, label: 'Mild', color: 'rgba(234,179,8,0.15)', borderColor: '#EAB308' },
+                    { min: 10, max: 14, label: 'Moderate', color: 'rgba(249,115,22,0.15)', borderColor: '#F97316' },
+                    { min: 15, max: 19, label: 'Mod. Severe', color: 'rgba(239,68,68,0.15)', borderColor: '#EF4444' },
+                    { min: 20, max: 27, label: 'Severe', color: 'rgba(185,28,28,0.15)', borderColor: '#B91C1C' }
+                ]
+            },
+            GAD7: {
+                label: 'Anxiety (GAD-7)',
+                maxScore: 21,
+                bands: [
+                    { min: 0, max: 4, label: 'Minimal', color: 'rgba(34,197,94,0.15)', borderColor: '#22C55E' },
+                    { min: 5, max: 9, label: 'Mild', color: 'rgba(234,179,8,0.15)', borderColor: '#EAB308' },
+                    { min: 10, max: 14, label: 'Moderate', color: 'rgba(249,115,22,0.15)', borderColor: '#F97316' },
+                    { min: 15, max: 21, label: 'Severe', color: 'rgba(239,68,68,0.15)', borderColor: '#EF4444' }
+                ]
+            },
+            PSS10: {
+                label: 'Stress (PSS-10)',
+                maxScore: 40,
+                bands: [
+                    { min: 0, max: 13, label: 'Low', color: 'rgba(34,197,94,0.15)', borderColor: '#22C55E' },
+                    { min: 14, max: 26, label: 'Moderate', color: 'rgba(234,179,8,0.15)', borderColor: '#EAB308' },
+                    { min: 27, max: 40, label: 'High', color: 'rgba(239,68,68,0.15)', borderColor: '#EF4444' }
+                ]
+            },
+            ISI: {
+                label: 'Sleep (ISI)',
+                maxScore: 28,
+                bands: [
+                    { min: 0, max: 7, label: 'No Insomnia', color: 'rgba(34,197,94,0.15)', borderColor: '#22C55E' },
+                    { min: 8, max: 14, label: 'Subthreshold', color: 'rgba(234,179,8,0.15)', borderColor: '#EAB308' },
+                    { min: 15, max: 21, label: 'Moderate', color: 'rgba(249,115,22,0.15)', borderColor: '#F97316' },
+                    { min: 22, max: 28, label: 'Severe', color: 'rgba(239,68,68,0.15)', borderColor: '#EF4444' }
+                ]
+            }
+        };
+
+        let dashboardCharts = {};
+
+        async function openDashboard() {
+            document.getElementById('dashboardOverlay').style.display = 'flex';
+            try {
+                const resp = await authFetch('/api/screening/history');
+                const data = await resp.json();
+                if (data.status === 'ok') {
+                    renderDashboard(data.history);
+                }
+            } catch (e) {
+                console.error('Dashboard load error:', e);
+                document.getElementById('dashboardContent').innerHTML =
+                    '<div class="dashboard-empty"><p>Unable to load screening history.</p></div>';
+            }
+        }
+
+        function closeDashboard() {
+            document.getElementById('dashboardOverlay').style.display = 'none';
+            // Destroy charts to free memory
+            Object.values(dashboardCharts).forEach(c => c.destroy());
+            dashboardCharts = {};
+        }
+
+        function renderDashboard(history) {
+            const contentEl = document.getElementById('dashboardContent');
+            const alertsEl = document.getElementById('dashboardAlerts');
+            alertsEl.innerHTML = '';
+
+            if (!history || Object.keys(history).length === 0) {
+                contentEl.innerHTML = `
+                    <div class="dashboard-empty">
+                        <div class="dashboard-empty-icon">&#128202;</div>
+                        <p>No screening history yet.</p>
+                        <p style="font-size:12px;margin-top:8px;">Complete a wellness check-in to start tracking your trends.</p>
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            const alerts = [];
+
+            for (const [key, config] of Object.entries(DASHBOARD_CONFIG)) {
+                const data = history[key];
+                if (!data || data.length === 0) continue;
+
+                const latest = data[data.length - 1];
+                const latestScore = latest.total_score;
+                const latestLabel = latest.severity_label;
+
+                // Check for alerts
+                if (data.length >= 2) {
+                    const prev = data[data.length - 2];
+                    const increase = latestScore - prev.total_score;
+                    if (increase >= 5) {
+                        alerts.push({
+                            type: 'warning',
+                            text: `Your ${config.label} score increased by ${increase} points since your last check-in. Consider sharing this with your healthcare provider.`
+                        });
+                    }
+                }
+
+                // High severity alerts
+                if (key === 'PHQ9' && latestScore >= 15) {
+                    alerts.push({ type: 'warning', text: `Your PHQ-9 score (${latestScore}) falls in the moderately severe to severe range. Share this result with your healthcare provider.` });
+                }
+                if (key === 'GAD7' && latestScore >= 15) {
+                    alerts.push({ type: 'warning', text: `Your GAD-7 score (${latestScore}) falls in the severe range. Share this result with your healthcare provider.` });
+                }
+                if (key === 'PSS10' && latestScore >= 27) {
+                    alerts.push({ type: 'warning', text: `Your PSS-10 score (${latestScore}) falls in the high perceived stress range. Share this result with your healthcare provider.` });
+                }
+                if (key === 'ISI' && latestScore >= 22) {
+                    alerts.push({ type: 'warning', text: `Your ISI score (${latestScore}) falls in the severe clinical insomnia range. Share this result with your healthcare provider.` });
+                }
+
+                // Narrative text
+                let narrative = '';
+                if (data.length >= 2) {
+                    const prev = data[data.length - 2];
+                    const diff = latestScore - prev.total_score;
+                    if (diff < -2) {
+                        narrative = `Your ${config.label.split('(')[0].trim().toLowerCase()} score improved from ${prev.total_score} (${prev.severity_label}) to ${latestScore} (${latestLabel}).`;
+                    } else if (diff > 2) {
+                        narrative = `Your ${config.label.split('(')[0].trim().toLowerCase()} score increased from ${prev.total_score} (${prev.severity_label}) to ${latestScore} (${latestLabel}).`;
+                    } else {
+                        narrative = `Your ${config.label.split('(')[0].trim().toLowerCase()} score is ${latestScore} (${latestLabel}), similar to your previous check-in.`;
+                    }
+                } else {
+                    narrative = `Your ${config.label.split('(')[0].trim().toLowerCase()} score is ${latestScore} (${latestLabel}). Take another check-in later to see your trend.`;
+                }
+
+                // Check if retake needed (30+ days)
+                const lastDate = new Date(latest.completed_at);
+                const daysSince = Math.floor((Date.now() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+                let retakePrompt = '';
+                if (daysSince >= 30) {
+                    retakePrompt = `
+                        <div class="dashboard-retake-prompt">
+                            Last completed ${daysSince} days ago.
+                            <br><button onclick="closeDashboard(); startScreening('${key}');">Retake ${config.label.split('(')[0].trim()}</button>
+                        </div>`;
+                }
+
+                html += `
+                    <div class="dashboard-chart-card">
+                        <div class="dashboard-chart-title">${config.label}</div>
+                        <div class="dashboard-chart-subtitle">Latest: ${latestScore} (${latestLabel}) &mdash; ${formatDate(latest.completed_at)}</div>
+                        ${retakePrompt}
+                        <canvas id="chart_${key}" height="${data.length > 1 ? 160 : 60}"></canvas>
+                        <div class="dashboard-narrative">${narrative}</div>
+                    </div>`;
+            }
+
+            // Render alerts
+            if (alerts.length > 0) {
+                alertsEl.innerHTML = alerts.map(a =>
+                    `<div class="dashboard-alert dashboard-alert-${a.type}">${a.text}</div>`
+                ).join('');
+            }
+
+            // Check for instruments with no data
+            const missingInstruments = Object.keys(DASHBOARD_CONFIG).filter(k => !history[k] || history[k].length === 0);
+            if (missingInstruments.length > 0) {
+                const names = missingInstruments.map(k => DASHBOARD_CONFIG[k].label.split('(')[0].trim()).join(', ');
+                html += `
+                    <div class="dashboard-retake-prompt">
+                        You haven't completed: ${names}
+                        <br><button onclick="closeDashboard(); startScreening('${missingInstruments[0]}');">Start ${DASHBOARD_CONFIG[missingInstruments[0]].label.split('(')[0].trim()}</button>
+                    </div>`;
+            }
+
+            contentEl.innerHTML = html;
+
+            // Render charts
+            for (const [key, config] of Object.entries(DASHBOARD_CONFIG)) {
+                const data = history[key];
+                if (!data || data.length < 2) continue;
+                renderChart(key, config, data);
+            }
+        }
+
+        function renderChart(key, config, data) {
+            const ctx = document.getElementById(`chart_${key}`);
+            if (!ctx) return;
+
+            const labels = data.map(d => formatDate(d.completed_at));
+            const scores = data.map(d => d.total_score);
+
+            // Build severity band annotations
+            const annotations = {};
+            config.bands.forEach((band, i) => {
+                annotations[`band_${i}`] = {
+                    type: 'box',
+                    yMin: band.min,
+                    yMax: band.max,
+                    backgroundColor: band.color,
+                    borderWidth: 0,
+                    label: {
+                        display: true,
+                        content: band.label,
+                        position: { x: 'end', y: 'center' },
+                        font: { size: 9, weight: '500' },
+                        color: '#888',
+                        padding: 2
+                    }
+                };
+            });
+
+            dashboardCharts[key] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: config.label,
+                        data: scores,
+                        borderColor: '#6366F1',
+                        backgroundColor: 'rgba(99,102,241,0.1)',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#6366F1',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        annotation: { annotations: annotations }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: config.maxScore,
+                            ticks: { font: { size: 10 } },
+                            grid: { display: false }
+                        },
+                        x: {
+                            ticks: { font: { size: 10 }, maxRotation: 45 },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function formatDate(isoStr) {
+            const d = new Date(isoStr);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         }
     </script>
 </body>

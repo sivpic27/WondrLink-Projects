@@ -774,6 +774,20 @@ def api_load_screening():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/screening/history", methods=["GET"])
+@require_auth
+def api_screening_history():
+    """Load screening history for all instruments (for dashboard charts)."""
+    try:
+        user_id = request.user["user_id"]
+        from supabase_storage import load_all_screening_history
+        history = load_all_screening_history(user_id)
+        return jsonify({"status": "ok", "history": history})
+    except Exception as e:
+        logger.exception("Screening history error")
+        return jsonify({"error": str(e)}), 500
+
+
 # -------------------------
 # Clinical Trials Route
 # -------------------------

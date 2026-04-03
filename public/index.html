@@ -4073,6 +4073,24 @@
                     </div>
                 </div>
 
+                <!-- Nutrition Quick Questions -->
+                <div class="section-card compact">
+                    <div class="section-header">
+                        <div class="section-title">Nutrition</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px;padding:0 12px 12px;">
+                        <button onclick="askNutritionQuestion('What should I eat during chemotherapy?')" class="suggestion-chip" style="text-align:left;width:100%;font-size:12px;padding:8px 12px;">
+                            Eating during chemo
+                        </button>
+                        <button onclick="askNutritionQuestion('What diet helps prevent colon cancer recurrence?')" class="suggestion-chip" style="text-align:left;width:100%;font-size:12px;padding:8px 12px;">
+                            Anti-recurrence diet
+                        </button>
+                        <button onclick="askNutritionQuestion('What foods should I avoid after colon surgery?')" class="suggestion-chip" style="text-align:left;width:100%;font-size:12px;padding:8px 12px;">
+                            Post-surgery foods
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Screening Ambassador (Item 9) -->
                 <div class="section-card compact" id="ambassadorSection" style="display:none;">
                     <div class="section-header">
@@ -7955,6 +7973,24 @@
         function formatDate(isoStr) {
             const d = new Date(isoStr);
             return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        // =============================================
+        // NUTRITION QUICK QUESTIONS
+        // =============================================
+        function askNutritionQuestion(question) {
+            const input = document.getElementById('chatInput');
+            if (input) {
+                input.value = question;
+                // Trigger the submit
+                const form = input.closest('form');
+                if (form) {
+                    form.dispatchEvent(new Event('submit'));
+                } else {
+                    // Fallback: call submitChatMessage if available
+                    if (typeof submitChatMessage === 'function') submitChatMessage();
+                }
+            }
         }
 
         // =============================================

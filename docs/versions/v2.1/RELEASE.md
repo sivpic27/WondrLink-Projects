@@ -189,6 +189,55 @@ Symptom burden trends appear in the "View Trends" dashboard alongside mental hea
 
 ---
 
+---
+
+## Survivorship Surveillance Schedules
+
+**Problem:** NCCN guidelines specify exact surveillance timelines (colonoscopy, CEA, CT, office visits), but no patient-facing app digitizes these into personalized schedules. Missed surveillance colonoscopies directly delay recurrence detection.
+
+**Solution:** Rule engine (`lib/surveillance.py`) generates personalized schedules from patient stage and surgery date.
+
+### Schedule Items by Stage
+
+| Stage | Colonoscopy | CEA | CT Imaging | Office Visit |
+|-------|------------|-----|------------|-------------|
+| I | 1yr, then q3yr | q6mo x 2yr | Not routine | q6mo x 2yr, then annually |
+| II-III | 1yr, then q3yr | q3-6mo x 2yr, then q6mo x 3yr | Annually x 5yr | q3-6mo x 2yr, then q6mo |
+| IV | Per oncologist | Per oncologist | Per oncologist | Per oncologist |
+
+### UI
+- Sidebar card "Follow-Up Schedule" appears when profile is loaded
+- Shows each item with next due date and overdue alerts (red highlight)
+- Chat integration: "When is my next colonoscopy?" gets a personalized answer
+
+---
+
+## PREMM5 Lynch Syndrome Risk Screening
+
+**Problem:** ~10% of CRC has germline origins. Lynch syndrome carriers who get regular colonoscopy see 60%+ reduction in CRC death. No patient-facing cancer app integrates PREMM5.
+
+**Solution:** 10-question yes/no screening about personal and family cancer history, integrated into the existing screening engine.
+
+### Questions Cover
+- Early-onset CRC (< 50), multiple cancers, family history of CRC/endometrial/ovarian/stomach/urinary/brain cancer, known Lynch syndrome in family, MSI-H/dMMR tumor status
+
+### Risk Levels
+- **Low (0-1):** Standard follow-up
+- **Moderate (2-3):** Consider genetic counseling (nsgc.org referral)
+- **High (4+):** Genetic counseling recommended with direct contact info
+
+### Placement
+- Button in Ambassador section ("Check Lynch Syndrome Risk")
+- Also surfaces when screening_ambassador queries mention hereditary/genetic risk
+
+**Files:**
+- Created: `lib/surveillance.py`
+- Modified: `api/index.py` (GET /api/surveillance, PREMM5 in instruments)
+- Modified: `lib/llm_utils.py` (surveillance context for follow-up questions)
+- Modified: `public/index.html` (PREMM5 instrument, surveillance sidebar, schedule loading)
+
+---
+
 ## Commits
 
 ```
@@ -197,4 +246,5 @@ b77c787 Add HIPAA de-identification layer and update screening language
 ba3f657 Add mental health trend dashboard with severity-banded charts
 b3e0958 Fix dashboard chart infinite resize loop
 c262cc4 Add PRO-CTCAE symptom tracking with dashboard and chat integration
+1d6f9c9 Add survivorship surveillance schedules and PREMM5 Lynch screening
 ```

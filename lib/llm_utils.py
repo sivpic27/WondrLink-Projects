@@ -1057,6 +1057,51 @@ EVIDENCE-BASED WELLNESS INTERVENTIONS for CRC patients:
 """
 
 # =============================================================================
+# NUTRITION GUIDANCE (Phase 5)
+# =============================================================================
+
+CRC_NUTRITION_GUIDANCE = """
+CRC-SPECIFIC NUTRITION CONTEXT:
+When a user asks about diet, food, nutrition, eating, or weight during/after CRC treatment:
+
+1. PHASE-BASED GUIDANCE (tailor to patient's treatment status):
+   - Post-surgery: Low-residue diet, gradual fiber reintroduction over 6-12 weeks
+   - During chemo: Small frequent meals, manage nausea with ginger/bland foods, increased protein (1.0-1.5g/kg/day)
+   - Survivorship: AICR guidelines (plant-rich diet, limit red/processed meat, maintain healthy weight)
+
+2. COMMON CHEMO SIDE EFFECT DIET TIPS:
+   - Nausea: Cold/room-temp foods, ginger, crackers, eat between meals
+   - Diarrhea (5-FU, irinotecan): BRAT diet, soluble fiber, replace electrolytes
+   - Constipation (ondansetron, opioids): Increase fiber gradually, prune juice, fluids
+   - Mouth sores (5-FU, capecitabine): Soft moist foods, avoid acidic/spicy, baking soda rinse
+   - Neuropathy (oxaliplatin): Avoid cold foods/drinks during and 3-5 days after infusion
+   - Metallic taste: Try cold meats, marinades, plastic utensils
+
+3. STOMA-SPECIFIC (if applicable):
+   - Chew thoroughly, drink between meals not during
+   - Thickening foods: applesauce, banana, rice, peanut butter
+   - Thinning foods: fruit juice, leafy greens, spicy food
+
+4. EVIDENCE-BASED ANTI-RECURRENCE DIET:
+   - Higher fiber intake associated with 18% lower CRC-specific mortality per 5g/day increase
+   - Western diet pattern linked to 3.25x higher recurrence risk (JAMA Oncology 2018)
+   - Cruciferous vegetables, berries, omega-3 fatty acids have supporting evidence
+   - Limit: red meat under 18oz/week, avoid processed meat, limit alcohol
+
+5. SUPPLEMENTS (always note: discuss with oncologist first):
+   - Vitamin D: 1000-2000 IU daily (observational evidence for CRC outcomes)
+   - Calcium: 1000-1200mg daily
+   - Avoid high-dose antioxidant supplements during active chemotherapy
+
+6. COMORBIDITY-AWARE NUTRITION:
+   - Diabetes + CRC: Complex carbs, pair with protein, monitor glucose on steroids
+   - Hypertension + CRC: DASH-compatible, limit sodium <2300mg, important with bevacizumab
+   - Obesity + CRC: Moderate calorie focus post-treatment (not during active chemo)
+
+7. REFERRAL: Suggest oncology-certified dietitian (CSO credential) via eatright.org
+
+Always present nutrition information as educational. Do not prescribe specific diets."""
+
 # SCREENING AMBASSADOR (Item 9)
 # =============================================================================
 
@@ -1233,6 +1278,15 @@ def classify_query_type(message: str) -> str:
         'feeling down', 'losing hope', 'afraid', 'worried', 'immune system'
     ]
 
+    # Nutrition queries (Phase 5)
+    nutrition_keywords = [
+        'diet', 'food', 'eat', 'eating', 'nutrition', 'meal', 'recipe',
+        'fiber', 'protein', 'vitamin', 'supplement', 'weight',
+        'stoma', 'colostomy', 'ileostomy', 'low-residue', 'low residue',
+        'nausea food', 'what to eat', 'what should i eat', 'appetite',
+        'cooking', 'grocery', 'calorie', 'sugar', 'sodium'
+    ]
+
     # Weighted scoring: multi-word phrases get bonus to beat single-word overlaps
     def _weighted_score(keywords, text):
         score = 0
@@ -1251,6 +1305,7 @@ def classify_query_type(message: str) -> str:
         'caregiver': _weighted_score(caregiver_keywords, message_lower),
         'screening_ambassador': _weighted_score(family_screening_keywords, message_lower),
         'emotional': _weighted_score(emotional_keywords_classify, message_lower),
+        'nutrition': _weighted_score(nutrition_keywords, message_lower),
     }
 
     # Boost: "side effect" phrase or specific symptoms strongly indicate side_effect category
@@ -1747,6 +1802,15 @@ This is a reasonable question to bring to their next appointment. It doesn't mea
         wellness_context = f"\n\n{HOLISTIC_WELLNESS_GUIDANCE}"
 
     # ==========================================================================
+    # STEP 4i: Nutrition guidance (Phase 5)
+    # ==========================================================================
+    nutrition_context = ""
+    nutrition_kws = ['diet', 'food', 'eat', 'nutrition', 'meal', 'fiber', 'stoma',
+                     'colostomy', 'ileostomy', 'weight', 'supplement', 'vitamin']
+    if query_type == 'nutrition' or any(kw in message_lower for kw in nutrition_kws):
+        nutrition_context = f"\n\n{CRC_NUTRITION_GUIDANCE}"
+
+    # ==========================================================================
     # STEP 4j: Surveillance schedule context for follow-up questions
     # ==========================================================================
     surveillance_context = ""
@@ -1869,6 +1933,8 @@ Provide interim management tips while they await medical consultation."""
         prompt_parts.append(wellness_context)
     if surveillance_context:
         prompt_parts.append(surveillance_context)
+    if nutrition_context:
+        prompt_parts.append(nutrition_context)
 
     prompt_parts.extend([
         "",

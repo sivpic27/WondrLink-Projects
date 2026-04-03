@@ -1,6 +1,6 @@
 # WondrLink Comprehensive Test Report
 
-**Generated:** 2026-04-03 12:49:47
+**Generated:** 2026-04-03 15:42:41
 
 **Total Tests:** 60
 **Passed:** 58/60 (96.7%)
@@ -108,10 +108,9 @@
 *HIGH sensitivity — full ANP framework expected*
 
 
-**Answer:** It's completely understandable that you're worried about your prognosis, and it's natural to have concerns about the future. Many people in your situation wonder about this, and it's a tough question to face. Your care team can help you understand your individual prognosis, which depends on various factors, including your stage IIIB cancer, treatment response, and overall health - they can discuss the specifics with you and provide guidance on what to expect.
+**Answer:** It's completely understandable that you're worried about your prognosis, and it's natural to have concerns about the future. As a stage IIIB colon cancer patient, your treatment plan, including FOLFOX and Bevacizumab, is aimed at reducing the risk of cancer recurrence. Many people with stage III colon cancer can be successfully treated and go on to live for many years, but it's essential to discuss your individual prognosis and any concerns you have with your care team.
 
-You might also want to ask about: 
-...
+You might also want to a...
 
 *API: together | Query type: prognosis | Chunks: 5*
 
@@ -133,11 +132,10 @@ You might also want to ask about:
 *MEDIUM sensitivity — normalization expected*
 
 
-**Answer:** It's completely understandable that you're feeling scared and overwhelmed by your diagnosis - it's a lot to take in. Many people in your situation feel the same way, and it's okay to feel sad and cry. You don't have to go through this alone; oncology social workers and support groups can offer emotional support and help you cope with your feelings. 
+**Answer:** It's completely understandable that you're feeling scared and overwhelmed by your diagnosis - it's a lot to take in. Many people in your situation feel the same way, and it's okay to acknowledge and express your emotions. You can reach out to an oncology social worker at your cancer center for support, or call the Cancer Support Helpline at 1-888-793-9355 for free and confidential guidance. 
 
 You might also want to ask about: 
-• How can I manage my fatigue and nausea during treatment to improve my quality of life?
-• What are some healthy...
+• How can I manage my peripheral neuropathy symptoms to improve my da...
 
 *API: together | Query type: emotional | Chunks: 5*
 
@@ -159,11 +157,11 @@ You might also want to ask about:
 *LOW sensitivity — must NOT trigger high tone from 'die' in 'diet'*
 
 
-**Answer:** To manage your diet during chemotherapy, it's recommended to eat small, frequent meals to help with nausea and appetite. You should also focus on getting enough protein and calories, and consider high-calorie foods if you're losing weight. Additionally, drinking plenty of fluids and eating foods with high water content can help prevent dehydration.
+**Answer:** During chemotherapy, it's helpful to eat small, frequent meals to manage nausea and appetite loss. Try cold or room-temperature foods, as they are often better tolerated than hot foods, and consider ginger tea or candies to reduce nausea. You might also find it helpful to eat bland, starchy foods like crackers, toast, rice, or potatoes. 
 
 You might also want to ask about: 
-• How to manage diarrhea or constipation that may occur during treatment
-• What types of exercises or physical ac...
+• How to manage diarrhea or constipation that may occur during chemotherapy
+• What types of exercise are safe and beneficial...
 
 *API: together | Query type: treatment | Chunks: 5*
 
@@ -175,11 +173,11 @@ You might also want to ask about:
 *HIGH sensitivity — acknowledge + normalize expected*
 
 
-**Answer:** It's completely understandable to feel like giving up when dealing with a challenging situation like cancer treatment. Your feelings are valid, and many people in your situation have felt the same way. You don't have to go through this alone - oncology social workers and support groups can provide emotional support and help you cope with your feelings.
+**Answer:** It's completely normal to feel overwhelmed and like giving up when dealing with a cancer diagnosis and treatment. Your feelings make sense, and many people in your situation have felt the same way. You can talk to an oncology social worker or call the Cancer Support Helpline at 1-888-793-9355 for emotional support and guidance.
 
 You might also want to ask about: 
 • How can I manage my peripheral neuropathy and other side effects to improve my quality of life?
-• What are ...
+• What are my options for coping wit...
 
 *API: together | Query type: emotional | Chunks: 5*
 
@@ -204,7 +202,9 @@ You might also want to ask about:
 *Should mention diabetes-chemo interaction (dexamethasone)*
 
 
-**Answer:** With FOLFOX treatment, you should watch for side effects like fatigue, nausea, diarrhea, and peripheral neuropathy, which can cause numbness or tingling in your hands and feet. To manage these side effects, make sure to stay hydrated, eat small meals, and take your medications as prescribed. If you experience severe or worsening symptoms, such as difficulty breathing, chest pain, or severe abdominal pain, contact your care team immediately. For less severe symptoms, like mild nausea or fatigue, ...
+**Answer:** With FOLFOX treatment, you should watch for side effects like nausea, diarrhea, fatigue, and peripheral neuropathy, which can cause numbness or tingling in your hands and feet. To manage these side effects, you can try eating small, frequent meals, staying hydrated, and avoiding cold foods and drinks during and after infusion. If you experience severe or worsening side effects, contact your care team right away, as they may need to adjust your treatment dose. 
+
+You might also want to ask about: ...
 
 *API: together | Query type: side_effect | Chunks: 5*
 
@@ -218,10 +218,11 @@ You might also want to ask about:
 *Should mention steroid-glucose interaction*
 
 
-**Answer:** Your diabetes can affect how you tolerate chemotherapy, as some chemotherapy drugs can raise or lower your blood sugar levels. It's essential to monitor your blood sugar levels closely and adjust your diabetes management plan as needed while undergoing chemotherapy. You should discuss your diabetes management with your oncologist and healthcare team to ensure you're getting the best care possible. 
+**Answer:** Your diabetes can affect how you tolerate chemotherapy, as some chemotherapy drugs can raise blood sugar levels. It's essential to monitor your blood sugar levels closely and adjust your diabetes management plan as needed. You should discuss your diabetes management with your oncologist, as they can help you balance your cancer treatment with your diabetes care.
 
 You might also want to ask about: 
-• How to manage potential interactions between your diabetes m...
+• How to manage potential interactions between your diabetes medications and chemotherapy
+• What st...
 
 *API: together | Query type: treatment | Chunks: 5*
 
@@ -234,10 +235,10 @@ You might also want to ask about:
 *Should mention bevacizumab-hypertension interaction*
 
 
-**Answer:** Bevacizumab can be used with caution in patients with hypertension, like you, but it's essential to monitor your blood pressure regularly. Your oncologist will closely watch your blood pressure and may adjust your treatment or add medications to control it if needed. Since you have a KRAS mutation and are MSS, bevacizumab is still a viable option for you, but it's crucial to discuss the potential benefits and risks with your medical team.
+**Answer:** Given your hypertension, it's essential to monitor your blood pressure closely while on bevacizumab, as it can cause or worsen high blood pressure. You should report any significant changes in your blood pressure readings to your oncology team. Bevacizumab is not typically recommended for standard adjuvant treatment in stage II/III colon cancer, so it's a good idea to discuss the reasons for its use in your case with your oncologist. 
 
 You might also want to ask about: 
-• How to manage your ...
+• How to manage potential...
 
 *API: together | Query type: treatment | Chunks: 5*
 
@@ -255,7 +256,7 @@ You might also want to ask about:
 *Must NOT make causal claims about stress and cancer*
 
 
-**Answer:** Managing stress is important for your overall wellbeing and quality of life during treatment. It's understandable to worry about how stress might affect your cancer, but research shows that the relationship between stress and cancer progression is complex and not fully understood. ⚠️ URGENT: Worsening symptoms should be reported to your oncology team promptly - typically within 24-48 hours. Dose modifications are common and expected; don't hesitate to report changes. In the meantime, try relaxat...
+**Answer:** Managing stress is important for your overall wellbeing and quality of life during treatment. While stress itself doesn't directly make cancer worse, it can affect your immune system, sleep, and ability to recover from treatment. ⚠️ URGENT: Worsening symptoms should be reported to your oncology team promptly - typically within 24-48 hours. Dose modifications are common and expected; don't hesitate to report changes. In the meantime, try relaxation techniques like deep breathing, meditation, or s...
 
 *API: together | Query type: emotional | Chunks: 5*
 
@@ -273,10 +274,10 @@ You might also want to ask about:
 *Should mention MBSR or mindfulness-based programs*
 
 
-**Answer:** Mindfulness can be a powerful tool for cancer patients, helping to reduce stress and anxiety, improve sleep, and increase energy levels. Mindfulness-Based Stress Reduction (MBSR) is a specific program that has been studied and shown to be beneficial for people with cancer, and it can be found in many cancer centers. You can also try using apps like Calm or Headspace, which offer free cancer-specific meditation programs. 
+**Answer:** Mindfulness can be a powerful tool for cancer patients, helping to reduce stress and anxiety, improve sleep, and increase energy levels. Mindfulness-Based Stress Reduction (MBSR) is a specific program that has been studied and shown to be beneficial for people with cancer, and it can be found in many cancer centers or online. You can also try using apps like Calm or Headspace, which offer free cancer-specific meditation programs. 
 
 You might also want to ask about: 
-• How can I manage my fatigue and nause...
+• How can I manage my fatigue...
 
 *API: together | Query type: emotional | Chunks: 5*
 
@@ -310,10 +311,10 @@ You might also want to ask about:
 *Should classify as caregiver*
 
 
-**Answer:** To help your wife manage her chemo side effects at home, you can start by keeping track of her symptoms and medication schedule together. This can include monitoring her temperature, appetite, and any changes in her bowel movements or fatigue levels. You can also help her stay comfortable by encouraging her to stay hydrated, eat small frequent meals, and take breaks to rest when needed.
+**Answer:** To help your wife manage her chemo side effects at home, make sure she stays hydrated by drinking plenty of water, and encourage her to rest when she feels tired. You can also help her keep track of her medications and appointments using a planner or a reminder app. Additionally, consider reaching out to a dietitian for guidance on managing her decreased appetite and nausea.
 
 You might also want to ask about: 
-• How to manage her peripheral neuropathy symptoms, such as tingling in he...
+• How to manage her peripheral neuropathy symptoms, such as tingling in her fingers, t...
 
 *API: together | Query type: caregiver | Chunks: 5*
 
@@ -332,7 +333,7 @@ You might also want to ask about:
 **Answer:** Since you have colon cancer, it's a good idea for your children to talk to their doctor about their risk and when to start screening. Generally, people with a first-degree relative (like a parent) with colon cancer should start screening at age 40, or 10 years before the relative's diagnosis, whichever is earlier. They can discuss options like a colonoscopy, FIT test, Cologuard, or CT Colonography with their doctor. 
 
 You might also want to ask about: 
-• How to manage your current fatigue and na...
+• How your KRAS mutation and current treatm...
 
 *API: together | Query type: screening_ambassador | Chunks: 5*
 
@@ -347,10 +348,10 @@ You might also want to ask about:
 *Should detect as screening_ambassador*
 
 
-**Answer:** Colon cancer can be hereditary, and having a family history of the disease increases your risk. If you have a first-degree relative (like a parent, sibling, or child) with colon cancer, they should start screening at age 40 or 10 years before the relative's diagnosis, whichever is earlier. They can discuss screening options like colonoscopy, FIT test, Cologuard, or CT Colonography with their doctor. 
+**Answer:** Having a family history of colon cancer can increase your relatives' risk, so it's great that you're thinking about their health. If you have a first-degree relative (like a parent, sibling, or child) with colon cancer, they should start screening at age 40 or 10 years before your diagnosis age, whichever is earlier. They can discuss screening options like colonoscopy, FIT test, Cologuard, or CT Colonography with their doctor. 
 
 You might also want to ask about: 
-• How can I manage my fatigue and nausea while undergoing tr...
+• How can I manage my current si...
 
 *API: together | Query type: screening_ambassador | Chunks: 5*
 
@@ -368,7 +369,7 @@ You might also want to ask about:
 *Should mention expanded access, compassionate use, or clinical trials*
 
 
-**Answer:** Given your stage IIIB sigmoid colon adenocarcinoma and current treatment with FOLFOX + Bevacizumab, if your cancer were to progress, your options might include switching to a different chemotherapy backbone, adding new targeted agents, or considering clinical trials. For example, if you had a KRAS mutation like yours, you might not benefit from EGFR-targeted therapies, but other treatments could be explored. You might be eligible for regimens like FOLFIRI or CAPEOX, which work by targeting diffe...
+**Answer:** Given your stage IIIB sigmoid colon adenocarcinoma and current treatment with FOLFOX + Bevacizumab, if your cancer were to progress, your next steps would depend on various factors including your overall health and specific biomarker profile. For someone with a KRAS mutation like yours, EGFR-targeted therapies wouldn't be an option. You might consider discussing second-line therapies with your oncologist, which could include switching to an alternative chemotherapy backbone or adding new targete...
 
 *API: together | Query type: treatment | Chunks: 5*
 
@@ -381,10 +382,7 @@ You might also want to ask about:
 *Should explain FDA expanded access pathways*
 
 
-**Answer:** Compassionate use, also known as expanded access, allows patients with serious conditions to access investigational drugs outside of a clinical trial when no other options are available. To access it, your oncologist must identify a potential drug, the manufacturer must agree to provide it, and the FDA will review the request. You can also reach out to the FDA's Project Facilitate at 1-855-543-3784 or visit ExpandedAccessNavigator.org for more information. 
-
-You might also want to ask about: 
-• ...
+**Answer:** Compassionate use, also known as expanded access, allows patients with serious conditions to access investigational drugs outside of clinical trials when no comparable alternative exists. To access it, your oncologist must identify a potentially helpful drug, the manufacturer must agree to provide it, and the FDA will review and typically decide within days. You can also reach out to resources like FDA Project Facilitate or the Reagan-Udall Foundation's ExpandedAccessNavigator.org for guidance. ...
 
 *API: together | Query type: general | Chunks: 5*
 
@@ -402,9 +400,10 @@ You might also want to ask about:
 *Should recommend evidence-based exercise*
 
 
-**Answer:** During chemotherapy, it's generally safe to do light to moderate exercises like walking, yoga, or swimming. These activities can help reduce fatigue and improve overall well-being. However, it's essential to avoid high-impact exercises or those that may cause injury, especially if you're experiencing neuropathy or other side effects. You might want to discuss with your oncologist the best exercises for your specific situation, considering your current health and treatment regimen.
+**Answer:** During chemotherapy, it's generally safe to do light to moderate exercises, such as walking, yoga, or swimming, as long as you're feeling up to it. These activities can help reduce fatigue and improve overall well-being. However, it's essential to avoid high-intensity exercises or those that may put too much strain on your body, especially if you're experiencing side effects like neuropathy or fatigue. 
 
-You might als...
+You might also want to ask about: 
+• How to manage neuropathy symptoms, such as tingling or ...
 
 *API: together | Query type: treatment | Chunks: 5*
 
@@ -417,9 +416,10 @@ You might als...
 *Should discuss yoga with safety notes*
 
 
-**Answer:** Yoga can be a great way to manage stress and improve your overall well-being while going through cancer treatment. Gentle, modified yoga programs, such as "Yoga for Cancer," are specifically designed for cancer patients and can help with fatigue, anxiety, and procedure anxiety. You can ask your oncologist about local yoga programs or online resources that cater to cancer patients, and many cancer centers also offer yoga classes as part of their supportive care services. 
+**Answer:** Yoga can be a great way to manage stress and improve your overall well-being during cancer treatment. Gentle, modified yoga programs, such as "Yoga for Cancer," are specifically designed for cancer patients and can help with fatigue, anxiety, and procedure anxiety. You can ask your oncologist about local yoga programs or online resources that cater to cancer patients, and many communities offer free or low-cost classes. 
 
-You might also want to ...
+You might also want to ask about: 
+• How can I manage my peripheral neurop...
 
 *API: together | Query type: emotional | Chunks: 5*
 
@@ -435,7 +435,9 @@ You might also want to ...
 *Should explain Phase III in plain language*
 
 
-**Answer:** In a clinical trial, Phase III (what you're asking about) means the treatment is being tested in a large group of patients to see how well it works and how safe it is compared to standard treatments (Phase III trials are like a "head-to-head" comparison). This phase helps doctors understand if the new treatment should become a standard option for patients. Clinical trial availability changes frequently. Always verify trial status at ClinicalTrials.gov or with your oncology team before making dec...
+**Answer:** In a clinical trial, "Phase III" means that the treatment is being tested in a large group of patients to see how well it works and how safe it is compared to standard treatments (Phase III trials are like a final check before a treatment can be approved). This phase helps doctors understand the benefits and risks of the new treatment. Clinical trial availability changes frequently. Always verify trial status at ClinicalTrials.gov or with your oncology team before making decisions.
+
+As someone w...
 
 *API: together | Query type: clinical_trial | Chunks: 5*
 
@@ -470,10 +472,7 @@ Yo...
 *Should retrieve chunks from Cancer_Stress_DAndre_2024.pdf*
 
 
-**Answer:** Managing stress is important for your overall wellbeing and quality of life during treatment. When you're stressed, your body releases hormones like cortisol and adrenaline, which can affect your immune function, sleep, and ability to recover from treatment over time. This doesn't mean stress affects your cancer directly, but rather it can impact how you feel and your energy levels. 
-
-You might also want to ask about: 
-• How can I manage my fatigue and nausea during chemotherapy to improve my da...
+**Answer:** Managing stress is important for your overall wellbeing and quality of life during treatment. When you're stressed, your body releases hormones like cortisol and adrenaline, which can affect your immune function, sleep, and ability to recover from treatment over time. This doesn't mean stress affects your cancer directly, but rather it can impact how you feel and your energy levels. You can manage stress through techniques like mindfulness, exercise, and social support - resources like the Socie...
 
 *API: together | Query type: emotional | Chunks: 5*
 
@@ -490,10 +489,10 @@ You might also want to ask about:
 *Should retrieve from NCI/ACS caregiver docs*
 
 
-**Answer:** As a caregiver, it's great that you're looking for resources to support yourself and your loved one. There are many organizations that offer help, such as CancerCare, which has a caregiver support line (800-813-4673), and the Caregiver Action Network, which provides online resources and community support. You can also reach out to oncology social workers, who can connect you with local support groups and respite care services.
+**Answer:** As a caregiver, it's great that you're looking for resources to support yourself and your loved one. There are many organizations that offer help, such as CancerCare, which has a caregiver support group and hotline (800-813-4673), and the Caregiver Action Network, which provides guidance and resources. You can also check out Lotsa Helping Hands, a platform that helps caregivers manage tasks and get support from family and friends.
 
 You might also want to ask about: 
-• How to manage your loved one's ...
+• How to manage your loved on...
 
 *API: together | Query type: caregiver | Chunks: 5*
 
@@ -509,10 +508,9 @@ You might also want to ask about:
 *Should retrieve from CRC_Screening_Barriers.pdf*
 
 
-**Answer:** Many people don't get screened for colon cancer because they're afraid of the procedure, don't know about all the screening options, or think it's only for older adults. Some also worry about the cost or are embarrassed about the preparation and procedure. It's essential to know that there are non-invasive options like the FIT test or Cologuard that can be done at home. 
+**Answer:** Many people don't get screened for colon cancer because they're afraid of the procedure, don't know about all the screening options, or worry about the cost. Some also think they only need to get screened if they have symptoms, or they believe colon cancer only affects older adults. It's essential to know that there are non-invasive options like the FIT test or Cologuard that can be done at home, and many organizations offer resources to help make screening more accessible.
 
-You might also want to ask about: 
-• How can I manage my current side effects from FOLFOX, such as peripheral neuropathy and ...
+You might also want ...
 
 *API: together | Query type: general | Chunks: 5*
 
@@ -528,10 +526,10 @@ You might also want to ask about:
 *Should retrieve from Cancer_Sleep_Disorders.pdf*
 
 
-**Answer:** Cancer treatment can affect sleep due to anxiety, pain, medications, and treatment schedules. To manage sleep problems, good sleep hygiene practices such as maintaining a consistent sleep schedule, creating a relaxing bedtime routine, and avoiding caffeine and electronics before bedtime can be helpful. Sometimes, medications or cognitive behavioral therapy for insomnia (CBT-I) may also be recommended to address underlying causes like pain or anxiety. 
+**Answer:** Cancer treatment can affect sleep due to anxiety, pain, medications, and treatment schedules. To manage sleep problems, it's essential to practice good sleep hygiene, such as maintaining a consistent sleep schedule, creating a relaxing bedtime routine, and avoiding caffeine and electronics before bedtime. Sometimes, medications or cognitive behavioral therapy for insomnia (CBT-I) may be necessary to help improve sleep.
 
 You might also want to ask about: 
-• How ca...
+• How can I manage my fatigue and nausea ...
 
 *API: together | Query type: treatment | Chunks: 5*
 
@@ -548,8 +546,8 @@ You might also want to ask about:
 **Answer:** For average-risk individuals, colon cancer screening should start at age 45. However, since you have a history of colon cancer, your doctor may recommend a different screening schedule. It's essential to discuss your specific situation with your medical team to determine the best approach for you. 
 
 You might also want to ask about: 
-• How will my treatment plan change after I complete the remaining 4 cycles of FOLFOX + Bevacizumab?
-• What can I do to manage my Grade 2 Peripheral Neuropathy and ...
+• How can I manage my peripheral neuropathy symptoms to improve my quality of life?
+• What are the potential benefits and risks of continuing bevacizumab in my adju...
 
 *API: together | Query type: general | Chunks: 5*
 
@@ -564,10 +562,10 @@ You might also want to ask about:
 
 #### [PASS] Q: What is FOLFOX and how does it work?
 
-**Answer:** FOLFOX is a type of chemotherapy that combines three drugs: 5-FU, Leucovorin, and Oxaliplatin. It works by stopping cancer cells from growing and dividing, which helps to slow down the spread of the cancer. As someone with a KRAS mutation and MSS (Microsatellite Stable) status, you're currently receiving FOLFOX with Bevacizumab, which is a targeted therapy that helps stop the growth of new blood vessels that feed the cancer. 
+**Answer:** FOLFOX is a type of chemotherapy that combines three drugs: 5-FU, Leucovorin, and Oxaliplatin. It works by targeting and killing cancer cells that are growing and dividing quickly. As someone with a KRAS mutation and MSS (Microsatellite Stable) status, you're currently receiving FOLFOX with Bevacizumab, which is a targeted therapy that helps stop the growth of new blood vessels that feed cancer cells. 
 
 You might also want to ask about: 
-• How can I manage the side effect...
+• How can I manage the side effects of Oxaliplatin, such a...
 
 *API: together | Query type: treatment | Chunks: 5*
 
@@ -579,7 +577,7 @@ You might also want to ask about:
 
 #### [PASS] Q: Why was bevacizumab added to my treatment?
 
-**Answer:** Bevacizumab was added to your treatment, which is not typically recommended for standard adjuvant treatment in stage II/III colon cancer, so it's possible that your doctor chose this treatment based on specific factors in your case or as part of a clinical trial. Your treatment includes FOLFOX (a combination of 5-FU, Leucovorin, and Oxaliplatin) and Bevacizumab, which works by blocking the growth of new blood vessels that feed your cancer. Since you have a KRAS mutation and are MSS (Microsatelli...
+**Answer:** Bevacizumab was added to your treatment, which is not typically recommended for standard adjuvant treatment in stage II/III colon cancer, so it's likely your doctor chose this based on specific factors about your case. Your treatment includes FOLFOX (a combination of 5-FU, Leucovorin, and Oxaliplatin) plus Bevacizumab, which works by stopping tumors from forming new blood vessels, thereby slowing their growth. Since you have a KRAS mutation, EGFR-targeted therapies like cetuximab won't be effect...
 
 *API: together | Query type: treatment | Chunks: 5*
 
@@ -608,7 +606,9 @@ You might also wa...
 
 #### [PASS] Q: How can I manage the fatigue from chemotherapy?
 
-**Answer:** To manage fatigue from chemotherapy, you can try treating the underlying causes, such as anemia, poor nutrition, or sleep problems. This might involve adjusting your diet, taking iron supplements if you're anemic, or practicing good sleep habits. You can also try exercising regularly, but gently, to help build up your strength and energy levels. If your fatigue is severe or interferes with your daily activities, be sure to contact your care team for guidance, as they may need to adjust your trea...
+**Answer:** To manage fatigue from chemotherapy, you can try treating the underlying causes, such as anemia, poor nutrition, or sleep problems. This might involve adjusting your diet, taking iron supplements, or practicing relaxation techniques to improve your sleep. You can also try pacing yourself, taking regular breaks, and engaging in gentle exercises like walking to help boost your energy levels. If your fatigue worsens or interferes with your daily activities, contact your care team for guidance.
+
+You...
 
 *API: together | Query type: side_effect | Chunks: 5*
 
@@ -623,9 +623,7 @@ You might also wa...
 
 #### [FAIL] Q: I have a fever of 101F and chills. What should I do?
 
-**Answer:** 🚨 EMERGENCY: Fever during chemotherapy is a medical emergency due to risk of neutropenic sepsis. Contact your oncologist immediately or go to the ER. Do not wait. If going to the ER, tell triage immediately that you're on chemotherapy, bring your medication list or a photo of your pill bottles, have your oncologist's after-hours number saved, and bring your insurance card and ID. While waiting for medical help, try to stay hydrated by drinking plenty of fluids and rest as much as possible. 
-
-You...
+**Answer:** 🚨 EMERGENCY: Fever during chemotherapy is a medical emergency due to risk of neutropenic sepsis. Contact your oncologist immediately or go to the ER. Do not wait. If going to the ER, tell triage immediately that you're on chemotherapy, bring your medication list or a photo of your pill bottles, have your oncologist's after-hours number saved, and bring your insurance card and ID. While waiting for medical attention, try to stay hydrated by drinking plenty of fluids and rest as much as possible. ...
 
 *API: together | Query type: side_effect | Chunks: 5*
 
@@ -640,9 +638,11 @@ You...
 
 #### [PASS] Q: I'm feeling anxious about my diagnosis. Is this normal?
 
-**Answer:** It's completely normal to feel anxious about your diagnosis, and many people in your situation experience similar emotions. Anxiety, fear, and sadness are common reactions to a cancer diagnosis, and it's essential to acknowledge and address these feelings. You can talk to an oncology social worker or call the Cancer Support Helpline at 1-888-793-9355 for emotional support, and you can also try using apps like Calm and Headspace that offer free cancer-specific meditation programs.
+**Answer:** It's completely normal to feel anxious about your diagnosis, and many people in your situation experience anxiety, fear, and sadness. Your feelings make sense, and it's okay to acknowledge them. You can talk to an oncology social worker at your cancer center or call the Cancer Support Helpline at 1-888-793-9355 for emotional support and guidance.
 
-You might also...
+You might also want to ask about: 
+• How can I manage my fatigue and nausea during treatment to improve my quality of life?
+• What are the possible lo...
 
 *API: together | Query type: side_effect | Chunks: 5*
 
@@ -664,9 +664,9 @@ You might also...
 
 #### [PASS] Q: What is stage IIIB colon cancer?
 
-**Answer:** Stage IIIB colon cancer means that the cancer has grown through the wall of your colon and has spread to nearby lymph nodes, but not to distant parts of your body. This stage has a relatively good prognosis, with a 5-year survival rate ranging from 50-70%, depending on various factors such as the tumor's grade, location, and your overall health. Your treatment team will consider these factors, along with your biomarker status and treatment response, to provide a more personalized prognosis. 
+**Answer:** Stage IIIB colon cancer means that the cancer has grown through the wall of your colon and has spread to nearby lymph nodes, but not to distant parts of your body. This stage has a relatively good prognosis, with a 5-year survival rate ranging from 50-70%, depending on various factors such as the tumor's grade, your overall health, and how well you respond to treatment. Your care team can discuss your specific prognosis based on your pathology, biomarkers, and treatment response. 
 
-Yo...
+You might als...
 
 *API: together | Query type: prognosis | Chunks: 5*
 
@@ -692,7 +692,9 @@ Yo...
 *Should trigger STAGE_IV_PALLIATIVE_CONTEXT*
 
 
-**Answer:** Your prognosis with stage IV colon cancer is a serious concern, and it's completely understandable to have questions about it. The five-year survival rate for stage IV colon cancer is around 10-15%, but this can vary depending on several factors, including your tumor's genetic markers, such as your MSI-H status, which may respond well to immunotherapy, and your BRAF V600E mutation, which may respond to targeted therapy combinations. Many people with stage IV disease live well for years with the ...
+**Answer:** Your prognosis with stage IV colon cancer is serious, but it's great that you're asking about it - this shows you're taking an active role in your care. Many people with stage IV disease live well for years, and treatment options continue to expand. Your oncologist can discuss different scenarios with you, including the best-case, expected, and if-disease-progresses outcomes, which depend on various factors such as your tumor's MSI-H status, BRAF V600E mutation, and overall health.
+
+You might al...
 
 *API: together | Query type: prognosis | Chunks: 5*
 
@@ -715,10 +717,9 @@ Yo...
 *Should distinguish palliative from hospice*
 
 
-**Answer:** It's completely understandable that you're thinking about hospice, given your stage IV colon cancer diagnosis. However, hospice is not just about end-of-life care, but also about changing what you hope for - focusing on comfort, quality of life, and support when treatment is no longer curative. Your care team can help you determine if hospice is the right fit for you, and it's essential to discuss your goals, values, and priorities with them. 
+**Answer:** It's completely understandable that you're thinking about hospice, given your stage IV colon cancer diagnosis. However, hospice is not just about end-of-life care, but also about changing what you hope for - focusing on comfort, quality of life, and support when treatment is no longer effective. Your care team can help you determine if hospice is the right option for you, and it's essential to have an open conversation with them about your goals, values, and priorities. 
 
-You might also want to ask about: 
-• What palliativ...
+You might also want to ...
 
 *API: together | Query type: general | Chunks: 5*
 
@@ -733,9 +734,7 @@ You might also want to ask about:
 *Balanced, honest, empowering — not toxic positivity*
 
 
-**Answer:** It's completely understandable to wonder about hope with a stage 4 colon cancer diagnosis. While stage 4 cancer is serious, many people live well for years with this diagnosis, and treatment options continue to expand. Your prognosis depends on several factors, including the cancer's spread, your overall health, and how well you respond to treatment - with a 5-year survival rate ranging from 10-15% for stage 4, but also considering your MSI-H status which may respond well to immunotherapy.
-
-You ...
+**Answer:** It's completely understandable to have questions about the prognosis for stage 4 colon cancer, and I want to acknowledge that this is a difficult and emotional topic. Many people in your situation wonder about their chances of a good outcome, and it's a sign of strength, not giving up, to ask about prognosis. Your oncologist can discuss three kinds of questions with you: what the data says about people with a similar situation, what your own goals for treatment are, and what quality of life look...
 
 *API: together | Query type: prognosis | Chunks: 5*
 
@@ -758,10 +757,10 @@ You ...
 *Emotional + Stage IV context*
 
 
-**Answer:** Talking to your family about your prognosis can be really tough, but it's a great way to make sure everyone is on the same page and that you're all supported. You might want to start by asking your oncologist to explain your prognosis in a way that's easy to understand, and then you can share that information with your family. Oncology social workers can also help you have this conversation and provide guidance on how to communicate with your loved ones. 
+**Answer:** Talking to your family about your prognosis can be really tough, but it's a great way to make sure everyone is on the same page and that you're all supported. Many people in your situation find it helpful to have a family meeting, where you can all discuss what's going on and how you're feeling. You might consider asking a social worker or counselor to help facilitate the conversation, as they can provide guidance and support. 
 
 You might also want to ask about: 
-• Ho...
+• How can I manage my fatigue an...
 
 *API: together | Query type: screening_ambassador | Chunks: 5*
 
@@ -785,10 +784,10 @@ You might also want to ask about:
 *Should mention heart disease interactions*
 
 
-**Answer:** With regorafenib and your heart condition, it's essential to monitor your heart health closely. You should watch for symptoms like chest pain, shortness of breath, or palpitations, and report them to your oncologist immediately. Given your BRAF V600E mutation and MSI-H status, you may also be eligible for other treatments like encorafenib + cetuximab or immunotherapy with pembrolizumab, which your oncologist can discuss with you. 
+**Answer:** Given your heart condition, it's essential to monitor your cardiac health while on regorafenib. You should watch for symptoms like chest pain, shortness of breath, or palpitations, and report them to your oncologist immediately. Your oncologist will also monitor your heart function, possibly with an echocardiogram, to assess any potential effects of regorafenib on your heart. 
 
 You might also want to ask about: 
-• How to manage your hand-foo...
+• How your kidney disease might affect the dosing of regorafenib or other potential ...
 
 *API: together | Query type: treatment | Chunks: 5*
 
@@ -801,10 +800,7 @@ You might also want to ask about:
 *Should mention renal dose adjustments*
 
 
-**Answer:** Having kidney disease means that your oncologist will need to carefully choose and dose your cancer treatments to avoid hurting your kidneys. Some chemotherapy drugs, like oxaliplatin, can be harmful to kidneys, so your doctor may need to adjust the dose or choose a different treatment. Your kidney function will be regularly checked before each treatment cycle to make sure it's safe to proceed. 
-
-You might also want to ask about: 
-• How your heart disease might affect your treatment options, suc...
+**Answer:** Having kidney disease can affect your cancer treatment because some chemotherapy drugs are cleared from the body by the kidneys. Your oncologist will monitor your kidney function regularly and adjust the doses of certain medications, such as oxaliplatin, to prevent further kidney damage. It's essential to discuss your kidney disease with your oncologist to determine the best treatment plan for you, considering your biomarkers, including your KRAS wild-type status, BRAF V600E mutation, and MSI-Hi...
 
 *API: together | Query type: treatment | Chunks: 5*
 

@@ -428,6 +428,26 @@ def api_chat():
         # We want to ensure extract_patient_context_complex is called even if profile is mostly empty.
         patient_context = extract_patient_context_complex(patient_profile) if (patient_profile is not None and len(patient_profile) > 0) else {}
 
+        # Inject recent symptom check-in data for side_effect/treatment queries
+        if query_type in ('side_effect', 'treatment'):
+            try:
+                from supabase_storage import load_latest_screening_score
+                latest_symptoms = load_latest_screening_score(user_id, 'SYMPTOM')
+                if latest_symptoms and latest_symptoms.get('scores'):
+                    symptom_names = ['Nausea', 'Fatigue', 'Diarrhea', 'Neuropathy', 'Pain',
+                                     'Appetite loss', 'Mouth sores', 'Hand-foot syndrome', 'Constipation', 'Skin rash']
+                    reported = []
+                    for idx, name in enumerate(symptom_names):
+                        score = latest_symptoms['scores'].get(str(idx), 0)
+                        if score >= 2:
+                            severity = ['', 'mild', 'moderate', 'severe', 'very severe'][min(score, 4)]
+                            reported.append(f"{name} ({severity})")
+                    if reported:
+                        patient_context['recent_symptom_report'] = reported
+                        patient_context['symptom_report_date'] = latest_symptoms.get('completed_at', '')
+            except Exception:
+                logger.debug("Could not load symptom data for context")
+
         # Check for cancer type mismatch
         mismatch_detected = False
         if patient_context.get('cancer_type'):
@@ -763,7 +783,7 @@ def api_load_screening():
         from supabase_storage import load_latest_screening_score
 
         result = {}
-        for instrument in ['PHQ9', 'GAD7', 'PSS10', 'ISI']:
+        for instrument in ['PHQ9', 'GAD7', 'PSS10', 'ISI', 'SYMPTOM']:
             score_data = load_latest_screening_score(user_id, instrument)
             if score_data:
                 result[instrument] = score_data

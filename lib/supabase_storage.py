@@ -754,7 +754,7 @@ def load_screening_history(user_id: str, instrument: str, limit: int = 20) -> li
 
 def load_all_screening_history(user_id: str) -> dict:
     """Load screening history for all instruments, grouped by instrument."""
-    instruments = ['PHQ9', 'GAD7', 'PSS10', 'ISI']
+    instruments = ['PHQ9', 'GAD7', 'PSS10', 'ISI', 'SYMPTOM']
     history = {}
     for inst in instruments:
         data = load_screening_history(user_id, inst, limit=20)

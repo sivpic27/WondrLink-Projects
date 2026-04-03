@@ -107,9 +107,50 @@ WondrChat 2.1 adds a HIPAA de-identification layer that strips all Protected Hea
 
 ---
 
+---
+
+## Mental Health Trend Dashboard
+
+**Problem:** WondrChat captures PHQ-9, GAD-7, PSS-10, and ISI screening scores, but patients can only see their most recent score. No longitudinal visualization exists. Research shows measurement-based care (showing patients their trends) improves remission rates by up to 75%.
+
+**Solution:** Interactive dashboard accessible via "View Trends" button in the Wellness Check-In sidebar. Uses Chart.js with the PROTEUS Consortium-recommended traffic-light severity bands.
+
+### Features
+
+| Feature | Detail |
+|---------|--------|
+| Line charts | One per instrument, with color-banded severity zones (green/yellow/orange/red) |
+| Narrative text | "Your depression score improved from moderate to mild" |
+| Score change alerts | Increase of 5+ points triggers a warning to share with provider |
+| Severity alerts | PHQ-9 >= 15, GAD-7 >= 15, PSS-10 >= 27, ISI >= 22 |
+| Retake prompts | 30+ days since last check-in prompts a retake |
+| Missing instruments | Shows which screenings haven't been completed yet |
+
+### Severity Bands (PROTEUS Consortium)
+
+**PHQ-9:** 0-4 Minimal (green), 5-9 Mild (yellow), 10-14 Moderate (orange), 15-19 Mod. Severe (red), 20-27 Severe (dark red)
+**GAD-7:** 0-4 Minimal, 5-9 Mild, 10-14 Moderate, 15-21 Severe
+**PSS-10:** 0-13 Low, 14-26 Moderate, 27-40 High
+**ISI:** 0-7 No Insomnia, 8-14 Subthreshold, 15-21 Moderate, 22-28 Severe
+
+### Alert Thresholds
+
+- PHQ-9 Q9 >= 1 (suicidal ideation) -> Crisis resources (988 Lifeline) — already existed
+- Score increase >= 5 points between assessments -> "Consider sharing with your care team"
+- Severe thresholds (PHQ-9 >= 15, GAD-7 >= 15, PSS-10 >= 27, ISI >= 22) -> Provider share prompt
+
+**Files:**
+- New endpoint: `GET /api/screening/history`
+- Modified: `lib/supabase_storage.py` (load_all_screening_history)
+- Modified: `public/index.html` (Chart.js CDN, dashboard overlay, chart rendering, alerts, narratives)
+
+---
+
 ## Commits
 
 ```
 b77c787 Add HIPAA de-identification layer and update screening language
 7160cf1 Implement hybrid RAG with pgvector and add version docs
+ba3f657 Add mental health trend dashboard with severity-banded charts
+b3e0958 Fix dashboard chart infinite resize loop
 ```

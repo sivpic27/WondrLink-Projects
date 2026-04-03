@@ -1436,6 +1436,12 @@ def filter_relevant_context(patient_context: Dict[str, Any], query_type: str, me
     if symptoms:
         full_context.append(f"Recent symptoms: {', '.join(symptoms)}")
 
+    # Patient-reported symptom check-in (from dashboard)
+    symptom_report = patient_context.get('recent_symptom_report', [])
+    if symptom_report:
+        report_date = patient_context.get('symptom_report_date', '')
+        full_context.append(f"Patient-reported symptoms: {', '.join(symptom_report)}")
+
     return " | ".join(full_context)
 
 

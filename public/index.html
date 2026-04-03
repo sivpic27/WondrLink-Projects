@@ -4067,6 +4067,9 @@
                         <button onclick="startScreening('ISI')" class="suggestion-chip" style="text-align:left;width:100%;font-size:12px;padding:8px 12px;">
                             Sleep (ISI)
                         </button>
+                        <button onclick="startScreening('SYMPTOM')" class="suggestion-chip" style="text-align:left;width:100%;font-size:12px;padding:8px 12px;background:var(--primary);color:white;">
+                            Symptom Check-In
+                        </button>
                     </div>
                 </div>
 
@@ -7441,6 +7444,37 @@
                     { max: 21, label: 'moderate insomnia', message: 'Your ISI score falls in the moderate clinical insomnia range. Share this result with your healthcare provider.' },
                     { max: 28, label: 'severe insomnia', message: 'Your ISI score falls in the severe clinical insomnia range. Share this result with your healthcare provider.' }
                 ]
+            },
+            SYMPTOM: {
+                title: 'Symptom Check-In',
+                subtitle: 'In the last 7 days, rate the severity of each symptom at its worst.',
+                normalization: 'Tracking symptoms helps your care team adjust your treatment. This takes about 2 minutes.',
+                options: [
+                    { label: 'None', score: 0 },
+                    { label: 'Mild', score: 1 },
+                    { label: 'Moderate', score: 2 },
+                    { label: 'Severe', score: 3 },
+                    { label: 'Very severe', score: 4 }
+                ],
+                questions: [
+                    'Nausea',
+                    'Fatigue or tiredness',
+                    'Diarrhea',
+                    'Numbness or tingling in hands/feet (neuropathy)',
+                    'Pain',
+                    'Loss of appetite',
+                    'Mouth sores',
+                    'Hand-foot syndrome (redness, swelling, or peeling on palms/soles)',
+                    'Constipation',
+                    'Skin rash or dryness'
+                ],
+                severity: [
+                    { max: 8, label: 'mild symptoms', message: 'Your symptom burden is in the mild range. Share this result with your healthcare provider at your next visit.' },
+                    { max: 18, label: 'moderate symptoms', message: 'Your symptom burden is in the moderate range. Share this result with your healthcare provider.' },
+                    { max: 28, label: 'significant symptoms', message: 'Your symptom burden is significant. Share this result with your healthcare provider.' },
+                    { max: 40, label: 'severe symptoms', message: 'Your symptom burden is severe. Share this result with your healthcare provider promptly.' }
+                ],
+                is_symptom_tracker: true
             }
         };
 
@@ -7562,6 +7596,30 @@
                 console.error('Screening save error:', e);
             }
 
+            // Check for severe individual symptoms (Grade 3+)
+            let toxicityAlert = '';
+            if (instrument.is_symptom_tracker) {
+                const severeSymptoms = [];
+                const questions = instrument.questions;
+                for (const [idx, score] of Object.entries(screeningScores)) {
+                    if (score >= 3 && questions[parseInt(idx)]) {
+                        severeSymptoms.push(questions[parseInt(idx)]);
+                    }
+                }
+                if (severeSymptoms.length > 0) {
+                    toxicityAlert = `
+                        <div style="background:#FEF2F2;border:1px solid #EF4444;border-radius:8px;padding:12px 16px;margin-top:16px;text-align:left;">
+                            <div style="font-weight:600;color:#991B1B;margin-bottom:6px;">Severe symptoms reported:</div>
+                            <ul style="margin:0;padding-left:20px;color:#991B1B;font-size:13px;">
+                                ${severeSymptoms.map(s => `<li>${s}</li>`).join('')}
+                            </ul>
+                            <div style="margin-top:8px;font-size:12px;color:#7F1D1D;">
+                                Contact your oncology team today to report these symptoms.
+                            </div>
+                        </div>`;
+                }
+            }
+
             // Show result
             document.getElementById('screeningQuestion').style.display = 'none';
             document.getElementById('screeningOptions').style.display = 'none';
@@ -7571,6 +7629,7 @@
                 <div class="screening-result-score">${total}</div>
                 <div class="screening-result-label">${severityLabel}</div>
                 <div class="screening-result-message">${severityMessage}</div>
+                ${toxicityAlert}
                 <button onclick="document.getElementById('screeningOverlay').style.display='none'" style="
                     margin-top:16px;padding:10px 24px;
                     background:var(--primary);color:white;border:none;
@@ -7626,6 +7685,16 @@
                     { min: 8, max: 14, label: 'Subthreshold', color: 'rgba(234,179,8,0.15)', borderColor: '#EAB308' },
                     { min: 15, max: 21, label: 'Moderate', color: 'rgba(249,115,22,0.15)', borderColor: '#F97316' },
                     { min: 22, max: 28, label: 'Severe', color: 'rgba(239,68,68,0.15)', borderColor: '#EF4444' }
+                ]
+            },
+            SYMPTOM: {
+                label: 'Symptoms',
+                maxScore: 40,
+                bands: [
+                    { min: 0, max: 8, label: 'Mild', color: 'rgba(34,197,94,0.15)', borderColor: '#22C55E' },
+                    { min: 9, max: 18, label: 'Moderate', color: 'rgba(234,179,8,0.15)', borderColor: '#EAB308' },
+                    { min: 19, max: 28, label: 'Significant', color: 'rgba(249,115,22,0.15)', borderColor: '#F97316' },
+                    { min: 29, max: 40, label: 'Severe', color: 'rgba(239,68,68,0.15)', borderColor: '#EF4444' }
                 ]
             }
         };

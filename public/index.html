@@ -7997,17 +7997,11 @@
         // NUTRITION QUICK QUESTIONS
         // =============================================
         function askNutritionQuestion(question) {
-            const input = document.getElementById('chatInput');
-            if (input) {
+            const input = document.getElementById('msgInput');
+            const send = document.getElementById('sendBtn');
+            if (input && send) {
                 input.value = question;
-                // Trigger the submit
-                const form = input.closest('form');
-                if (form) {
-                    form.dispatchEvent(new Event('submit'));
-                } else {
-                    // Fallback: call submitChatMessage if available
-                    if (typeof submitChatMessage === 'function') submitChatMessage();
-                }
+                send.click();
             }
         }
 

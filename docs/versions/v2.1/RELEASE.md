@@ -238,6 +238,43 @@ Symptom burden trends appear in the "View Trends" dashboard alongside mental hea
 
 ---
 
+---
+
+## CRC Nutrition Guidance
+
+**Problem:** 46% of CRC survivors report unmet needs for complementary therapy information including nutrition. No dedicated colon cancer nutrition app exists despite unique dietary needs (post-colectomy diet phases, low-residue requirements, stoma management, fiber reintroduction timelines, chemo-specific dietary adaptations).
+
+**Solution:** Comprehensive nutrition module with 3 new knowledge base documents, a new `nutrition` query type, phase-based dietary guidance, and sidebar quick-question chips.
+
+### Knowledge Base Documents Added
+- **CRC_Post_Colectomy_Diet.pdf** — 3 dietary phases (clear liquids, low-residue, fiber reintroduction), stoma management, hydration guidelines
+- **CRC_Nutrition_During_Chemo.pdf** — Side-effect specific tips (nausea, diarrhea, constipation, mouth sores, neuropathy), protein requirements, AICR guidelines
+- **CRC_Survivorship_Nutrition.pdf** — Anti-recurrence evidence (Western diet 3.25x risk, fiber 18% mortality reduction), comorbidity-specific nutrition, supplement guidance
+
+**Total KB: 23 documents, 1,745 chunks (all embedded)**
+
+### Nutrition Query Classification
+New `nutrition` category with 20+ keywords: diet, food, eat, nutrition, meal, fiber, stoma, colostomy, ileostomy, weight, supplement, vitamin, etc.
+
+### Guidance Content Covers
+- Phase-based advice (post-surgery / during chemo / survivorship)
+- Side-effect specific diet tips (nausea, diarrhea, constipation, mouth sores, neuropathy, metallic taste)
+- Stoma management (thickening/thinning foods, hydration)
+- Evidence-based anti-recurrence diet (JAMA Oncology 2018)
+- Comorbidity-aware nutrition (diabetes + CRC, hypertension + CRC, obesity + CRC)
+- Supplement guidance (Vitamin D, calcium, omega-3, with "discuss with oncologist" framing)
+- Oncology dietitian referral (CSO credential, eatright.org)
+
+### Frontend
+Sidebar "Nutrition" section with quick-question chips: "Eating during chemo", "Anti-recurrence diet", "Post-surgery foods"
+
+**Files:**
+- Created: 3 PDFs in `data/`
+- Modified: `lib/llm_utils.py` (nutrition query type, CRC_NUTRITION_GUIDANCE, context injection)
+- Modified: `public/index.html` (nutrition sidebar, quick-question chips)
+
+---
+
 ## Commits
 
 ```
@@ -247,4 +284,5 @@ ba3f657 Add mental health trend dashboard with severity-banded charts
 b3e0958 Fix dashboard chart infinite resize loop
 c262cc4 Add PRO-CTCAE symptom tracking with dashboard and chat integration
 1d6f9c9 Add survivorship surveillance schedules and PREMM5 Lynch screening
+8fed78c Add CRC nutrition guidance with knowledge base and query classification
 ```

@@ -762,3 +762,45 @@ def load_all_screening_history(user_id: str) -> dict:
             # Return in chronological order (oldest first) for charting
             history[inst] = list(reversed(data))
     return history
+
+
+def delete_all_user_data(user_id: str) -> dict:
+    """
+    Delete ALL data for a user across all tables. GDPR Article 17 compliance.
+
+    Returns dict with deletion results per table.
+    """
+    results = {}
+    try:
+        client = get_admin_client()
+
+        tables = [
+            'patient_profiles',
+            'chat_messages',
+            'screening_scores',
+            'user_acknowledgements',
+            'chat_feedback',
+            'conversations',
+            'messages',
+            'rate_limits',
+        ]
+
+        for table in tables:
+            try:
+                client.table(table).delete().eq('user_id', user_id).execute()
+                results[table] = 'deleted'
+            except Exception as e:
+                results[table] = f'error: {str(e)}'
+
+        # Delete rate limits by identifier (user_id)
+        try:
+            client.table('rate_limits').delete().eq('identifier', user_id).execute()
+        except Exception:
+            pass
+
+        logger.info(f"All data deleted for user {user_id}")
+        return results
+
+    except Exception as e:
+        logger.error(f"Failed to delete user data: {e}")
+        return {'error': str(e)}

@@ -22,8 +22,16 @@ def register_user(email: str, password: str) -> Tuple[Optional[Dict[str, Any]], 
     if not email or not password:
         return None, "Email and password are required"
 
-    if len(password) < 6:
-        return None, "Password must be at least 6 characters"
+    if len(password) < 8:
+        return None, "Password must be at least 8 characters"
+
+    import re
+    if not re.search(r'[A-Z]', password):
+        return None, "Password must contain at least one uppercase letter"
+    if not re.search(r'[a-z]', password):
+        return None, "Password must contain at least one lowercase letter"
+    if not re.search(r'[0-9]', password):
+        return None, "Password must contain at least one number"
 
     try:
         client = get_supabase_client()

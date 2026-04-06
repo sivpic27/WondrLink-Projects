@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>WondrLink - Your Cancer Care Guide</title>
     <meta name="color-scheme" content="light">
+    <link rel="icon" type="image/png" href="/Logo.png">
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Chart.js for mental health dashboard -->
@@ -3861,38 +3862,56 @@
                 <button class="policy-modal-close" onclick="closePolicyModal('privacyOverlay')" aria-label="Close">&times;</button>
             </div>
             <div class="policy-modal-body">
-                <p><strong>Effective Date:</strong> February 2026</p>
+                <p><strong>Effective Date:</strong> April 2026</p>
 
                 <h3>Information We Collect</h3>
                 <p>WondrLink collects the following information to provide personalized cancer care guidance:</p>
                 <ul>
                     <li>Account information (email address for authentication)</li>
-                    <li>Patient profile data you voluntarily provide (diagnosis, treatments, biomarkers)</li>
+                    <li>Patient profile data you voluntarily provide (diagnosis, treatments, biomarkers, comorbidities)</li>
                     <li>Chat conversation history</li>
+                    <li>Mental health screening results (PHQ-9, GAD-7, PSS-10, ISI)</li>
+                    <li>Symptom check-in reports</li>
                 </ul>
 
                 <h3>How We Use Your Information</h3>
                 <ul>
                     <li>To provide personalized, evidence-based cancer care information</li>
                     <li>To match you with relevant clinical trials</li>
+                    <li>To track your wellness trends over time</li>
                     <li>To improve response quality and accuracy</li>
                 </ul>
 
                 <h3>Data Storage & Security</h3>
-                <p>Your data is stored securely in encrypted databases. We use industry-standard security measures to protect your information. Conversations and profile data are associated with your account and are not accessible to other users.</p>
+                <p>Your data is stored securely in encrypted databases hosted by Supabase (PostgreSQL). We use industry-standard security measures including encryption in transit (TLS) and at rest. Conversations and profile data are associated with your account and are not accessible to other users.</p>
+                <p><strong>De-identification:</strong> Before your profile data is sent to our AI service for response generation, all personally identifying information (name, date of birth, zip code, addresses) is stripped. Only clinically relevant data (diagnosis, stage, treatments, biomarkers) is used to personalize responses.</p>
 
-                <h3>Data Sharing</h3>
-                <p>We do <strong>not</strong> sell or share your personal health information with third parties. Your data is used solely to provide and improve the WondrLink service.</p>
+                <h3>Third-Party Services</h3>
+                <p>WondrLink uses the following third-party services to operate:</p>
+                <ul>
+                    <li><strong>Supabase</strong> — Database and authentication</li>
+                    <li><strong>Together AI / Groq</strong> — AI response generation (receives de-identified data only)</li>
+                    <li><strong>Vercel</strong> — Application hosting</li>
+                    <li><strong>ClinicalTrials.gov</strong> — Clinical trial search (public API, no user data sent)</li>
+                </ul>
+                <p>We do <strong>not</strong> sell your personal health information to third parties.</p>
+
+                <h3>Data Retention</h3>
+                <p>We retain your data for as long as your account is active. Upon account deletion, all data is permanently removed within 30 days. Rate limiting records are automatically deleted after 24 hours.</p>
 
                 <h3>Your Rights</h3>
+                <p>You have the following rights regarding your data:</p>
                 <ul>
-                    <li>You can view and update your profile at any time</li>
-                    <li>You can clear your conversation history</li>
-                    <li>You can request deletion of your account and all associated data by contacting support</li>
+                    <li><strong>Access:</strong> View your profile, chat history, and screening scores at any time</li>
+                    <li><strong>Correction:</strong> Update your profile information at any time</li>
+                    <li><strong>Deletion:</strong> Permanently delete your account and all associated data using the "Delete Account" option in your profile settings</li>
+                    <li><strong>Portability:</strong> Export your conversation history using the Export feature</li>
                 </ul>
+                <p>For California residents (CCPA): You have the right to know what data we collect, request deletion, and opt out of data sales (we do not sell data).</p>
+                <p>For EU/EEA residents (GDPR): You have the rights of access, rectification, erasure, and data portability as described above.</p>
 
                 <h3>Contact</h3>
-                <p>For privacy-related questions, please contact our team through the WondrLink support channel.</p>
+                <p>For privacy-related questions or data requests, contact us at <a href="mailto:info@wondrlinkfoundation.org" style="color:var(--primary);">info@wondrlinkfoundation.org</a>.</p>
             </div>
         </div>
     </div>
@@ -3905,16 +3924,19 @@
                 <button class="policy-modal-close" onclick="closePolicyModal('termsOverlay')" aria-label="Close">&times;</button>
             </div>
             <div class="policy-modal-body">
-                <p><strong>Effective Date:</strong> February 2026</p>
+                <p><strong>Effective Date:</strong> April 2026</p>
 
                 <h3>Purpose</h3>
-                <p>WondrLink is an <strong>educational support tool</strong> designed to help colon cancer patients understand their diagnosis, treatment options, and care journey using evidence-based medical guidelines.</p>
+                <p>WondrLink is a <strong>health education tool</strong> designed to help colon cancer patients and caregivers understand diagnosis, treatment options, and care journeys using evidence-based medical guidelines.</p>
 
                 <h3>Not Medical Advice</h3>
                 <p>WondrLink does <strong>not</strong> provide medical advice, diagnosis, or treatment recommendations. All information is for educational and informational purposes only. Always consult your oncologist or healthcare team before making any medical decisions.</p>
 
                 <h3>Accuracy</h3>
-                <p>While WondrLink draws from established medical guidelines, AI-generated responses may occasionally contain errors. Always verify important information with your healthcare provider.</p>
+                <p>While WondrLink draws from established medical guidelines (NCCN, ASCO, ACS), AI-generated responses may occasionally contain errors or inaccuracies. Always verify important information with your healthcare provider.</p>
+
+                <h3>Screening Instruments</h3>
+                <p>Mental health screening tools (PHQ-9, GAD-7, PSS-10, ISI) display raw scores with standard severity labels. These are not diagnostic tools. Share your results with your healthcare provider for proper evaluation.</p>
 
                 <h3>Clinical Trials</h3>
                 <p>Clinical trial information is sourced from ClinicalTrials.gov. WondrLink provides trial matches as a convenience; eligibility must be confirmed by the trial's research team.</p>
@@ -3922,12 +3944,26 @@
                 <h3>Emergency Situations</h3>
                 <p>WondrLink is <strong>not</strong> an emergency service. If you experience severe symptoms, call 911 or go to the nearest emergency room immediately.</p>
 
-                <h3>User Responsibilities</h3>
+                <h3>User Conduct</h3>
                 <ul>
                     <li>Provide accurate profile information for the best experience</li>
                     <li>Do not rely on WondrLink as your sole source of medical information</li>
-                    <li>Consult your healthcare team for all medical decisions</li>
+                    <li>Do not share your account credentials with others</li>
+                    <li>Do not use automated tools to scrape or extract data from WondrLink</li>
+                    <li>Do not attempt to reverse-engineer or exploit the service</li>
                 </ul>
+
+                <h3>Limitation of Liability</h3>
+                <p>WondrLink Foundation provides this service "as is" without warranties of any kind. To the fullest extent permitted by law, WondrLink Foundation shall not be liable for any indirect, incidental, consequential, or punitive damages arising from your use of the service. WondrLink Foundation's total liability shall not exceed the amount you paid for the service (if any).</p>
+
+                <h3>Indemnification</h3>
+                <p>You agree to hold WondrLink Foundation harmless from any claims, damages, or expenses arising from your use of the service, your violation of these terms, or your violation of any rights of a third party.</p>
+
+                <h3>Termination</h3>
+                <p>WondrLink Foundation reserves the right to suspend or terminate your account at any time for violations of these terms or for any other reason. You may delete your account at any time through your profile settings.</p>
+
+                <h3>Contact</h3>
+                <p>For questions about these terms, contact us at <a href="mailto:info@wondrlinkfoundation.org" style="color:var(--primary);">info@wondrlinkfoundation.org</a>.</p>
             </div>
         </div>
     </div>
@@ -4263,6 +4299,11 @@
                         style="display: none;">Edit Profile</button>
                     <button class="small secondary" id="clearProfileBtn"
                         style="display: none; margin-top: 8px; width: 100%;">Clear Profile</button>
+                    <button class="small" id="deleteAccountBtn"
+                        onclick="confirmDeleteAccount()"
+                        style="margin-top: 8px; width: 100%; background: transparent; color: var(--danger); border: 1px solid var(--danger); font-size: 11px;">
+                        Delete Account
+                    </button>
                 </div>
 
             </div>
@@ -8070,6 +8111,32 @@
         // =============================================
         // NUTRITION QUICK QUESTIONS
         // =============================================
+        // =============================================
+        // ACCOUNT DELETION
+        // =============================================
+        async function confirmDeleteAccount() {
+            const confirmation = prompt(
+                'This will PERMANENTLY delete your account and ALL data (profile, chat history, screening scores, everything).\n\nType DELETE to confirm:'
+            );
+            if (confirmation !== 'DELETE') {
+                if (confirmation !== null) alert('Account deletion cancelled. You must type DELETE exactly.');
+                return;
+            }
+            try {
+                const resp = await authFetch('/api/delete_account', { method: 'DELETE' });
+                const data = await resp.json();
+                if (data.status === 'ok') {
+                    alert('Your account and all data have been permanently deleted.');
+                    localStorage.clear();
+                    window.location.reload();
+                } else {
+                    alert('Error deleting account: ' + (data.error || 'Unknown error'));
+                }
+            } catch (e) {
+                alert('Failed to delete account. Please contact info@wondrlinkfoundation.org');
+            }
+        }
+
         function askNutritionQuestion(question) {
             const input = document.getElementById('msgInput');
             const send = document.getElementById('sendBtn');

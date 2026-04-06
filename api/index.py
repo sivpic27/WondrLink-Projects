@@ -59,6 +59,7 @@ def _origin_allowed(origin: str) -> bool:
 # Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "wondrlink-dev-secret-key")
+app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024  # 1MB max request size
 
 # -------------------------
 # Auth Decorator
@@ -89,6 +90,13 @@ def require_auth(f):
 def api_register():
     """Register a new user with Supabase Auth."""
     try:
+        # Rate limit registration by IP
+        from rate_limit import check_rate_limit
+        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr or 'unknown').split(',')[0].strip()
+        allowed, remaining = check_rate_limit(client_ip, 'auth/register', 3, 60)
+        if not allowed:
+            return jsonify({"error": "Too many registration attempts. Please try again later."}), 429
+
         # Try to get JSON data from request body
         data = {}
         try:
@@ -128,6 +136,13 @@ def api_register():
 def api_login():
     """Authenticate and log in a user."""
     try:
+        # Rate limit login by IP
+        from rate_limit import check_rate_limit
+        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr or 'unknown').split(',')[0].strip()
+        allowed, remaining = check_rate_limit(client_ip, 'auth/login', 5, 15)
+        if not allowed:
+            return jsonify({"error": "Too many login attempts. Please try again in 15 minutes."}), 429
+
         # Try to get JSON data from request body
         data = {}
         try:
@@ -164,6 +179,7 @@ def api_login():
 
 
 @app.route("/api/auth/logout", methods=["POST"])
+@require_auth
 def api_logout():
     """Log out the current user."""
     auth_header = request.headers.get('Authorization')
@@ -383,6 +399,12 @@ def api_chat():
     """Main chat endpoint."""
     try:
         user_id = request.user["user_id"]
+
+        # Rate limit chat requests
+        from rate_limit import check_rate_limit
+        allowed, remaining = check_rate_limit(user_id, 'chat', 30, 60)
+        if not allowed:
+            return jsonify({"error": "You've reached the message limit. Please wait a bit before sending more."}), 429
         # Try to get JSON data from request body
         data = {}
         try:
@@ -567,7 +589,7 @@ def api_chat():
             try:
                 profile_updates = extract_profile_updates_from_query(original_message, patient_profile or {})
                 if profile_updates:
-                    logger.info(f"Detected profile updates for user {user_id}: {profile_updates}")
+                    logger.info(f"Detected profile updates for user {user_id}: {list(profile_updates.keys())}")
                     source_info = {
                         "source_type": "chat",
                         "session_id": session_id,
@@ -669,12 +691,11 @@ def api_chat():
 # Feedback Route
 # -------------------------
 @app.route("/api/feedback", methods=["POST"])
+@require_auth
 def api_feedback():
     """Save user feedback on bot responses."""
     try:
-        user_id = get_user_id()
-        if not user_id:
-            return jsonify({"error": "Unauthorized"}), 401
+        user_id = request.user["user_id"]
 
         data = request.get_json(silent=True) or {}
         rating = data.get("rating")  # "up" or "down"
@@ -901,25 +922,35 @@ def api_clinical_trials():
 
 
 # -------------------------
-# Debug Route
 # -------------------------
-@app.route("/api/debug", methods=["GET"])
-def api_debug():
-    """Debug information about system status."""
-    llm_status = get_llm_status()
+# Account Deletion (GDPR/CCPA)
+# -------------------------
+@app.route("/api/delete_account", methods=["DELETE"])
+@require_auth
+def api_delete_account():
+    """Delete all user data and account. GDPR Article 17 compliance."""
+    try:
+        user_id = request.user["user_id"]
 
-    return jsonify({
-        "together_available": llm_status["together_available"],
-        "groq_available": llm_status["groq_available"],
-        "primary_api": llm_status["primary_api"],
-        "supabase_configured": bool(os.environ.get("SUPABASE_URL")),
-        "environment": {
-            "SUPABASE_URL": "SET" if os.environ.get("SUPABASE_URL") else "NOT_SET",
-            "SUPABASE_KEY": "SET" if os.environ.get("SUPABASE_KEY") else "NOT_SET",
-            "TOGETHER_API_KEY": "SET" if os.environ.get("TOGETHER_API_KEY") else "NOT_SET",
-            "GROQ_API_KEY": "SET" if os.environ.get("GROQ_API_KEY") else "NOT_SET"
-        }
-    })
+        # Delete all data from all tables
+        from supabase_storage import delete_all_user_data
+        results = delete_all_user_data(user_id)
+
+        # Delete the auth user account
+        try:
+            from supabase_client import get_admin_client
+            admin = get_admin_client()
+            admin.auth.admin.delete_user(user_id)
+            results['auth_user'] = 'deleted'
+        except Exception as e:
+            results['auth_user'] = f'error: {str(e)}'
+
+        logger.info(f"Account deleted for user {user_id}")
+        return jsonify({"status": "ok", "message": "Account and all data permanently deleted", "details": results})
+    except Exception as e:
+        logger.exception("Account deletion error")
+        return jsonify({"error": str(e)}), 500
+
 
 # -------------------------
 # Health Check

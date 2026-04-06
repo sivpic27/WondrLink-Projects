@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>WondrLink - Your Cancer Care Guide</title>
-    <meta name="color-scheme" content="light dark">
+    <meta name="color-scheme" content="light">
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Chart.js for mental health dashboard -->
@@ -3786,121 +3786,6 @@
             }
         }
 
-        /* ============================================= */
-        /* DARK MODE                                     */
-        /* ============================================= */
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme="light"]) {
-                --primary: #5DB8AD;
-                --primary-light: #7CCEC4;
-                --primary-lighter: #A3E0D8;
-                --primary-dark: #4A9990;
-                --primary-subtle: rgba(93, 184, 173, 0.1);
-                --primary-ring: rgba(93, 184, 173, 0.2);
-                --accent: #FBBF24;
-                --accent-light: #FCD34D;
-                --success: #22C55E;
-                --danger: #EF4444;
-                --danger-hover: #F87171;
-                --warning: #FBBF24;
-                --info: #60A5FA;
-                --severity-mild: #22C55E;
-                --severity-moderate: #FBBF24;
-                --severity-severe: #EF4444;
-                --background: #0F1419;
-                --background-alt: #1A2028;
-                --surface: #1E252D;
-                --surface-raised: #252D36;
-                --surface-overlay: rgba(30, 37, 45, 0.95);
-                --border: #2D3640;
-                --border-light: #232B34;
-                --border-hover: #3D4750;
-                --text-primary: #E8ECF0;
-                --text-secondary: #9CA3AF;
-                --text-muted: #6B7280;
-                --text-inverse: #111827;
-                --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
-                --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-                --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-                --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-                --shadow-xl: 0 20px 50px -12px rgba(0, 0, 0, 0.6);
-                --glass-bg: rgba(30, 37, 45, 0.7);
-                --glass-border: rgba(45, 54, 64, 0.5);
-                --overlay-bg: rgba(0, 0, 0, 0.6);
-                --alert-warning-bg: #422006;
-                --alert-warning-border: #D97706;
-                --alert-warning-text: #FDE68A;
-                --alert-info-bg: #1E3A5F;
-                --alert-info-border: #3B82F6;
-                --alert-info-text: #93C5FD;
-                --alert-danger-bg: #450A0A;
-                --alert-danger-border: #DC2626;
-                --alert-danger-text: #FCA5A5;
-                --header-bg: var(--surface);
-            }
-        }
-
-        html[data-theme="dark"] {
-            --primary: #5DB8AD;
-            --primary-light: #7CCEC4;
-            --primary-lighter: #A3E0D8;
-            --primary-dark: #4A9990;
-            --primary-subtle: rgba(93, 184, 173, 0.1);
-            --primary-ring: rgba(93, 184, 173, 0.2);
-            --accent: #FBBF24;
-            --accent-light: #FCD34D;
-            --success: #22C55E;
-            --danger: #EF4444;
-            --danger-hover: #F87171;
-            --warning: #FBBF24;
-            --info: #60A5FA;
-            --severity-mild: #22C55E;
-            --severity-moderate: #FBBF24;
-            --severity-severe: #EF4444;
-            --background: #0F1419;
-            --background-alt: #1A2028;
-            --surface: #1E252D;
-            --surface-raised: #252D36;
-            --surface-overlay: rgba(30, 37, 45, 0.95);
-            --border: #2D3640;
-            --border-light: #232B34;
-            --border-hover: #3D4750;
-            --text-primary: #E8ECF0;
-            --text-secondary: #9CA3AF;
-            --text-muted: #6B7280;
-            --text-inverse: #111827;
-            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-            --shadow-xl: 0 20px 50px -12px rgba(0, 0, 0, 0.6);
-            --glass-bg: rgba(30, 37, 45, 0.7);
-            --glass-border: rgba(45, 54, 64, 0.5);
-            --overlay-bg: rgba(0, 0, 0, 0.6);
-            --alert-warning-bg: #422006;
-            --alert-warning-border: #D97706;
-            --alert-warning-text: #FDE68A;
-            --alert-info-bg: #1E3A5F;
-            --alert-info-border: #3B82F6;
-            --alert-info-text: #93C5FD;
-            --alert-danger-bg: #450A0A;
-            --alert-danger-border: #DC2626;
-            --alert-danger-text: #FCA5A5;
-            --header-bg: var(--surface);
-        }
-
-        /* Dark mode logo adjustment */
-        html[data-theme="dark"] .brand-logo,
-        :root:not([data-theme="light"]) .brand-logo {
-            filter: brightness(1.2);
-        }
-
-        /* Theme transition smoothing */
-        body, .sidebar, .chat-wrap, .messages, .input-section, .section-card,
-        .auth-modal, .screening-container, .dashboard-modal {
-            transition: background-color var(--transition-slow), border-color var(--transition-slow), color var(--transition-slow);
-        }
-
         /* High contrast mode */
         @media (prefers-contrast: high) {
             :root {
@@ -3910,22 +3795,6 @@
                 --text-muted: #374151;
                 --border: #9CA3AF;
             }
-        }
-
-        /* Dark mode theme toggle styling */
-        .theme-toggle-btn {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            color: rgba(255, 255, 255, 0.9);
-            padding: 3px 8px;
-            font-size: 14px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: background var(--transition);
-            line-height: 1;
-        }
-        .theme-toggle-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
         }
     </style>
 </head>
@@ -4201,12 +4070,7 @@
                 </div>
                 <div class="brand-user-row">
                     <span class="brand-user-email" id="userEmail">User</span>
-                    <div style="display:flex;gap:4px;">
-                        <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">
-                            <span id="themeIcon">&#9790;</span>
-                        </button>
-                        <button class="brand-logout-btn" onclick="handleLogout()">Logout</button>
-                    </div>
+                    <button class="brand-logout-btn" onclick="handleLogout()">Logout</button>
                 </div>
             </div>
 
@@ -7931,33 +7795,6 @@
         function closeCrisisModal() {
             document.getElementById('crisisOverlay').style.display = 'none';
         }
-
-        // =============================================
-        // THEME TOGGLE (Dark/Light Mode)
-        // =============================================
-        function toggleTheme() {
-            const html = document.documentElement;
-            const current = html.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', next);
-            localStorage.setItem('wondrlink-theme', next);
-            updateThemeIcon(next);
-        }
-        function updateThemeIcon(theme) {
-            const icon = document.getElementById('themeIcon');
-            if (icon) icon.textContent = theme === 'dark' ? '\u2600' : '\u263E';
-        }
-        // Initialize theme on load
-        (function() {
-            const saved = localStorage.getItem('wondrlink-theme');
-            if (saved) {
-                document.documentElement.setAttribute('data-theme', saved);
-                updateThemeIcon(saved);
-            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                updateThemeIcon('dark');
-            }
-        })();
 
         // =============================================
         // MENTAL HEALTH DASHBOARD

@@ -2,6 +2,7 @@
 
 | Version | Date | Summary |
 |---------|------|---------|
+| [v2.2](v2.2/RELEASE.md) | April 2026 | Empathy-first tone, Safety Valve, Patient Advocate, navigator escalation, exercise/mucositis KB |
 | [v2.1](v2.1/RELEASE.md) | April 2026 | HIPAA de-identification, hybrid RAG, mental health dashboard, symptom tracking, survivorship schedules, PREMM5, nutrition |
 | [v2.0](v2.0/RELEASE.md) | March 2026 | Full platform with 13 clinical feedback items, 20-doc KB, 4 screening instruments, clinical trials integration |
 
